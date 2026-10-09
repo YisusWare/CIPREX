@@ -11,17 +11,17 @@ TagManager:
   - Ground
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Breakable
+  - Meltable
+  - Platform
+  - Hazard
+  - Player
+  - PlayerHurtbox
+  - PlayerProjectile
+  - Enemy
+  - EnemyHurtbox
+  - EnemyProjectile
+  - Pickup
   - 
   - 
   - 

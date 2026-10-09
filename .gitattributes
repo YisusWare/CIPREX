@@ -1,0 +1,9 @@
+# Sin Git LFS (decisión 2026-10-09). Solo se marcan los binarios para que Git no intente
+# compararlos ni convertir sus fines de línea.
+*.png   binary
+*.psd   binary
+*.wav   binary
+*.ogg   binary
+*.mp3   binary
+*.ttf   binary
+*.otf   binary
