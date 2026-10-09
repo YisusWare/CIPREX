@@ -1,0 +1,65 @@
+
+# ==========================================
+# Unity - Generated files and cache
+# ==========================================
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# ==========================================
+# Build outputs
+# ==========================================
+[Bb]uild/
+[Bb]uilds/
+[Aa]rtifacts/
+[Dd]ist/
+
+# ==========================================
+# IDEs - Visual Studio / Rider / VS Code
+# ==========================================
+.vs/
+.idea/
+.vscode/
+.gradle/
+
+# Visual Studio generated files
+ExportedObj/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svclog
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+# Rider / ReSharper
+*.sln.iml
+*.DotSettings.user
+
+# ==========================================
+# Operating system files
+# ==========================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ==========================================
+# Crash reports and logs
+# ==========================================
+sysinfo.txt
+crashlytics-build.properties
+
+# ==========================================
+# Auto-generated packages and assets
+# ==========================================
+Assets/AssetStoreTools*
