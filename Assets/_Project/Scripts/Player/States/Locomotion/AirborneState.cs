@@ -40,6 +40,7 @@ namespace Game.Player
             isJumping = true;
             jumpCut = false;
             coyoteTimer = 0f;
+            fsm.RaiseJumped();
         }
 
         public override void Tick(float dt)
@@ -82,7 +83,7 @@ namespace Game.Player
 
         public override void FixedTick(float dt)
         {
-            float maxSpeed = fsm.CarriesDashMomentum ? Data.DashSpeed : Data.runSpeed;
+            float maxSpeed = (fsm.CarriesDashMomentum ? Data.DashSpeed : Data.runSpeed) * SpeedMultiplier;
             Motor.MoveTowardsX(Input.MoveX * maxSpeed, Data.airAcceleration, dt);
 
             float multiplier = Motor.Velocity.y < 0f ? Data.fallGravityMultiplier : 1f;

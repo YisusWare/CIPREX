@@ -399,7 +399,7 @@ Alive ──(Damaged)──▶ Hurt ──(fin del knockback)──▶ Alive
 | `Idle` | En suelo, sin input horizontal | `Run` (input H) · `Crouch` (abajo) · `Airborne` (salto o pierde el suelo) · `Dash` (botón de dash) |
 | `Run` | En suelo con input horizontal | `Idle` · `Crouch` · `Airborne` · `Dash` |
 | `Crouch` | En suelo con abajo presionado | `Idle` (suelta abajo y hay espacio arriba) · `Airborne` (pierde el suelo) |
-| `Dash` | Botón de dash en el suelo | `Airborne` con impulso de dash (salto) · `Airborne` (pierde el suelo) · `Idle` / `Run` (se acaba el tiempo) |
+| `Dash` | Botón de dash en el suelo | `Airborne` con impulso de dash (salto o pierde el suelo) · `Idle` / `Run` (se acaba el tiempo) |
 | `Airborne` | Salto o caída | `Idle` / `Run` al aterrizar · `AirDash` (botón de dash y hay air dash disponible) |
 | `AirDash` | Botón de dash en el aire | `Airborne` (se acaba el tiempo) · `Idle` / `Run` (aterriza) |
 
@@ -435,7 +435,7 @@ Valores iniciales en unidades (1 unidad = 1 tile = 16 px):
 
 - **Dirección:** hacia donde mira el personaje. Durante el dash no se puede voltear.
 - **Air dash:** horizontal y sin gravedad durante su duración. Al terminar, la velocidad Y empieza en 0.
-- **Dash jump:** si se salta desde `Dash` (o dentro del jump buffer), se entra a `Airborne` con `carriesDashMomentum = true`. Mientras sea verdadero, la velocidad horizontal máxima es la del dash. El impulso se pierde al aterrizar o si el jugador suelta la dirección o cambia de dirección.
+- **Dash jump:** si se salta desde `Dash` (o dentro del jump buffer), se entra a `Airborne` con `carriesDashMomentum = true`. **Lo mismo al salir de una orilla durante el dash** (decisión del 2026-10-10): el impulso se conserva en la caída y también en un salto de coyote time. Mientras sea verdadero, la velocidad horizontal máxima es la del dash. El impulso se pierde al aterrizar o si el jugador suelta la dirección o cambia de dirección.
 - **Collider:** el dash en el suelo mantiene la altura normal del collider.
 - **No hay dash desde agachado.**
 - **Dash por botón:** solo con el botón dedicado. No hay doble toque de dirección.
@@ -817,7 +817,7 @@ Los clips solo marcan **momentos**: `OnFootstep` y `OnHitboxOn` / `OnHitboxOff` 
 - **Vidas infinitas:** al morir se reaparece en el último checkpoint. No hay Game Over ni contador de vidas.
 - Al recibir daño: estado `Hurt` con knockback de 0.3 s, luego i-frames de 1.5 s **[AJUSTAR]**.
 - **Parpadeo de i-frames:** se activan y desactivan los SpriteRenderers del jugador cada pocos frames. No requiere shader.
-- **Flash de daño en enemigos:** un Shader Graph sencillo (`Sprite Lit`) con una propiedad `_FlashAmount` que mezcla el sprite con blanco, controlada con `MaterialPropertyBlock`.
+- **Flash de daño en enemigos:** shader `Game/Sprite-Lit-Flash` (`Art/Shaders/Sprite-Lit-Flash.shader`), una copia del `Sprite-Lit-Default` de URP con `_FlashColor` y `_FlashAmount` que mezclan el sprite con blanco. Lo controla `DamageFlash` con `MaterialPropertyBlock`. Se escribió en HLSL en lugar de Shader Graph porque es un cambio de dos líneas sobre el shader de URP. Si se actualiza URP, conviene volver a copiar el shader original y repetir el cambio.
 - Durante los i-frames se ignora el daño por contacto y por proyectiles, pero **no** los peligros que matan al instante (fosos, pinchos).
 
 ```csharp
@@ -1270,6 +1270,88 @@ public class SfxData : ScriptableObject
 | Jefes | Tema de jefe + tema del comandante **[DECIDIR]** si cada jefe tiene su propio tema |
 | Jingles | Victoria, habilidad obtenida |
 
+#### Checklist de clips por conseguir
+
+Marca cada casilla al importar el clip y asignarlo a su `SfxData` (en `Assets/_Project/Data/Audio/`). Registra el origen en `CREDITS.md` en el momento de descargarlo.
+
+- **Nombre del archivo:** igual al del `SfxData`, por ejemplo `Sfx_PlayerJump.wav`. Si hay variantes, se agrega `_01`, `_02`, etc., y todas van en el arreglo `clips` del mismo `SfxData`.
+- **Formato:** `.wav` mono a 44.1 kHz, sin silencio al inicio (ver *Origen del audio*).
+- **Loop:** los sonidos marcados con *loop* deben repetirse sin "clic"; en su `SfxData` se activa `loop`.
+- **Columna `SfxData`:** las marcadas con ✔ ya existen como asset vacío (las crea **Game → Setup**). Las demás se crean al llegar a su hito.
+
+**Hito 2: jugador (ya se usan en el juego)**
+
+| ✓ | Sonido | `SfxData` | Variantes | Notas |
+|---|---|---|---|---|
+| [ ] | Disparo del bláster | `Sfx_PlayerShoot` ✔ | 2–3 | Muy corto (< 0.15 s); suena cientos de veces |
+| [ ] | Salto | `Sfx_PlayerJump` ✔ | 1–2 | |
+| [ ] | Aterrizaje | `Sfx_PlayerLand` ✔ | 1–2 | Suave; suena en cada caída |
+| [ ] | Dash | `Sfx_PlayerDash` ✔ | 1 | También para el air dash |
+| [ ] | Daño recibido | `Sfx_PlayerHurt` ✔ | 1–2 | |
+| [ ] | Muerte | `Sfx_PlayerDeath` ✔ | 1 | Se importa con la animación de muerte (Hito 3) |
+
+**Hito 3: animación del jugador**
+
+| ✓ | Sonido | `SfxData` | Variantes | Notas |
+|---|---|---|---|---|
+| [ ] | Pasos | `Sfx_PlayerStep` | 3–4 | Los dispara el Animation Event `OnFootstep` |
+| [ ] | Teletransporte (entrada) | `Sfx_PlayerTeleportIn` | 1 | Al empezar la misión y al reaparecer |
+| [ ] | Teletransporte (salida) | `Sfx_PlayerTeleportOut` | 1 | Al terminar la misión |
+
+**Hito 4: habilidades**
+
+| ✓ | Sonido | `SfxData` | Variantes | Notas |
+|---|---|---|---|---|
+| [ ] | Cambio de habilidad | `Sfx_AbilitySwitch` | 1 | Grupo `UI` |
+| [ ] | Sin energía (error) | `Sfx_AbilityNoEnergy` | 1 | Grupo `UI` |
+| [ ] | Lanzar granada | `Sfx_GrenadeThrow` | 1 | |
+| [ ] | Rebote de granada | `Sfx_GrenadeBounce` | 2 | Cooldown corto para que no se sature |
+| [ ] | Explosión | `Sfx_Explosion` | 2 | Se reutiliza para enemigos |
+| [ ] | Tajo de espada de fuego | `Sfx_SwordSlash` | 2 | |
+| [ ] | Proyectil destruido por la espada | `Sfx_SwordDeflect` | 1 | |
+| [ ] | Lanzallamas | `Sfx_FlamethrowerLoop` | 1 | *loop* |
+| [ ] | Taladro | `Sfx_DrillShoot` | 1 | |
+| [ ] | Láser: carga | `Sfx_LaserCharge` | 1 | Dura ~0.1 s (el arranque del láser) |
+| [ ] | Láser: rayo | `Sfx_LaserLoop` | 1 | *loop* |
+
+**Hito 5: enemigos, pickups y obstáculos**
+
+| ✓ | Sonido | `SfxData` | Variantes | Notas |
+|---|---|---|---|---|
+| [ ] | Disparo enemigo | `Sfx_EnemyShoot` | 2 | Distinto al del jugador para reconocerlo |
+| [ ] | Golpe a enemigo | `Sfx_EnemyHit` | 2–3 | Muy corto; suena con cada bala que acierta |
+| [ ] | Muerte de enemigo | `Sfx_EnemyDeath` | 2–3 | Genéricas para todos los enemigos al inicio |
+| [ ] | Pickup de vida | `Sfx_PickupHealth` | 1 | |
+| [ ] | Pickup de energía | `Sfx_PickupEnergy` | 1 | |
+| [ ] | Bloque roto | `Sfx_BlockBreak` | 1–2 | Taladro contra `Breakable` |
+| [ ] | Acero calentándose | `Sfx_SteelHeatLoop` | 1 | *loop* |
+| [ ] | Acero fundido | `Sfx_SteelMelt` | 1 | |
+
+**Hito 6: interfaz y diálogos** (grupo `UI`)
+
+| ✓ | Sonido | `SfxData` | Variantes | Notas |
+|---|---|---|---|---|
+| [ ] | Mover cursor | `Sfx_UIMove` | 1 | |
+| [ ] | Confirmar | `Sfx_UIConfirm` | 1 | |
+| [ ] | Cancelar | `Sfx_UICancel` | 1 | |
+| [ ] | Pausa | `Sfx_UIPause` | 1 | |
+| [ ] | Letra del diálogo | `Sfx_DialogueBlip` | 1–2 | Muy corto; suena cada pocas letras |
+| [ ] | Misión desbloqueada | `Sfx_UIMissionUnlocked` | 1 | |
+
+**Música (la compone el equipo, Hito 6 en adelante)**
+
+Cada pista con introducción se exporta como `Track_Nombre_Intro.ogg` + `Track_Nombre_Loop.ogg`.
+
+- [ ] Tema principal (menú)
+- [ ] Selección de misiones
+- [ ] Temas de las 5 misiones (uno por misión)
+- [ ] Misión final
+- [ ] Tema de jefe (compartido; ver decisión pendiente 6)
+- [ ] Tema del comandante (jefe final)
+- [ ] Jingle de victoria (sin loop)
+- [ ] Jingle de habilidad obtenida (sin loop)
+- [ ] Créditos
+
 #### Origen del audio
 
 **SFX: librerías de audio.**
@@ -1432,12 +1514,16 @@ Los estados (correr, saltar, dash) se distinguen cambiando el `color` del Sprite
 5. `Legs_Crouch` + `Torso_Crouch`.
 
 ### Hito 2 — Disparo y daño
-- [ ] FSM de acción: `Ready` y `Shooting` con shoot pose, bloqueada durante el dash
-- [ ] `PlayerBuster` + `BusterData` + pool de proyectiles
-- [ ] Las cuatro direcciones de apuntado y el disparo agachado
-- [ ] Matriz de capas, `IDamageable`, `PlayerHealth` con knockback e i-frames
-- [ ] Muñeco de práctica que recibe daño
-- [ ] `SfxPlayer`, `SfxData` y `AudioMixer` con los primeros sonidos de librería (disparo, salto, dash, daño) y `CREDITS.md` iniciado
+
+Herramienta: menú **Game → Setup** (`Scripts/Editor/GameSetup.cs`), que crea el arte placeholder, los datos, la matriz de colisiones, los prefabs (jugador, bala, muñeco y zona de daño) y la escena `Test_Movement`.
+
+- [x] FSM de acción: `Ready` y `Shooting` con shoot pose, bloqueada durante el dash
+- [x] `PlayerBuster` + `BusterData` + pool de proyectiles
+- [x] Las cuatro direcciones de apuntado y el disparo agachado
+- [x] Matriz de capas, `IDamageable`, `PlayerHealth` con knockback e i-frames
+- [x] Muñeco de práctica que recibe daño
+- [x] FSM de nivel superior: `Alive`, `Hurt`, `Dead`, `Respawning` y `Disabled` (respawn temporal en el punto de inicio hasta los checkpoints del Hito 5). `Disabled` se probará con los diálogos y el jefe
+- [x] `SfxPlayer`, `SfxData` y `AudioMixer` con los primeros sonidos de librería (disparo, salto, dash, daño) y `CREDITS.md` iniciado. Falta `Sfx_PlayerDeath`, que se importa junto con la animación de muerte (Hito 3)
 
 ### Hito 3 — Personaje animado
 - [ ] Sprites en Piskel de piernas, torso y cuerpo completo (lienzo 48×64, pies en y = 12)
@@ -1445,6 +1531,7 @@ Los estados (correr, saltar, dash) se distinguen cambiando el `color` del Sprite
 - [ ] Fogonazo como VFX separado
 - [ ] `PlayerAnimation.Sync()` con las poses de apuntado arriba y en diagonal
 - [ ] Validar alineación en Pixel Perfect al correr, saltar, agacharse y hacer dash
+- [ ] Importar `Sfx_PlayerDeath` junto con la animación de muerte (pendiente del Hito 2)
 
 ### Hito 4 — Habilidades
 
@@ -1497,7 +1584,7 @@ Ordenadas de la más sencilla a la más compleja; cada una agrega una pieza nuev
 | Disparo | Normal, un tiro por pulsación, sin carga |
 | Direcciones de disparo | Adelante, diagonal arriba-adelante, arriba y abajo (solo en el aire) |
 | Pose del torso | Cambia al mantener arriba o arriba-adelante; adelante y abajo solo al disparar |
-| Dash | Suelo + aire (uno por salto), dash jump con impulso, sin i-frames |
+| Dash | Suelo + aire (uno por salto), dash jump con impulso (también al salir de una orilla durante el dash), sin i-frames |
 | Disparar durante el dash | No (tampoco usar habilidades) |
 | Dash desde agachado | No |
 | Collider durante el dash | Sin cambios |

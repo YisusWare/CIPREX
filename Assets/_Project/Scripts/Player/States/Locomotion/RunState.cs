@@ -20,6 +20,6 @@ namespace Game.Player
             if (Input.MoveX == 0) { fsm.ChangeState(fsm.Idle); return; }
         }
 
-        public override void FixedTick(float dt) => GroundStep(Input.MoveX * Data.runSpeed, dt);
+        public override void FixedTick(float dt) => GroundStep(Input.MoveX * Data.runSpeed * SpeedMultiplier, dt);
     }
 }

@@ -3,8 +3,9 @@ using UnityEngine;
 namespace Game.Player
 {
     /// <summary>
-    /// SOLO PARA DEPURAR (Hito 1): voltea el Visual, pinta el placeholder según el estado
-    /// de locomoción y muestra datos en pantalla. Se reemplaza por PlayerAnimation en el Hito 3.
+    /// SOLO PARA DEPURAR (hitos 1 y 2): voltea el Visual, pinta el placeholder según el estado,
+    /// hace parpadear los i-frames, dibuja la dirección de apuntado y muestra datos en pantalla.
+    /// Se reemplaza por PlayerAnimation en el Hito 3.
     /// </summary>
     public class PlayerDebugView : MonoBehaviour
     {
@@ -13,7 +14,11 @@ namespace Game.Player
         [SerializeField] SpriteRenderer body;
         [SerializeField] Sprite standingSprite;
         [SerializeField] Sprite crouchingSprite;
+        [Tooltip("Indicador del cañón: se coloca en el FirePoint de la dirección de apuntado.")]
+        [SerializeField] Transform aimMarker;
         [SerializeField] bool showOverlay = true;
+        [Tooltip("Segundos entre encendido y apagado del parpadeo de i-frames.")]
+        [SerializeField] float blinkInterval = 0.05f;
 
         [Header("Colores por estado")]
         [SerializeField] Color idle = Color.white;
@@ -24,6 +29,8 @@ namespace Game.Player
         [SerializeField] Color dashJump = new(1f, 0.6f, 0.2f);
         [SerializeField] Color dash = new(1f, 0.35f, 1f);
         [SerializeField] Color airDash = new(1f, 0.3f, 0.3f);
+        [SerializeField] Color hurt = new(0.6f, 0.1f, 0.1f);
+        [SerializeField] Color dead = new(0.15f, 0.15f, 0.15f);
 
         float fps;
 
@@ -40,6 +47,21 @@ namespace Game.Player
                 body.color = ColorFor(loco);
                 Sprite s = loco.IsCrouching && crouchingSprite != null ? crouchingSprite : standingSprite;
                 if (s != null) body.sprite = s;
+
+                // Parpadeo de i-frames (sección 10.1): se apaga y enciende el SpriteRenderer.
+                bool blinkOff = player.Health.IsInvulnerable &&
+                                Mathf.FloorToInt(Time.time / blinkInterval) % 2 == 0;
+                body.enabled = !blinkOff;
+            }
+
+            if (aimMarker != null)
+            {
+                var action = player.Action;
+                bool show = player.IsAlive && !loco.IsDashing &&
+                            (action.IsInShootPose || action.AimDir == AimDirection.Up || action.AimDir == AimDirection.DiagUp);
+                aimMarker.gameObject.SetActive(show);
+                if (show)
+                    aimMarker.position = player.Buster.FirePosition(action.AimDir, loco.FacingDir, loco.IsCrouching);
             }
 
             fps = Mathf.Lerp(fps, 1f / Mathf.Max(Time.unscaledDeltaTime, 0.0001f), 0.1f);
@@ -47,6 +69,9 @@ namespace Game.Player
 
         Color ColorFor(LocomotionFSM loco)
         {
+            if (player.Health.IsDead) return dead;
+            if (player.IsHurt) return hurt;
+
             var c = loco.Current;
             if (c == loco.Idle) return idle;
             if (c == loco.Run) return run;
@@ -65,16 +90,18 @@ namespace Game.Player
         {
             if (!showOverlay || player == null || player.Context == null) return;
             var loco = player.Locomotion;
+            var action = player.Action;
+            var health = player.Health;
             Vector2 v = player.Motor.Velocity;
             string text =
-                $"Estado: {loco.CurrentName}\n" +
-                $"Vel: ({v.x:0.00}, {v.y:0.00})\n" +
-                $"Suelo: {loco.IsGrounded}   Mira: {(loco.FacingDir > 0 ? "→" : "←")}\n" +
+                $"Vida: {health.Current}/{health.Max}{(health.IsInvulnerable ? "  (i-frames)" : "")}   [{player.LifeStateName}]\n" +
+                $"Locomoción: {loco.CurrentName}   Acción: {action.CurrentName}\n" +
+                $"Apunta: {action.AimDir}   Mira: {(loco.FacingDir > 0 ? "→" : "←")}\n" +
+                $"Vel: ({v.x:0.00}, {v.y:0.00})   Suelo: {loco.IsGrounded}\n" +
                 $"Air dashes: {loco.AirDashesLeft}   Impulso dash: {loco.CarriesDashMomentum}\n" +
-                $"Pos: ({player.transform.position.x:0.00}, {player.transform.position.y:0.00})\n" +
-                $"FPS: {fps:0}";
-            GUI.Box(new Rect(8, 8, 300, 110), GUIContent.none);
-            GUI.Label(new Rect(16, 12, 290, 106), text);
+                $"Pos: ({player.transform.position.x:0.00}, {player.transform.position.y:0.00})   FPS: {fps:0}";
+            GUI.Box(new Rect(8, 8, 330, 112), GUIContent.none);
+            GUI.Label(new Rect(16, 12, 320, 108), text);
         }
     }
 }

@@ -17,6 +17,8 @@ namespace Game.Player
         protected InputSnapshot Input => ctx.Input;
         protected PlayerMotor Motor => ctx.Motor;
         protected PlayerMovementData Data => ctx.Movement;
+        /// <summary>moveSpeedMultiplier de la habilidad activa (sección 6.4); 1 si no hay ninguna.</summary>
+        protected float SpeedMultiplier => ctx.Action != null ? ctx.Action.MoveSpeedMultiplier : 1f;
 
         public virtual void Enter() { }
         public virtual void Tick(float dt) { }

@@ -2,7 +2,7 @@ namespace Game.Player
 {
     /// <summary>
     /// Dash en el suelo (sección 6.3): hacia donde mira, sin voltear, collider normal.
-    /// Saltar durante el dash da un dash jump que conserva el impulso.
+    /// Saltar durante el dash (dash jump) o salir de una orilla conserva el impulso.
     /// </summary>
     public class DashState : LocomotionState
     {
@@ -23,7 +23,8 @@ namespace Game.Player
         public override void Tick(float dt)
         {
             timer -= dt;
-            if (!Motor.IsGrounded) { fsm.GoAirborne(AirborneEntry.Fall); return; }
+            // Salir de una orilla durante el dash conserva el impulso, igual que el dash jump.
+            if (!Motor.IsGrounded) { fsm.GoAirborne(AirborneEntry.Fall, carryDashMomentum: true); return; }
             if (TryStartJump(carryDashMomentum: true)) return;
             if (timer <= 0f) { fsm.GoGrounded(); return; }
         }

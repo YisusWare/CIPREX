@@ -17,6 +17,8 @@ namespace Game.Player
         [SerializeField] LayerMask groundMask;
         [Tooltip("Capas que impiden levantarse al estar agachado (sin plataformas atravesables).")]
         [SerializeField] LayerMask ceilingMask;
+        [Tooltip("Trigger en la capa PlayerHurtbox. Se ajusta junto con el collider al agacharse.")]
+        [SerializeField] BoxCollider2D hurtbox;
 
         Rigidbody2D rb;
         BoxCollider2D box;
@@ -93,6 +95,14 @@ namespace Game.Player
             rb.linearVelocity = v;
         }
 
+        /// <summary>Mueve al jugador sin interpolación (reaparecer, checkpoints).</summary>
+        public void Teleport(Vector2 position)
+        {
+            rb.position = position;
+            transform.position = position;
+            rb.linearVelocity = Vector2.zero;
+        }
+
         // ---------- Collider ----------
 
         public void SetCrouching(bool crouching)
@@ -101,6 +111,13 @@ namespace Game.Player
             float h = crouching ? movement.crouchingHeight : movement.standingHeight;
             box.size = new Vector2(movement.colliderWidth, h);
             box.offset = new Vector2(0f, h * 0.5f); // pivote en los pies
+
+            if (hurtbox != null)
+            {
+                // 1 px más chica que el collider por cada lado, para que los roces no cuenten.
+                hurtbox.size = new Vector2(movement.colliderWidth - 0.125f, h - 0.125f);
+                hurtbox.offset = new Vector2(0f, h * 0.5f);
+            }
         }
 
         /// <summary>True si hay espacio para pasar del collider agachado al de pie.</summary>

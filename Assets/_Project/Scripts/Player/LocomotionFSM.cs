@@ -11,7 +11,9 @@ namespace Game.Player
         /// <summary>Salto: aplica la velocidad inicial del salto.</summary>
         Jump,
         /// <summary>Terminó un air dash: velocidad Y en 0, sin coyote time.</summary>
-        AfterAirDash
+        AfterAirDash,
+        /// <summary>Se reanuda después de Hurt, Disabled o reaparecer: conserva la velocidad.</summary>
+        Resume
     }
 
     /// <summary>
@@ -29,6 +31,8 @@ namespace Game.Player
         public readonly DashState Dash;
         public readonly AirborneState Airborne;
         public readonly AirDashState AirDash;
+        /// <summary>Sin control: Hurt, Dead, Disabled (FSM de nivel superior, sección 6.2).</summary>
+        public readonly SuspendedState Suspended;
 
         public LocomotionFSM(PlayerContext ctx)
         {
@@ -39,6 +43,7 @@ namespace Game.Player
             Dash = new DashState(ctx, this);
             Airborne = new AirborneState(ctx, this);
             AirDash = new AirDashState(ctx, this);
+            Suspended = new SuspendedState(ctx, this);
             machine.Changed += (prev, next) => StateChanged?.Invoke(prev, next);
         }
 
@@ -48,6 +53,8 @@ namespace Game.Player
         public bool IsGrounded => ctx.Motor.IsGrounded;
         public bool IsCrouching => machine.Current == Crouch;
         public bool IsDashing => machine.Current == Dash || machine.Current == AirDash;
+        public bool IsAirborne => machine.Current == Airborne || machine.Current == AirDash;
+        public bool IsSuspended => machine.Current == Suspended;
 
         /// <summary>1 = derecha, -1 = izquierda.</summary>
         public int FacingDir { get; set; } = 1;
@@ -62,6 +69,10 @@ namespace Game.Player
         public AirborneEntry PendingAirborneEntry { get; private set; }
 
         public event Action<IState, IState> StateChanged;
+        /// <summary>Cada salto, incluido el de coyote time (para el SFX).</summary>
+        public event Action Jumped;
+
+        internal void RaiseJumped() => Jumped?.Invoke();
 
         public string CurrentName => machine.Current == null
             ? "-"
@@ -87,6 +98,18 @@ namespace Game.Player
 
         /// <summary>Idle o Run según el input horizontal.</summary>
         public void GoGrounded() => machine.ChangeState(ctx.Input.MoveX != 0 ? Run : Idle);
+
+        /// <summary>Sale del estado actual (su Exit restaura el collider, etc.) y deja de responder al input.</summary>
+        public void Suspend() => machine.ChangeState(Suspended);
+
+        /// <summary>Vuelve a un estado normal según si hay suelo.</summary>
+        public void Resume()
+        {
+            if (!IsSuspended) return;
+            CarriesDashMomentum = false;
+            if (ctx.Motor.IsGrounded) GoGrounded();
+            else GoAirborne(AirborneEntry.Resume);
+        }
 
         /// <summary>Lo llaman los estados de suelo al entrar: recarga el air dash y quita el impulso.</summary>
         public void OnGrounded()
