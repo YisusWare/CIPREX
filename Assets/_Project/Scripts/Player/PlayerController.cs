@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Game.Player
 {
+    /// <summary>Estado de nivel superior (sección 6.2), para animación y depuración.</summary>
+    public enum PlayerLifeState { Alive, Hurt, Dead, Respawning, Disabled }
+
     /// <summary>
     /// Crea el contexto y actualiza las máquinas de estados (secciones 5.2, 5.3 y 6.2).
     /// No lee input ni mueve el Rigidbody directamente.
@@ -14,6 +17,9 @@ namespace Game.Player
     [RequireComponent(typeof(PlayerBuster), typeof(PlayerHealth))]
     public partial class PlayerController : MonoBehaviour
     {
+        [Tooltip("Duración de la aparición (Teleport_In) al empezar y al reaparecer. Debe coincidir con el clip FullBody_Teleport_In.")]
+        [SerializeField] float spawnDuration = 0.67f;
+
         PlayerInputReader inputReader;
         PlayerMotor motor;
         PlayerBuster buster;
@@ -38,6 +44,13 @@ namespace Game.Player
 
         public bool IsAlive => life.Current == alive;
         public bool IsHurt => life.Current == hurt;
+
+        public PlayerLifeState LifeState =>
+            life.Current == hurt ? PlayerLifeState.Hurt :
+            life.Current == dead ? PlayerLifeState.Dead :
+            life.Current == respawning ? PlayerLifeState.Respawning :
+            life.Current == disabled ? PlayerLifeState.Disabled :
+            PlayerLifeState.Alive;
         public string LifeStateName => life.Current == null ? "-" : life.Current.GetType().Name.Replace("State", "");
 
         public event System.Action<IState, IState> LifeStateChanged;
@@ -76,7 +89,9 @@ namespace Game.Player
             RespawnPoint = transform.position;
             Locomotion.Start();
             Action.Start();
-            life.ChangeState(alive);
+            // Aparece con Teleport_In, igual que al reaparecer.
+            Locomotion.Suspend();
+            life.ChangeState(respawning);
         }
 
         void OnDestroy()

@@ -6,10 +6,10 @@ namespace Game.Player
     /// <summary>FSM de nivel superior del jugador (sección 6.2).</summary>
     public partial class PlayerController
     {
-        abstract class LifeState : IState
+        abstract class LifeStateBase : IState
         {
             protected readonly PlayerController p;
-            protected LifeState(PlayerController owner) => p = owner;
+            protected LifeStateBase(PlayerController owner) => p = owner;
 
             public virtual void Enter() { }
             public virtual void Tick(float dt) { }
@@ -18,7 +18,7 @@ namespace Game.Player
         }
 
         /// <summary>Control normal: corren las FSM de locomoción y acción.</summary>
-        class AliveState : LifeState
+        class AliveState : LifeStateBase
         {
             public AliveState(PlayerController owner) : base(owner) { }
 
@@ -32,7 +32,7 @@ namespace Game.Player
         }
 
         /// <summary>Knockback hacia atrás. Los i-frames siguen corriendo en PlayerHealth al volver a Alive.</summary>
-        class HurtState : LifeState
+        class HurtState : LifeStateBase
         {
             float timer;
             int direction;
@@ -65,7 +65,7 @@ namespace Game.Player
         }
 
         /// <summary>Se congela y, tras un momento, pasa a Respawning.</summary>
-        class DeadState : LifeState
+        class DeadState : LifeStateBase
         {
             float timer;
 
@@ -89,26 +89,36 @@ namespace Game.Player
         }
 
         /// <summary>
-        /// Reaparece en RespawnPoint con la vida llena. En el Hito 3 aquí va Teleport_In;
-        /// en el Hito 4 también se rellena la energía.
+        /// Aparece en RespawnPoint con la vida llena mientras se ve Teleport_In
+        /// (al empezar el nivel y al reaparecer). En el Hito 4 también se rellena la energía.
         /// </summary>
-        class RespawningState : LifeState
+        class RespawningState : LifeStateBase
         {
+            float timer;
+
             public RespawningState(PlayerController owner) : base(owner) { }
 
             public override void Enter()
             {
+                p.SuspendControl();
                 p.motor.Teleport(p.RespawnPoint);
                 p.health.Refill();
+                timer = p.spawnDuration;
             }
 
-            public override void Tick(float dt) => p.life.ChangeState(p.alive);
+            public override void Tick(float dt)
+            {
+                timer -= dt;
+                if (timer <= 0f) p.life.ChangeState(p.alive);
+            }
+
+            public override void FixedTick(float dt) => p.motor.Velocity = Vector2.zero;
 
             public override void Exit() => p.ResumeControl();
         }
 
         /// <summary>Sin control (cinemáticas, diálogos). Solo cae con la gravedad.</summary>
-        class DisabledState : LifeState
+        class DisabledState : LifeStateBase
         {
             public DisabledState(PlayerController owner) : base(owner) { }
 

@@ -36828,11 +36828,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 34
+  near clip plane: 0.1
+  far clip plane: 5000
+  field of view: 40
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 6.0625
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -36857,7 +36857,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: 2, z: -10}
+  m_LocalPosition: {x: 3.4999995, y: 1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -37141,9 +37141,153 @@ CompositeCollider2D:
   m_EdgeRadius: 0
   m_ColliderPaths:
   - m_Collider: {fileID: 656686481}
-    m_ColliderPaths: []
+    m_ColliderPaths:
+    - - X: 1690000000
+        Y: 170000000
+      - X: 1660000000
+        Y: 170000000
+      - X: 1660000000
+        Y: 0
+      - X: 1290000000
+        Y: 0
+      - X: 1290000000
+        Y: 20000000
+      - X: 1270000000
+        Y: 20000000
+      - X: 1270000000
+        Y: 0
+      - X: 1220000000
+        Y: 0
+      - X: 1220000000
+        Y: -30000000
+      - X: 1130000000
+        Y: -30000000
+      - X: 1130000000
+        Y: 0
+      - X: 1070000000
+        Y: 0
+      - X: 1070000000
+        Y: -30000000
+      - X: 1000000000
+        Y: -30000000
+      - X: 1000000000
+        Y: 0
+      - X: 940000000
+        Y: 0
+      - X: 940000000
+        Y: -30000000
+      - X: 890000000
+        Y: -30000000
+      - X: 890000000
+        Y: 0
+      - X: 830000000
+        Y: 0
+      - X: 830000000
+        Y: -30000000
+      - X: 800000000
+        Y: -30000000
+      - X: 800000000
+        Y: 0
+      - X: 720000000
+        Y: 0
+      - X: 720000000
+        Y: 40000000
+      - X: 680000000
+        Y: 40000000
+      - X: 680000000
+        Y: 0
+      - X: 640000000
+        Y: 0
+      - X: 640000000
+        Y: 30000000
+      - X: 600000000
+        Y: 30000000
+      - X: 600000000
+        Y: 0
+      - X: 560000000
+        Y: 0
+      - X: 560000000
+        Y: 20000000
+      - X: 520000000
+        Y: 20000000
+      - X: 520000000
+        Y: 0
+      - X: 480000000
+        Y: 0
+      - X: 480000000
+        Y: 10000000
+      - X: 440000000
+        Y: 10000000
+      - X: 440000000
+        Y: 0
+      - X: -10000000
+        Y: 0
+      - X: -10000000
+        Y: 170000000
+      - X: -40000000
+        Y: 170000000
+      - X: -40000000
+        Y: -40000000
+      - X: 1690000000
+        Y: -40000000
+    - - X: 1370000000
+        Y: 40000000
+      - X: 1310000000
+        Y: 40000000
+      - X: 1310000000
+        Y: 30000000
+      - X: 1370000000
+        Y: 30000000
   m_CompositePaths:
-    m_Paths: []
+    m_Paths:
+    - - {x: 168.99997, y: -4}
+      - {x: 168.99997, y: 17}
+      - {x: 166, y: 16.999971}
+      - {x: 165.99997, y: 0}
+      - {x: 129, y: 0.0000294}
+      - {x: 128.99997, y: 2}
+      - {x: 127, y: 1.9999708}
+      - {x: 126.99998, y: 0}
+      - {x: 122, y: -0.000029300001}
+      - {x: 121.99998, y: -3}
+      - {x: 113, y: -2.9999707}
+      - {x: 112.99998, y: 0}
+      - {x: 107, y: -0.000029300001}
+      - {x: 106.99997, y: -3}
+      - {x: 100, y: -2.9999707}
+      - {x: 99.99997, y: 0}
+      - {x: 94, y: -0.000029300001}
+      - {x: 93.99997, y: -3}
+      - {x: 89, y: -2.9999707}
+      - {x: 88.99997, y: 0}
+      - {x: 83, y: -0.000029300001}
+      - {x: 82.99997, y: -3}
+      - {x: 80, y: -2.9999707}
+      - {x: 79.99997, y: 0}
+      - {x: 72, y: 0.0000294}
+      - {x: 71.99997, y: 4}
+      - {x: 68, y: 3.999971}
+      - {x: 67.99997, y: 0}
+      - {x: 64, y: 0.0000294}
+      - {x: 63.99997, y: 3}
+      - {x: 60, y: 2.999971}
+      - {x: 59.99997, y: 0}
+      - {x: 56, y: 0.0000294}
+      - {x: 55.99997, y: 2}
+      - {x: 52, y: 1.9999708}
+      - {x: 51.999973, y: 0}
+      - {x: 48, y: 0.0000294}
+      - {x: 47.999973, y: 1}
+      - {x: 44, y: 0.99997073}
+      - {x: 43.999973, y: 0}
+      - {x: -1, y: 0.0000294}
+      - {x: -1.0000293, y: 17}
+      - {x: -4, y: 16.999971}
+      - {x: -3.999971, y: -4}
+    - - {x: 136.99997, y: 3}
+      - {x: 136.99997, y: 4}
+      - {x: 131, y: 3.999971}
+      - {x: 131.00003, y: 3}
   m_VertexDistance: 0.0005
   m_OffsetDistance: 0.00005
   m_UseDelaunayMesh: 0
@@ -45130,7 +45274,7 @@ MonoBehaviour:
     m_Value: 0
   OutputChannel: 1
   StandbyUpdate: 2
-  m_StreamingVersion: 0
+  m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
     TrackingTarget: {fileID: 1615643858}
@@ -45165,7 +45309,7 @@ Transform:
   m_GameObject: {fileID: 740713994}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: 2, z: -10}
+  m_LocalPosition: {x: 3.4999995, y: 1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -45267,9 +45411,45 @@ CompositeCollider2D:
   m_EdgeRadius: 0
   m_ColliderPaths:
   - m_Collider: {fileID: 950868651}
-    m_ColliderPaths: []
+    m_ColliderPaths:
+    - - X: 1570000000
+        Y: 90000000
+      - X: 1520000000
+        Y: 90000000
+      - X: 1520000000
+        Y: 86250000
+      - X: 1570000000
+        Y: 86250000
+    - - X: 1510000000
+        Y: 60000000
+      - X: 1460000000
+        Y: 60000000
+      - X: 1460000000
+        Y: 56250000
+      - X: 1510000000
+        Y: 56250000
+    - - X: 1450000000
+        Y: 30000000
+      - X: 1400000000
+        Y: 30000000
+      - X: 1400000000
+        Y: 26250000
+      - X: 1450000000
+        Y: 26250000
   m_CompositePaths:
-    m_Paths: []
+    m_Paths:
+    - - {x: 156.99997, y: 8.625}
+      - {x: 156.99997, y: 9}
+      - {x: 152, y: 8.99997}
+      - {x: 152.00003, y: 8.625}
+    - - {x: 150.99997, y: 5.625}
+      - {x: 150.99997, y: 6}
+      - {x: 146, y: 5.999971}
+      - {x: 146.00003, y: 5.625}
+    - - {x: 144.99997, y: 2.625}
+      - {x: 144.99997, y: 3}
+      - {x: 140, y: 2.999971}
+      - {x: 140.00003, y: 2.625}
   m_VertexDistance: 0.0005
   m_OffsetDistance: 0.00005
   m_UseDelaunayMesh: 0
@@ -45650,6 +45830,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 175152527398822043, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 801131963575871942, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+      propertyPath: m_Size.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 801131963575871942, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+      propertyPath: m_Size.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 801131963575871942, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5471685925697864747, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2
@@ -45688,6 +45884,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5471685925697864747, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150886063167886478, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+      propertyPath: m_Size.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150886063167886478, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+      propertyPath: m_Size.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150886063167886478, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7150886063167886478, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+      propertyPath: m_WasSpriteAssigned
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7561707070088696486, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}

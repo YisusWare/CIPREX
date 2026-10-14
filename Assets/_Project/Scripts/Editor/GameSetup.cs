@@ -290,20 +290,38 @@ namespace Game.EditorTools
                 SetRef(reader, "actions", input);
                 SetRef(reader, "movement", movement);
 
-                // Visual (se voltea) → Placeholder + FirePoints. En el Hito 3 llegan Legs, Torso y FullBody.
-                var visual = Child(root.transform, "Visual", playerLayer);
-                var placeholder = Child(visual.transform, "Placeholder", playerLayer);
-                var sr = placeholder.AddComponent<SpriteRenderer>();
-                sr.sprite = stand;
-                sr.sortingOrder = 10;
+                // Visual (se voltea). Con los Animators del Hito 3: Legs + Torso + FullBody (sección 5.1).
+                // Sin ellos: un placeholder de color.
+                var legsController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(PlayerArtSetup.LegsControllerPath);
+                var torsoController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(PlayerArtSetup.TorsoControllerPath);
+                var fullController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(PlayerArtSetup.FullBodyControllerPath);
+                bool animated = legsController != null && torsoController != null && fullController != null;
 
-                // FirePoints en posiciones de píxel (múltiplos de 0.0625), mirando a la derecha.
+                var visual = Child(root.transform, "Visual", playerLayer);
+                SpriteRenderer sr = null;
+                Animator legsAnim = null, torsoAnim = null, fullAnim = null;
+                if (animated)
+                {
+                    legsAnim = AnimatedPart(visual.transform, "Legs", playerLayer, legsController, 10, true);
+                    torsoAnim = AnimatedPart(visual.transform, "Torso", playerLayer, torsoController, 11, true);
+                    fullAnim = AnimatedPart(visual.transform, "FullBody", playerLayer, fullController, 10, false);
+                }
+                else
+                {
+                    var placeholder = Child(visual.transform, "Placeholder", playerLayer);
+                    sr = placeholder.AddComponent<SpriteRenderer>();
+                    sr.sprite = stand;
+                    sr.sortingOrder = 10;
+                }
+
+                // FirePoints en la boca del cañón de cada pose del spritesheet de Rosslyn,
+                // en múltiplos de 0.0625, mirando a la derecha (pivote en los pies).
                 var firePoints = Child(visual.transform, "FirePoints", playerLayer);
-                var fpForward = Child(firePoints.transform, "Forward", playerLayer, new Vector2(0.75f, 1.125f));
-                var fpDiagUp = Child(firePoints.transform, "DiagUp", playerLayer, new Vector2(0.625f, 1.6875f));
-                var fpUp = Child(firePoints.transform, "Up", playerLayer, new Vector2(0.125f, 2.25f));
-                var fpDown = Child(firePoints.transform, "Down", playerLayer, new Vector2(0.125f, -0.375f));
-                var fpCrouch = Child(firePoints.transform, "Crouch", playerLayer, new Vector2(0.75f, 0.5f));
+                var fpForward = Child(firePoints.transform, "Forward", playerLayer, new Vector2(1.3125f, 1f));
+                var fpDiagUp = Child(firePoints.transform, "DiagUp", playerLayer, new Vector2(0.75f, 2.3125f));
+                var fpUp = Child(firePoints.transform, "Up", playerLayer, new Vector2(0f, 2.5f));
+                var fpDown = Child(firePoints.transform, "Down", playerLayer, new Vector2(0f, -0.0625f));
+                var fpCrouch = Child(firePoints.transform, "Crouch", playerLayer, new Vector2(1.5f, 0.125f));
 
                 var playerBuster = root.AddComponent<PlayerBuster>();
                 SetRef(playerBuster, "data", buster);
@@ -335,13 +353,28 @@ namespace Game.EditorTools
                 markerSr.sprite = marker;
                 markerSr.sortingOrder = 11;
 
+                if (animated)
+                {
+                    var anim = root.AddComponent<PlayerAnimation>();
+                    SetRef(anim, "player", controller);
+                    SetRef(anim, "visual", visual.transform);
+                    SetRef(anim, "legs", legsAnim);
+                    SetRef(anim, "torso", torsoAnim);
+                    SetRef(anim, "fullBody", fullAnim);
+                }
+
+                // Overlay de depuración. Con los Animators, el color por estado y el volteo
+                // los deja de hacer (los hace PlayerAnimation); solo queda el texto y el indicador del cañón.
                 var debug = root.AddComponent<PlayerDebugView>();
                 SetRef(debug, "player", controller);
-                SetRef(debug, "visual", visual.transform);
-                SetRef(debug, "body", sr);
-                SetRef(debug, "standingSprite", stand);
-                SetRef(debug, "crouchingSprite", crouch);
                 SetRef(debug, "aimMarker", aimMarker.transform);
+                if (!animated)
+                {
+                    SetRef(debug, "visual", visual.transform);
+                    SetRef(debug, "body", sr);
+                    SetRef(debug, "standingSprite", stand);
+                    SetRef(debug, "crouchingSprite", crouch);
+                }
 
                 PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);
                 Debug.Log($"[Setup] Prefab creado: {PlayerPrefabPath}");
@@ -350,6 +383,19 @@ namespace Game.EditorTools
             {
                 Object.DestroyImmediate(root);
             }
+        }
+
+        static Animator AnimatedPart(Transform parent, string name, int layer, RuntimeAnimatorController controller,
+            int sortingOrder, bool visible)
+        {
+            var go = Child(parent, name, layer);
+            var r = go.AddComponent<SpriteRenderer>();
+            r.sortingOrder = sortingOrder;
+            r.enabled = visible;
+            var anim = go.AddComponent<Animator>();
+            anim.runtimeAnimatorController = controller;
+            anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            return anim;
         }
 
         static void CreateBulletPrefab()

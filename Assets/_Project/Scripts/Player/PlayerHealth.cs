@@ -21,7 +21,7 @@ namespace Game.Player
 
         [Header("Muerte")]
         [Tooltip("Segundos entre morir y reaparecer.")]
-        [SerializeField] float respawnDelay = 1f;
+        [SerializeField] float respawnDelay = 1.5f;
 
         float invulnerableTimer;
 
