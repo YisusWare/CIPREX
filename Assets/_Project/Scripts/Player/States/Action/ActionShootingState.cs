@@ -2,13 +2,17 @@ namespace Game.Player
 {
     /// <summary>
     /// Shoot pose (sección 6.4): dura shootPoseDuration y se reinicia con cada disparo.
-    /// Se cancela si empieza un dash.
+    /// Se cancela si empieza un dash. También es la pose que dejan las habilidades al terminar.
     /// </summary>
     public class ActionShootingState : ActionState
     {
         public ActionShootingState(PlayerContext ctx, ActionFSM fsm) : base(ctx, fsm) { }
 
-        public override void Exit() => fsm.ShootPoseTimer = 0f;
+        public override void Exit()
+        {
+            fsm.ShootPoseTimer = 0f;
+            fsm.ForceForwardPose = false;
+        }
 
         public override void Tick(float dt)
         {
@@ -17,6 +21,7 @@ namespace Game.Player
                 fsm.ChangeState(fsm.Ready);
                 return;
             }
+            if (TryStartAbility()) return;
 
             if (Input.Fire.IsActive && ctx.Buster.CanFire)
             {

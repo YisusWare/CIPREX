@@ -625,6 +625,8 @@ GameObject:
   - component: {fileID: 4650324659444930235}
   - component: {fileID: 8072497201572373229}
   - component: {fileID: 2964514270249816677}
+  - component: {fileID: 6296371135490416248}
+  - component: {fileID: 610639431195389532}
   - component: {fileID: 8537449123790706066}
   - component: {fileID: 6736406093776867479}
   - component: {fileID: 5179788703388391927}
@@ -740,13 +742,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d79574655a7b9b5449fa5ace1987d2c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Player.PlayerMotor
-  movement: {fileID: 11400000, guid: 4614a13643545d1488f78fe1671168dd, type: 2}
   groundMask:
     serializedVersion: 2
-    m_Bits: 456
+    m_Bits: 328
   ceilingMask:
     serializedVersion: 2
-    m_Bits: 200
+    m_Bits: 72
   hurtbox: {fileID: 6330345918163784709}
 --- !u!114 &4650324659444930235
 MonoBehaviour:
@@ -761,7 +762,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Player.PlayerInputReader
   actions: {fileID: -944628639613478452, guid: 9f4661f6dce588f42936a4e8e818804c, type: 3}
-  movement: {fileID: 11400000, guid: 4614a13643545d1488f78fe1671168dd, type: 2}
   axisThreshold: 0.4
   fireBuffer: 0.05
   abilityBuffer: 0.05
@@ -777,7 +777,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10a17ec2f4bd58b478c1f9cd16b5d4cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Player.PlayerBuster
-  data: {fileID: 11400000, guid: efed0d5c26d3dfa429e8ff18c42fe50c, type: 2}
   visualRoot: {fileID: 8425469657222193808}
   firePointForward: {fileID: 3221423407053062948}
   firePointDiagUp: {fileID: 217271992790977310}
@@ -796,11 +795,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac54dcfece49fef4c85d5d854582a312, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Player.PlayerHealth
-  maxHealth: 28
   invulnerabilityDuration: 1.5
   knockbackDuration: 0.3
   knockbackSpeed: 2.5
   respawnDelay: 1.5
+--- !u!114 &6296371135490416248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7561707070088696486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19c0aa47624cae242a47f450cda598a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Game.Player.PlayerEnergy
+--- !u!114 &610639431195389532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7561707070088696486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a1842eba7620f54a811056f888bae18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Game.Player.PlayerAbilities
+  switchSfx: {fileID: 11400000, guid: 85914ceeb39db5947b931face0c8e271, type: 2}
+  noEnergySfx: {fileID: 11400000, guid: ee01397aa8d64204d83f75e4fc6c79a0, type: 2}
 --- !u!114 &8537449123790706066
 MonoBehaviour:
   m_ObjectHideFlags: 0

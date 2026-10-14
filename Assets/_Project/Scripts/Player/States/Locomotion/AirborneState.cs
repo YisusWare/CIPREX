@@ -67,7 +67,7 @@ namespace Game.Player
             if (vy <= 0f) isJumping = false;
 
             // Air dash: solo se consume el buffer si queda uno disponible.
-            if (fsm.AirDashesLeft > 0 && Input.Dash.Consume())
+            if (fsm.AirDashesLeft > 0 && !DashBlocked && Input.Dash.Consume())
             {
                 fsm.ChangeState(fsm.AirDash);
                 return;

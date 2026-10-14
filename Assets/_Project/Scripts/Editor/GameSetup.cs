@@ -18,12 +18,13 @@ using UnityEngine.Tilemaps;
 namespace Game.EditorTools
 {
     /// <summary>
-    /// Arma el contenido de prueba de los hitos 1 y 2 (sección 16): sprites placeholder, tiles,
-    /// datos, matriz de colisiones, prefabs y la escena Test_Movement.
+    /// Arma el contenido de prueba de los hitos 1, 2 y 4 (sección 16): sprites placeholder, tiles,
+    /// datos, matriz de colisiones, prefabs, personaje, habilidades, HUD y la escena Test_Movement.
+    /// Lo del Hito 4 (personaje, habilidades, HUD, capas) está en GameSetup.Hito4.cs.
     /// Menú: Game/Setup. Se puede volver a ejecutar; los PNG y los assets de datos que ya existen
     /// no se sobrescriben (para no perder arte ni valores ajustados).
     /// </summary>
-    public static class GameSetup
+    public static partial class GameSetup
     {
         const string Root = "Assets/_Project";
         const string PlaceholderDir = Root + "/Art/Characters/Player/Placeholder";
@@ -42,8 +43,11 @@ namespace Game.EditorTools
         const string SceneDir = Root + "/Scenes";
 
         const string InputPath = Root + "/Input/PlayerControls.inputactions";
-        const string MovementDataPath = PlayerDataDir + "/PlayerMovementData.asset";
-        const string BusterDataPath = PlayerDataDir + "/BusterData.asset";
+        // Hasta el Hito 3 estaban en Data/Player; EnsureMovementData/EnsureBusterData los mueven (conservan el GUID).
+        const string LegacyMovementDataPath = PlayerDataDir + "/PlayerMovementData.asset";
+        const string LegacyBusterDataPath = PlayerDataDir + "/BusterData.asset";
+        const string MovementDataPath = RosslynDataDir + "/Rosslyn_Movement.asset";
+        const string BusterDataPath = RosslynDataDir + "/Rosslyn_Buster.asset";
         const string NoFrictionPath = PhysicsDir + "/NoFriction.physicsMaterial2D";
         const string FlashShaderPath = Root + "/Art/Shaders/Sprite-Lit-Flash.shader";
         const string FlashMaterialPath = MaterialsDir + "/Sprite-Lit-Flash.mat";
@@ -71,7 +75,7 @@ namespace Game.EditorTools
 
         static readonly string[] RequiredLayers =
         {
-            "Ground", "Breakable", "Meltable", "Platform", "Hazard", "Player", "PlayerHurtbox",
+            "Ground", "AbilityObstacle", "Platform", "Hazard", "Player", "PlayerHurtbox",
             "PlayerProjectile", "Enemy", "EnemyHurtbox", "EnemyProjectile", "Pickup",
         };
 
@@ -103,6 +107,7 @@ namespace Game.EditorTools
             EnsureMovementData();
             EnsureNoFrictionMaterial();
             foreach (var name in SfxNames) EnsureSfx(name);
+            CreateHito4ArtAndData();
             AssetDatabase.SaveAssets();
             Debug.Log("[Setup] Arte placeholder, tiles y datos listos.");
         }
@@ -119,6 +124,8 @@ namespace Game.EditorTools
             CreateDummyPrefab();
             CreateDamageZonePrefab();
             CreatePlayerPrefab();
+            CreateAbilityPrefabsAndData();
+            EnsureCharacterData();
             AssetDatabase.SaveAssets();
         }
 
@@ -128,7 +135,8 @@ namespace Game.EditorTools
             if (!CheckLayers()) return;
 
             if (AssetDatabase.LoadAssetAtPath<GameObject>(PlayerPrefabPath) == null ||
-                AssetDatabase.LoadAssetAtPath<GameObject>(DummyPrefabPath) == null)
+                AssetDatabase.LoadAssetAtPath<GameObject>(DummyPrefabPath) == null ||
+                AssetDatabase.LoadAssetAtPath<CharacterData>(CharacterPath) == null)
                 CreatePrefabs();
             if (AssetDatabase.LoadAssetAtPath<Tile>(TileAssetsDir + "/Tile_Ground.asset") == null)
                 CreateArtAndData();
@@ -180,13 +188,20 @@ namespace Game.EditorTools
             PlaceInstance(dummyPrefab, scene, testRoot, "Dummy_Plataforma", new Vector3(154f, 9f, 0f));
             PlaceInstance(zonePrefab, scene, testRoot, "ZonaDeDaño", new Vector3(25f, 0.5f, 0f));
 
-            // ---------- Jugador ----------
-            var player = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab, scene);
-            player.transform.position = spawn;
-            Transform camTarget = player.transform.Find("CameraTarget");
-
             // ---------- Cámara ----------
-            SetupCamera(camTarget, spawn);
+            var vcam = SetupCamera(spawn);
+
+            // ---------- Jugador (sección 5.4) ----------
+            // El jugador no se coloca en la escena: PlayerSpawner instancia el prefab del personaje.
+            var character = AssetDatabase.LoadAssetAtPath<CharacterData>(CharacterPath);
+            var spawnerGO = new GameObject("PlayerSpawner");
+            spawnerGO.transform.position = spawn;
+            var spawner = spawnerGO.AddComponent<PlayerSpawner>();
+            SetRef(spawner, "fallbackCharacter", character);
+            SetRef(spawner, "playerCamera", vcam);
+
+            // ---------- HUD (sección 15.6) ----------
+            CreateHud();
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -202,12 +217,12 @@ namespace Game.EditorTools
             // Pares que SÍ colisionan entre las capas del juego (sección 11.1). Todo lo demás se ignora.
             // Los proyectiles y ContactDamage usan consultas (casts/overlaps), no dependen de esta matriz;
             // la matriz evita empujones y contactos físicos indeseados.
-            string[] solids = { "Ground", "Breakable", "Meltable", "Platform" };
+            string[] solids = { "Ground", "AbilityObstacle", "Platform" };
             var collide = new List<(string, string)>();
             foreach (var a in solids)
-                foreach (var b in new[] { "Ground", "Breakable", "Meltable", "Platform", "Player", "Enemy", "Pickup" })
+                foreach (var b in new[] { "Ground", "AbilityObstacle", "Platform", "Player", "Enemy", "Pickup" })
                     collide.Add((a, b));
-            foreach (var s in new[] { "Ground", "Breakable", "Meltable" })
+            foreach (var s in new[] { "Ground", "AbilityObstacle" })
             {
                 collide.Add((s, "PlayerProjectile")); // granada con física (Hito 4)
                 collide.Add((s, "EnemyProjectile"));
@@ -250,9 +265,9 @@ namespace Game.EditorTools
                 return;
             }
 
+            // Solo para el tamaño del collider: los datos los reparte PlayerController.Initialize (5.4).
             var movement = EnsureMovementData();
             var noFriction = EnsureNoFrictionMaterial();
-            var buster = EnsureBusterData();
             Sprite stand = LoadSprite(PlayerStandPath);
             Sprite crouch = LoadSprite(PlayerCrouchPath);
             Sprite marker = LoadSprite(AimMarkerPath);
@@ -281,14 +296,12 @@ namespace Game.EditorTools
                 hurtbox.offset = new Vector2(0f, movement.standingHeight * 0.5f);
 
                 var motor = root.AddComponent<PlayerMotor>();
-                SetRef(motor, "movement", movement);
                 SetRef(motor, "hurtbox", hurtbox);
-                SetMask(motor, "groundMask", LayerMask.GetMask("Ground", "Platform", "Breakable", "Meltable"));
-                SetMask(motor, "ceilingMask", LayerMask.GetMask("Ground", "Breakable", "Meltable"));
+                SetMask(motor, "groundMask", LayerMask.GetMask("Ground", "Platform", "AbilityObstacle"));
+                SetMask(motor, "ceilingMask", LayerMask.GetMask("Ground", "AbilityObstacle"));
 
                 var reader = root.AddComponent<PlayerInputReader>();
                 SetRef(reader, "actions", input);
-                SetRef(reader, "movement", movement);
 
                 // Visual (se voltea). Con los Animators del Hito 3: Legs + Torso + FullBody (sección 5.1).
                 // Sin ellos: un placeholder de color.
@@ -324,7 +337,6 @@ namespace Game.EditorTools
                 var fpCrouch = Child(firePoints.transform, "Crouch", playerLayer, new Vector2(1.5f, 0.125f));
 
                 var playerBuster = root.AddComponent<PlayerBuster>();
-                SetRef(playerBuster, "data", buster);
                 SetRef(playerBuster, "visualRoot", visual.transform);
                 SetRef(playerBuster, "firePointForward", fpForward.transform);
                 SetRef(playerBuster, "firePointDiagUp", fpDiagUp.transform);
@@ -333,6 +345,10 @@ namespace Game.EditorTools
                 SetRef(playerBuster, "firePointCrouch", fpCrouch.transform);
 
                 root.AddComponent<PlayerHealth>();
+                root.AddComponent<PlayerEnergy>();
+                var abilities = root.AddComponent<PlayerAbilities>();
+                SetRef(abilities, "switchSfx", EnsureSfx("Sfx_AbilitySwitch"));
+                SetRef(abilities, "noEnergySfx", EnsureSfx("Sfx_AbilityNoEnergy"));
                 var controller = root.AddComponent<PlayerController>();
 
                 var audio = root.AddComponent<PlayerAudio>();
@@ -409,7 +425,7 @@ namespace Game.EditorTools
 
                 var projectile = root.AddComponent<Projectile>();
                 SetMask(projectile, "targetMask", LayerMask.GetMask("EnemyHurtbox"));
-                SetMask(projectile, "solidMask", LayerMask.GetMask("Ground", "Breakable", "Meltable"));
+                SetMask(projectile, "solidMask", LayerMask.GetMask("Ground", "AbilityObstacle"));
                 SetFloat(projectile, "radius", 0.1875f);
 
                 PrefabUtility.SaveAsPrefabAsset(root, BulletPrefabPath);
@@ -598,7 +614,8 @@ namespace Game.EditorTools
 
         // ------------------------------------------------------------------ Cámara
 
-        static void SetupCamera(Transform followTarget, Vector3 spawn)
+        /// <summary>Cámara pixel perfect + Cinemachine. El objetivo lo asigna PlayerSpawner al crear al jugador.</summary>
+        static CinemachineCamera SetupCamera(Vector3 spawn)
         {
             Camera cam = Object.FindFirstObjectByType<Camera>();
             if (cam == null)
@@ -628,7 +645,6 @@ namespace Game.EditorTools
             var lens = vcam.Lens;
             lens.OrthographicSize = 180f / 16f / 2f; // 5.625: lo corrige CinemachinePixelPerfect
             vcam.Lens = lens;
-            vcam.Follow = followTarget;
 
             var composer = vcamGO.AddComponent<CinemachinePositionComposer>();
             composer.CameraDistance = 10f;
@@ -639,6 +655,7 @@ namespace Game.EditorTools
             composer.Composition = composition;
 
             vcamGO.AddComponent<CinemachinePixelPerfect>();
+            return vcam;
         }
 
         // ------------------------------------------------------------------ Arte placeholder
@@ -814,6 +831,7 @@ namespace Game.EditorTools
 
         static PlayerMovementData EnsureMovementData()
         {
+            MoveLegacyAsset(LegacyMovementDataPath, MovementDataPath);
             var data = AssetDatabase.LoadAssetAtPath<PlayerMovementData>(MovementDataPath);
             if (data != null) return data;
             data = ScriptableObject.CreateInstance<PlayerMovementData>();
@@ -823,6 +841,7 @@ namespace Game.EditorTools
 
         static BusterData EnsureBusterData()
         {
+            MoveLegacyAsset(LegacyBusterDataPath, BusterDataPath);
             var data = AssetDatabase.LoadAssetAtPath<BusterData>(BusterDataPath);
             if (data == null)
             {
@@ -864,6 +883,7 @@ namespace Game.EditorTools
 
         static bool CheckLayers()
         {
+            MigrateLayers();
             var missing = RequiredLayers.Where(l => LayerMask.NameToLayer(l) < 0).ToList();
             if (missing.Count == 0) return true;
             EditorUtility.DisplayDialog("Setup",
@@ -880,6 +900,7 @@ namespace Game.EditorTools
                          EnemyPrefabDir, LevelPrefabDir, SceneDir,
                      })
                 EnsureFolder(dir);
+            EnsureHito4Folders();
         }
 
         static void EnsureFolder(string path)

@@ -1858,8 +1858,8 @@ Herramienta: menú **Game → Setup** (`Scripts/Editor/GameSetup.cs`), que crea 
 - [x] `Legs.controller`, `Torso.controller` y `FullBody.controller`
 - [x] `PlayerAnimation.Sync()` con las poses de apuntado arriba y en diagonal
 - [x] Validar alineación en Pixel Perfect al correr, saltar, agacharse y hacer dash, y la boca del cañón en cada pose
-- [ ] Mover la tabla de clips de `PlayerArtSetup.cs` a un asset `SpritesheetLayout` (4.2.1)
-- [ ] Importar `Sfx_PlayerDeath` junto con la animación de muerte (pendiente del Hito 2)
+- [x] Mover la tabla de clips de `PlayerArtSetup.cs` a un asset `SpritesheetLayout` (4.2.1)
+- [x] Importar `Sfx_PlayerDeath` junto con la animación de muerte (pendiente del Hito 2)
 
 ### Hito 4 — Habilidades
 

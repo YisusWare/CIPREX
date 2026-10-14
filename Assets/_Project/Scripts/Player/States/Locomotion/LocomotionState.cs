@@ -18,6 +18,9 @@ namespace Game.Player
         protected PlayerMotor Motor => ctx.Motor;
         protected PlayerMovementData Data => ctx.Movement;
         /// <summary>moveSpeedMultiplier de la habilidad activa (sección 6.4); 1 si no hay ninguna.</summary>
+        /// <summary>No se puede hacer dash durante una habilidad por pulsación (8.5).</summary>
+        protected bool DashBlocked => ctx.Action != null && ctx.Action.BlocksDash;
+
         protected float SpeedMultiplier => ctx.Action != null ? ctx.Action.MoveSpeedMultiplier : 1f;
 
         public virtual void Enter() { }
@@ -41,6 +44,7 @@ namespace Game.Player
         /// <summary>Dash en el suelo, si hay uno en el buffer.</summary>
         protected bool TryStartDash()
         {
+            if (DashBlocked) return false; // se queda en el buffer por si la habilidad termina a tiempo
             if (!Input.Dash.Consume()) return false;
             fsm.ChangeState(fsm.Dash);
             return true;

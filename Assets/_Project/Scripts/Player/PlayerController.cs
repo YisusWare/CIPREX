@@ -1,3 +1,4 @@
+using Game.Abilities;
 using Game.Combat;
 using Game.Core;
 using UnityEngine;
@@ -8,13 +9,16 @@ namespace Game.Player
     public enum PlayerLifeState { Alive, Hurt, Dead, Respawning, Disabled }
 
     /// <summary>
-    /// Crea el contexto y actualiza las máquinas de estados (secciones 5.2, 5.3 y 6.2).
+    /// Recibe el CharacterData, crea el contexto y actualiza las máquinas de estados (secciones 5.2, 5.3, 5.4 y 6.2).
     /// No lee input ni mueve el Rigidbody directamente.
+    /// Flujo: se instancia el prefab del personaje → Awake (cada componente toma sus referencias) →
+    /// Initialize(characterData) reparte los datos → Start arranca las FSM.
     /// La FSM de nivel superior (Alive, Hurt, Dead, Respawning, Disabled) está en PlayerLifeStates.cs.
     /// </summary>
     [DefaultExecutionOrder(-50)]
     [RequireComponent(typeof(PlayerInputReader), typeof(PlayerMotor))]
     [RequireComponent(typeof(PlayerBuster), typeof(PlayerHealth))]
+    [RequireComponent(typeof(PlayerEnergy), typeof(PlayerAbilities))]
     public partial class PlayerController : MonoBehaviour
     {
         [Tooltip("Duración de la aparición (Teleport_In) al empezar y al reaparecer. Debe coincidir con el clip FullBody_Teleport_In.")]
@@ -24,6 +28,8 @@ namespace Game.Player
         PlayerMotor motor;
         PlayerBuster buster;
         PlayerHealth health;
+        PlayerEnergy energy;
+        PlayerAbilities abilities;
 
         readonly StateMachine life = new();
         AliveState alive;
@@ -32,12 +38,18 @@ namespace Game.Player
         RespawningState respawning;
         DisabledState disabled;
 
+        /// <summary>El personaje que se está jugando (5.4). Null hasta que se llama Initialize.</summary>
+        public CharacterData Character { get; private set; }
+        public bool IsInitialized => Character != null;
+
         public PlayerContext Context { get; private set; }
         public LocomotionFSM Locomotion => Context.Locomotion;
         public ActionFSM Action => Context.Action;
         public PlayerMotor Motor => motor;
         public PlayerBuster Buster => buster;
         public PlayerHealth Health => health;
+        public PlayerEnergy Energy => energy;
+        public PlayerAbilities Abilities => abilities;
 
         /// <summary>Dónde reaparece al morir. En el Hito 5 lo actualizan los checkpoints.</summary>
         public Vector3 RespawnPoint { get; set; }
@@ -61,17 +73,8 @@ namespace Game.Player
             motor = GetComponent<PlayerMotor>();
             buster = GetComponent<PlayerBuster>();
             health = GetComponent<PlayerHealth>();
-
-            Context = new PlayerContext
-            {
-                Input = inputReader.Snapshot,
-                Movement = motor.Movement,
-                Motor = motor,
-                Buster = buster,
-                Health = health,
-            };
-            Context.Locomotion = new LocomotionFSM(Context);
-            Context.Action = new ActionFSM(Context);
+            energy = GetComponent<PlayerEnergy>();
+            abilities = GetComponent<PlayerAbilities>();
 
             alive = new AliveState(this);
             hurt = new HurtState(this);
@@ -84,8 +87,56 @@ namespace Game.Player
             health.Died += OnDied;
         }
 
+        /// <summary>
+        /// Reparte los datos del personaje a los componentes (5.4). Ningún componente tiene estos
+        /// valores en sus propios campos: todos salen de aquí. Se llama una vez, justo después de instanciar.
+        /// </summary>
+        public void Initialize(CharacterData character)
+        {
+            if (IsInitialized)
+            {
+                Debug.LogWarning("PlayerController: Initialize se llamó dos veces.", this);
+                return;
+            }
+            if (character == null || character.movement == null || character.buster == null)
+            {
+                Debug.LogError("PlayerController: el CharacterData está vacío o le falta movement/buster.", this);
+                enabled = false;
+                return;
+            }
+
+            Character = character;
+            motor.Configure(character.movement);
+            inputReader.Configure(character.movement);
+            buster.SetData(character.buster);
+            health.SetMaxHealth(character.maxHealth);
+            energy.SetMax(character.maxEnergy);
+            abilities.SetAbilities(character.abilities, energy);
+
+            Context = new PlayerContext
+            {
+                Input = inputReader.Snapshot,
+                Movement = character.movement,
+                Motor = motor,
+                Buster = buster,
+                Health = health,
+                Energy = energy,
+                Abilities = abilities,
+            };
+            Context.Locomotion = new LocomotionFSM(Context);
+            Context.Action = new ActionFSM(Context);
+        }
+
         void Start()
         {
+            if (!IsInitialized)
+            {
+                Debug.LogError("PlayerController: falta llamar a Initialize(CharacterData). " +
+                               "El jugador no se coloca en la escena: lo instancia PlayerSpawner (5.4).", this);
+                enabled = false;
+                return;
+            }
+
             RespawnPoint = transform.position;
             Locomotion.Start();
             Action.Start();
@@ -103,7 +154,7 @@ namespace Game.Player
 
         void Update()
         {
-            // Orden de la sección 5.3: input → locomoción → acción (dentro de Alive) → animación (Hito 3).
+            // Orden de la sección 5.3: input → locomoción → acción (dentro de Alive) → animación.
             inputReader.Poll();
             life.Tick(Time.deltaTime);
         }
@@ -138,7 +189,7 @@ namespace Game.Player
         void SuspendControl()
         {
             Locomotion.Suspend();
-            Action.Reset();
+            Action.Reset(); // también cancela la habilidad en curso (8.5)
             Context.Input.ClearBuffers();
         }
 

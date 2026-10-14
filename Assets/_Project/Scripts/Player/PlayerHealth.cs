@@ -9,7 +9,7 @@ namespace Game.Player
     /// </summary>
     public class PlayerHealth : MonoBehaviour, IDamageable
     {
-        [SerializeField] int maxHealth = 28;
+        int maxHealth = 28; // lo asigna SetMaxHealth (CharacterData, sección 5.4)
         [Tooltip("Segundos de invulnerabilidad después de recibir daño. [AJUSTAR]")]
         [SerializeField] float invulnerabilityDuration = 1.5f;
 
@@ -39,6 +39,13 @@ namespace Game.Player
         public event Action<int, int> Changed;
 
         void Awake() => Current = maxHealth;
+
+        /// <summary>Lo llama PlayerController.Initialize con la vida del personaje. Deja la vida llena.</summary>
+        public void SetMaxHealth(int value)
+        {
+            maxHealth = Mathf.Max(1, value);
+            SetHealth(maxHealth);
+        }
 
         void Update()
         {

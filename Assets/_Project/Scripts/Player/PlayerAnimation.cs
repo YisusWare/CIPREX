@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Game.Abilities;
 using UnityEngine;
 
 namespace Game.Player
@@ -57,14 +58,18 @@ namespace Game.Player
         void Start()
         {
             if (player != null && player.Buster != null) player.Buster.Fired += OnFired;
+            if (player != null && player.Context != null) player.Action.AbilityStarted += OnAbilityStarted;
         }
 
         void OnDestroy()
         {
             if (player != null && player.Buster != null) player.Buster.Fired -= OnFired;
+            if (player != null && player.Context != null) player.Action.AbilityStarted -= OnAbilityStarted;
         }
 
         void OnFired(AimDirection aim, Vector2 origin) => shotThisFrame = true;
+        // Activar una habilidad reinicia su clip (propio o de disparo) aunque el estado no cambie.
+        void OnAbilityStarted(AbilityData ability) => shotThisFrame = true;
 
         void CacheClips(Animator animator)
         {
@@ -107,8 +112,9 @@ namespace Game.Player
                 Play(legs, ChooseLegs(loco), LegsIdle, ref currentLegs, false);
                 int t = ChooseTorso(loco, player.Action);
                 bool isShoot = t == ShootForward || t == ShootDiagUp || t == ShootUp || t == ShootDown || t == ShootCrouch;
-                // Cada disparo reinicia el clip de disparo, aunque el estado no cambie (sección 9.3).
-                Play(torso, t, TorsoIdle, ref currentTorso, isShoot && shotThisFrame);
+                bool isAbilityClip = t == abilityClipHash && t != 0;
+                // Cada disparo (y cada uso de habilidad) reinicia su clip, aunque el estado no cambie (sección 9.3).
+                Play(torso, t, TorsoIdle, ref currentTorso, (isShoot || isAbilityClip) && shotThisFrame);
             }
             shotThisFrame = false;
 
@@ -133,14 +139,33 @@ namespace Game.Player
             return LegsIdle;
         }
 
-        /// <summary>Lista de prioridad del torso (sección 9.2). Las habilidades llegan en el Hito 4.</summary>
+        int abilityClipHash;
+
+        /// <summary>Lista de prioridad del torso (sección 9.2).</summary>
         int ChooseTorso(LocomotionFSM loco, ActionFSM action)
         {
+            abilityClipHash = 0;
             if (loco.IsDashing) return TorsoDash;
+
+            // 2. Habilidad con clip propio en curso (espada, cuchillo).
+            var ability = action.ActiveAbility;
+            if (ability != null && ability.torsoPose == AbilityTorsoPose.CustomClip)
+            {
+                var clip = loco.IsCrouching && ability.customTorsoClipCrouch != null
+                    ? ability.customTorsoClipCrouch
+                    : ability.customTorsoClip;
+                if (clip != null)
+                {
+                    abilityClipHash = Hash(clip.name);
+                    return abilityClipHash;
+                }
+            }
 
             if (action.IsInShootPose)
             {
                 if (loco.IsCrouching) return ShootCrouch;
+                // 3. Pose forzada hacia adelante (granada).
+                if (action.ForceForwardPose) return ShootForward;
                 return action.AimDir switch
                 {
                     AimDirection.Up => ShootUp,

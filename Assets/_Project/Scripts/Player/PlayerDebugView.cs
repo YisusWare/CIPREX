@@ -99,9 +99,12 @@ namespace Game.Player
                 $"Apunta: {action.AimDir}   Mira: {(loco.FacingDir > 0 ? "→" : "←")}\n" +
                 $"Vel: ({v.x:0.00}, {v.y:0.00})   Suelo: {loco.IsGrounded}\n" +
                 $"Air dashes: {loco.AirDashesLeft}   Impulso dash: {loco.CarriesDashMomentum}\n" +
-                $"Pos: ({player.transform.position.x:0.00}, {player.transform.position.y:0.00})   FPS: {fps:0}";
-            GUI.Box(new Rect(8, 8, 330, 112), GUIContent.none);
-            GUI.Label(new Rect(16, 12, 320, 108), text);
+                $"Pos: ({player.transform.position.x:0.00}, {player.transform.position.y:0.00})   FPS: {fps:0}\n" +
+                $"Energía: {player.Energy.Current:0.0}/{player.Energy.Max:0}   Habilidad: {(player.Abilities.Selected != null ? player.Abilities.Selected.displayName : "-")}";
+            // Arriba a la derecha, para no tapar el HUD.
+            float x = Screen.width - 348f;
+            GUI.Box(new Rect(x, 8, 340, 128), GUIContent.none);
+            GUI.Label(new Rect(x + 8, 12, 330, 124), text);
         }
     }
 }

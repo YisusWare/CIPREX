@@ -12,7 +12,7 @@ namespace Game.Combat
     {
         [Tooltip("Capas que reciben daño (hurtboxes del bando contrario).")]
         [SerializeField] LayerMask targetMask;
-        [Tooltip("Capas que detienen el proyectil (Ground, Breakable, Meltable).")]
+        [Tooltip("Capas que detienen el proyectil (Ground, AbilityObstacle).")]
         [SerializeField] LayerMask solidMask;
         [Tooltip("Radio de colisión en unidades.")]
         [SerializeField] float radius = 0.125f;

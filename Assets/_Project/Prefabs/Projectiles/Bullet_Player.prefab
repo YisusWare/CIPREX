@@ -109,7 +109,7 @@ MonoBehaviour:
     m_Bits: 16384
   solidMask:
     serializedVersion: 2
-    m_Bits: 200
+    m_Bits: 72
   radius: 0.1875
   maxLifetime: 2
   pierceCount: 0

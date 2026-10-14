@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9ad2cbe6611be54b9b9907a3217450f, type: 3}
+  m_Name: Rosslyn
+  m_EditorClassIdentifier: Game.Gameplay::Game.Player.CharacterData
+  id: rosslyn
+  displayName: Rosslyn
+  description: "Soldado espacial. Bl\xE1ster de largo alcance."
+  selectPortrait: {fileID: 0}
+  prefab: {fileID: 8537449123790706066, guid: 6c2beb4642d8a884e8d1f505208f43b7, type: 3}
+  movement: {fileID: 11400000, guid: 4614a13643545d1488f78fe1671168dd, type: 2}
+  maxHealth: 28
+  maxEnergy: 28
+  buster: {fileID: 11400000, guid: efed0d5c26d3dfa429e8ff18c42fe50c, type: 2}
+  abilities:
+  - {fileID: 11400000, guid: 702fda295031a2b40980726b3d94f4ea, type: 2}
+  - {fileID: 11400000, guid: c9ae0174e29b54d4eabfeb8b89cfaa12, type: 2}
+  - {fileID: 11400000, guid: bbb14d7b5e39cbc4d8268606596b5741, type: 2}

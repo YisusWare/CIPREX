@@ -11,7 +11,7 @@ namespace Game.Player
     [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
     public class PlayerMotor : MonoBehaviour
     {
-        [SerializeField] PlayerMovementData movement;
+        PlayerMovementData movement; // lo asigna Configure (CharacterData, sección 5.4)
 
         [Tooltip("Capas sobre las que se puede estar parado.")]
         [SerializeField] LayerMask groundMask;
@@ -53,7 +53,12 @@ namespace Game.Player
             groundFilter = new ContactFilter2D();
             groundFilter.SetLayerMask(groundMask);
             groundFilter.SetNormalAngle(45f, 135f);
+        }
 
+        /// <summary>Lo llama PlayerController.Initialize con los datos del personaje.</summary>
+        public void Configure(PlayerMovementData data)
+        {
+            movement = data;
             SetCrouching(false);
         }
 

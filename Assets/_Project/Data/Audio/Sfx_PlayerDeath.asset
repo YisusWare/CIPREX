@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7b7f9c29f3b2c4499f82a7126e91821, type: 3}
   m_Name: Sfx_PlayerDeath
   m_EditorClassIdentifier: Game.Gameplay::Game.Audio.SfxData
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: 515f96479b8dfda46821c3f325dd0465, type: 3}
   volume: 1
   pitchRange: {x: 0.95, y: 1.05}
   group: {fileID: 0}

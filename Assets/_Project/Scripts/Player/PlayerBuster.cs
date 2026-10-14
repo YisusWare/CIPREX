@@ -11,7 +11,7 @@ namespace Game.Player
     /// </summary>
     public class PlayerBuster : MonoBehaviour
     {
-        [SerializeField] BusterData data;
+        BusterData data; // lo asigna SetData (CharacterData, sección 5.4)
         [Tooltip("El Visual que se voltea. Los FirePoints son hijos suyos.")]
         [SerializeField] Transform visualRoot;
         [SerializeField] Transform firePointForward;
@@ -28,8 +28,10 @@ namespace Game.Player
         /// <summary>Se lanza al disparar (para el fogonazo en el Hito 3).</summary>
         public event Action<AimDirection, Vector2> Fired;
 
-        void Awake()
+        /// <summary>Lo llama PlayerController.Initialize con el disparo básico del personaje.</summary>
+        public void SetData(BusterData busterData)
         {
+            data = busterData;
             if (data == null || data.projectilePrefab == null)
             {
                 Debug.LogError("PlayerBuster: falta BusterData o su prefab de proyectil.", this);

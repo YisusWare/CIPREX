@@ -90,7 +90,7 @@ namespace Game.Player
 
         /// <summary>
         /// Aparece en RespawnPoint con la vida llena mientras se ve Teleport_In
-        /// (al empezar el nivel y al reaparecer). En el Hito 4 también se rellena la energía.
+        /// (al empezar el nivel y al reaparecer), con la vida y la energía llenas.
         /// </summary>
         class RespawningState : LifeStateBase
         {
@@ -103,6 +103,7 @@ namespace Game.Player
                 p.SuspendControl();
                 p.motor.Teleport(p.RespawnPoint);
                 p.health.Refill();
+                p.energy.RefillFull(); // al empezar el nivel y al reaparecer (8.6)
                 timer = p.spawnDuration;
             }
 

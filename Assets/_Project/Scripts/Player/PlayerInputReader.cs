@@ -10,7 +10,7 @@ namespace Game.Player
     public class PlayerInputReader : MonoBehaviour
     {
         [SerializeField] InputActionAsset actions;
-        [SerializeField] PlayerMovementData movement;
+        PlayerMovementData movement; // lo asigna Configure (CharacterData, sección 5.4)
 
         [Tooltip("Umbral por eje para convertir el stick en dirección discreta.")]
         [SerializeField, Range(0.1f, 0.9f)] float axisThreshold = 0.4f;
@@ -41,6 +41,9 @@ namespace Game.Player
             abilityPrev = gameplay.FindAction("AbilityPrev", true);
             pause = gameplay.FindAction("Pause", true);
         }
+
+        /// <summary>Lo llama PlayerController.Initialize: los buffers de salto y dash salen de los datos del personaje.</summary>
+        public void Configure(PlayerMovementData data) => movement = data;
 
         void OnEnable() => gameplay?.Enable();
         void OnDisable() => gameplay?.Disable();

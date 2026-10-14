@@ -16,5 +16,9 @@ namespace Game.Combat
         public GameObject source;
         /// <summary>Fosos y pinchos: ignoran los i-frames.</summary>
         public bool instantKill;
+        /// <summary>Fuerza de empuje (u/s); 0 = ninguno. Opcional (10.1): cada receptor decide cómo reacciona.</summary>
+        public float knockback;
+        /// <summary>Segundos de aturdimiento; 0 = ninguno. Opcional (10.1).</summary>
+        public float stunDuration;
     }
 }
