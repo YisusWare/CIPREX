@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Game.Player;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEditor.U2D.Sprites;
@@ -10,9 +11,9 @@ namespace Game.EditorTools
 {
     /// <summary>
     /// Convierte el spritesheet de Rosslyn en sprites, clips y Animators (Hito 3).
-    /// La hoja es una cuadrícula de celdas de 48×64; cada clip empieza en una celda conocida y
-    /// toma las celdas no vacías consecutivas hacia la derecha. Si se agregan frames en la misma
-    /// fila y se vuelve a ejecutar, los clips se actualizan solos.
+    /// Dónde está cada clip lo dice el asset SpritesheetLayout (Data/Characters/SpritesheetLayout.asset,
+    /// sección 4.2.1): cada clip empieza en una celda y toma las celdas no vacías consecutivas hacia
+    /// la derecha. Si se agregan frames o entradas y se vuelve a ejecutar, los clips se actualizan solos.
     /// Menú: Game/Setup/4. Personaje animado.
     /// </summary>
     public static class PlayerArtSetup
@@ -23,44 +24,33 @@ namespace Game.EditorTools
         public const string TorsoControllerPath = AnimRoot + "/Torso.controller";
         public const string FullBodyControllerPath = AnimRoot + "/FullBody.controller";
 
-        const int CellW = 48, CellH = 64;
-        static readonly Vector2 Pivot = new(24f / CellW, 12f / CellH); // pies en (24, 12)
-        const float DefaultFps = 12f;
+        public const string LayoutPath = "Assets/_Project/Data/Characters/SpritesheetLayout.asset";
 
-        enum Part { Legs, Torso, FullBody }
+        // Layout en uso durante una ejecución del menú.
+        static SpritesheetLayout layout;
+        static int CellW => layout.cellWidth;
+        static int CellH => layout.cellHeight;
+        static Vector2 Pivot => new((float)layout.pivotPixels.x / CellW, (float)layout.pivotPixels.y / CellH);
 
-        // (clip, parte, fila desde arriba, columna inicial, loop)
-        static readonly (string name, Part part, int row, int col, bool loop)[] Layout =
+        /// <summary>Entrada del layout con fila y columna en base 0 (el asset usa base 1).</summary>
+        readonly struct ClipDef
         {
-            ("Torso_Idle", Part.Torso, 0, 0, true),
-            ("Legs_Idle", Part.Legs, 1, 0, true),
-            ("Torso_Run", Part.Torso, 2, 0, true),
-            ("Legs_Run", Part.Legs, 3, 0, true),
+            public readonly string name;
+            public readonly SpritesheetPart part;
+            public readonly int row, col;
+            public readonly bool loop;
 
-            ("Torso_JumpUp", Part.Torso, 4, 0, true),
-            ("Torso_Fall", Part.Torso, 4, 1, true),
-            ("Torso_Crouch", Part.Torso, 4, 2, true),
-            ("Torso_Dash", Part.Torso, 4, 3, true),
-            ("Torso_Aim_Up", Part.Torso, 4, 5, true),
-            ("Torso_Aim_DiagUp", Part.Torso, 4, 6, true),
+            public ClipDef(SpritesheetLayout.Entry e)
+            {
+                name = e.clipName.Trim();
+                part = e.part;
+                row = e.row - 1;
+                col = e.startColumn - 1;
+                loop = e.loop;
+            }
+        }
 
-            ("Legs_JumpUp", Part.Legs, 5, 0, true),
-            ("Legs_Fall", Part.Legs, 5, 1, true),
-            ("Legs_Crouch", Part.Legs, 5, 2, true),
-            ("Legs_Dash", Part.Legs, 5, 3, true),
-
-            ("Torso_Shoot_Forward", Part.Torso, 7, 0, false),
-            ("Torso_Shoot_Up", Part.Torso, 7, 5, false),
-            ("Torso_Shoot_DiagUp", Part.Torso, 7, 10, false),
-            ("Torso_Shoot_Crouch", Part.Torso, 7, 15, false),
-
-            ("Torso_Shoot_Down", Part.Torso, 8, 0, false),
-
-            ("FullBody_Hurt", Part.FullBody, 9, 0, false),
-            ("FullBody_Death", Part.FullBody, 10, 0, false),
-            ("FullBody_Teleport_In", Part.FullBody, 11, 0, false),
-            ("FullBody_Teleport_Out", Part.FullBody, 12, 0, false),
-        };
+        static ClipDef[] Layout;
 
         [MenuItem("Game/Setup/4. Personaje animado (spritesheet)", priority = 23)]
         public static void Run()
@@ -71,14 +61,25 @@ namespace Game.EditorTools
                 return;
             }
 
+            layout = LoadOrCreateLayout();
+            var errors = layout.Validate();
+            if (errors.Count > 0)
+            {
+                EditorUtility.DisplayDialog("Personaje animado",
+                    "Corrige el SpritesheetLayout antes de continuar:\n\n" + string.Join("\n", errors), "OK");
+                Selection.activeObject = layout;
+                return;
+            }
+            Layout = layout.clips.Select(e => new ClipDef(e)).ToArray();
+
             var frames = DetectFrames();
             SliceSheet(frames);
             var clips = WriteClips(frames);
 
             EnsureFolder(AnimRoot);
-            WriteController(LegsControllerPath, clips[Part.Legs], "Legs_Idle");
-            WriteController(TorsoControllerPath, clips[Part.Torso], "Torso_Idle");
-            WriteController(FullBodyControllerPath, clips[Part.FullBody], "FullBody_Hurt");
+            WriteController(LegsControllerPath, clips[SpritesheetPart.Legs], layout.DefaultClipFor(SpritesheetPart.Legs));
+            WriteController(TorsoControllerPath, clips[SpritesheetPart.Torso], layout.DefaultClipFor(SpritesheetPart.Torso));
+            WriteController(FullBodyControllerPath, clips[SpritesheetPart.FullBody], layout.DefaultClipFor(SpritesheetPart.FullBody));
             AssetDatabase.SaveAssets();
 
             // El prefab del jugador usa los Animators si existen.
@@ -86,6 +87,30 @@ namespace Game.EditorTools
 
             var report = string.Join("\n", Layout.Select(l => $"{l.name}: {frames[l.name].Count} frames"));
             Debug.Log("[Personaje animado] Listo.\n" + report);
+        }
+
+        // ------------------------------------------------------------------ Layout
+
+        /// <summary>Carga el SpritesheetLayout; si no existe, lo crea con el layout actual de Rosslyn.</summary>
+        static SpritesheetLayout LoadOrCreateLayout()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<SpritesheetLayout>(LayoutPath);
+            if (asset != null) return asset;
+
+            EnsureFolder(Path.GetDirectoryName(LayoutPath).Replace('\\', '/'));
+            asset = ScriptableObject.CreateInstance<SpritesheetLayout>();
+            asset.clips = SpritesheetLayout.DefaultEntries();
+            AssetDatabase.CreateAsset(asset, LayoutPath);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Personaje animado] Se creó {LayoutPath} con los {asset.clips.Count} clips actuales.");
+            return asset;
+        }
+
+        [MenuItem("Game/Setup/Abrir SpritesheetLayout", priority = 24)]
+        static void SelectLayout()
+        {
+            Selection.activeObject = LoadOrCreateLayout();
+            EditorGUIUtility.PingObject(Selection.activeObject);
         }
 
         // ------------------------------------------------------------------ Detección de frames
@@ -110,9 +135,16 @@ namespace Game.EditorTools
                 return false;
             }
 
+            int rows = texH / CellH;
             var result = new Dictionary<string, List<RectInt>>();
             foreach (var clip in Layout)
             {
+                if (clip.row >= rows || clip.col >= cols)
+                {
+                    Debug.LogWarning($"[Personaje animado] {clip.name}: la celda (fila {clip.row + 1}, columna {clip.col + 1}) está fuera de la hoja ({rows} filas × {cols} columnas).");
+                    result[clip.name] = new List<RectInt>();
+                    continue;
+                }
                 // El clip llega hasta la siguiente columna inicial de la misma fila.
                 int limit = Layout.Where(o => o.row == clip.row && o.col > clip.col)
                                   .Select(o => o.col).DefaultIfEmpty(cols).Min();
@@ -181,13 +213,13 @@ namespace Game.EditorTools
 
         // ------------------------------------------------------------------ Clips
 
-        static Dictionary<Part, List<AnimationClip>> WriteClips(Dictionary<string, List<RectInt>> frames)
+        static Dictionary<SpritesheetPart, List<AnimationClip>> WriteClips(Dictionary<string, List<RectInt>> frames)
         {
             var sprites = AssetDatabase.LoadAllAssetsAtPath(SheetPath).OfType<Sprite>()
                 .ToDictionary(s => s.name);
-            var result = new Dictionary<Part, List<AnimationClip>>
+            var result = new Dictionary<SpritesheetPart, List<AnimationClip>>
             {
-                [Part.Legs] = new(), [Part.Torso] = new(), [Part.FullBody] = new(),
+                [SpritesheetPart.Legs] = new(), [SpritesheetPart.Torso] = new(), [SpritesheetPart.FullBody] = new(),
             };
 
             foreach (var def in Layout)
@@ -209,8 +241,8 @@ namespace Game.EditorTools
         {
             var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
             bool isNew = clip == null;
-            if (isNew) clip = new AnimationClip { frameRate = DefaultFps };
-            float fps = clip.frameRate > 0f ? clip.frameRate : DefaultFps; // respeta el Sample Rate ajustado a mano
+            if (isNew) clip = new AnimationClip { frameRate = layout.defaultFps };
+            float fps = clip.frameRate > 0f ? clip.frameRate : layout.defaultFps; // respeta el Sample Rate ajustado a mano
 
             var binding = EditorCurveBinding.PPtrCurve("", typeof(SpriteRenderer), "m_Sprite");
             var keys = new ObjectReferenceKeyframe[frames.Length + 1];

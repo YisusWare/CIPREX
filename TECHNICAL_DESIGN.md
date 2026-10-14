@@ -1,6 +1,6 @@
 # Documento Técnico — Run & Gun 2D
 
-> **Estado:** borrador v25 (2026-10-14)
+> **Estado:** borrador v26 (2026-10-14)
 > **Motor:** Unity 6 · **Plataforma:** PC (teclado y gamepad) · **Arte:** pixel art hecho en Piskel
 > **Referencias:** Metal Slug (personaje dividido en dos mitades), Mega Man (habilidades), Mega Man X (dash)
 > Las secciones marcadas con **[DECIDIR]** son decisiones abiertas y las marcadas con **[AJUSTAR]** son valores que se afinan al probar. Todas están en la sección 17.
@@ -218,7 +218,7 @@ Como las dos mitades se dibujan en el **mismo lienzo y en su posición real**, c
 
 - **Traslape:** el torso se dibuja 1–2 px más largo hacia abajo de la cintura, para que no aparezca un hueco cuando las piernas rebotan.
 - **Orden de dibujo:** `Legs` con *Order in Layer* = 0 y `Torso` con *Order in Layer* = 1.
-- **Fogonazo del disparo como sprite separado:** el destello del cañón no se dibuja en los clips del torso. Es un objeto VFX en el FirePoint. Así una sola pose sirve para todos los disparos en esa dirección.
+- **Sin fogonazo:** el disparo no tiene destello del cañón (decisión del 2026-10-14). El movimiento del arma en los clips `Torso_Shoot_*` es el feedback visual del disparo.
 
 ### 4.2 Flujo de trabajo en Piskel
 
@@ -256,6 +256,8 @@ Cada clip empieza en una celda fija y toma las celdas **no vacías consecutivas*
 - Los clips se crean a 12 fps. Si se cambia el *Sample Rate* de un clip en Unity, al volver a ejecutar el menú se respeta.
 - **La tabla de esta sección vive en un asset `SpritesheetLayout`** (`Data/Characters/`), no en el código de `PlayerArtSetup.cs`. Cada entrada tiene el nombre del clip, la fila, la columna inicial, si hace loop y a qué mitad pertenece (piernas, torso o cuerpo completo). Todos los personajes usan el mismo layout. Para agregar un clip (por ejemplo, el de una habilidad nueva) se agrega una entrada al asset, se dibujan las celdas y se vuelve a ejecutar el menú, sin tocar código.
 - **No mover** un clip a otra celda sin cambiar su entrada en el `SpritesheetLayout`.
+- El asset se abre con **Game → Setup → Abrir SpritesheetLayout**. Si no existe, el menú lo crea con los clips actuales. Antes de cortar la hoja, el menú revisa que no haya nombres vacíos o repetidos ni dos clips en la misma celda inicial, y avisa si una entrada apunta fuera de la hoja.
+- Cada entrada tiene: nombre del clip (debe coincidir con el que busca `PlayerAnimation`), mitad (`Legs`, `Torso` o `FullBody`), fila y columna inicial (desde 1) y si hace loop. El asset también guarda el tamaño de celda (48 × 64), el pivote (24, 12), los fps de los clips nuevos (12) y el estado inicial de cada Animator.
 - Los clips `Torso_Melee` y `Torso_Melee_Crouch` todavía no tienen celdas: se agregan como filas nuevas al final de la hoja en el Hito 4.
 - Si en algún momento la hoja crece, se agregan filas al final (la hoja puede crecer hacia abajo).
 
@@ -579,7 +581,7 @@ Cada personaje tiene su propio `BusterData`, referenciado desde su `CharacterDat
 
 - Al llegar a `maxRange`, el proyectil se desactiva con un VFX corto de disipación, para que el jugador vea dónde termina el alcance.
 - **Diseño de enemigos y jefes:** con poco alcance, Veyron tiene que acercarse. Torretas lejanas, enemigos sobre plataformas altas y jefes que se quedan lejos deben poder alcanzarse sin recibir daño inevitable (14.2).
-- Si el sprite del proyectil o del fogonazo es distinto al de Rosslyn, solo cambian los prefabs referenciados en su `BusterData`.
+- Si el sprite del proyectil es distinto al de Rosslyn, solo cambia el prefab referenciado en su `BusterData`.
 
 ### 7.1 BusterData (ScriptableObject)
 
@@ -1852,11 +1854,10 @@ Herramienta: menú **Game → Setup** (`Scripts/Editor/GameSetup.cs`), que crea 
 - [x] `SfxPlayer`, `SfxData` y `AudioMixer` con los primeros sonidos de librería (disparo, salto, dash, daño) y `CREDITS.md` iniciado. Falta `Sfx_PlayerDeath`, que se importa junto con la animación de muerte (Hito 3)
 
 ### Hito 3 — Personaje animado
-- [ ] Sprites en Piskel de piernas, torso y cuerpo completo (lienzo 48×64, pies en y = 12)
-- [ ] `Legs.controller`, `Torso.controller` y `FullBody.controller`
-- [ ] Fogonazo como VFX separado
-- [ ] `PlayerAnimation.Sync()` con las poses de apuntado arriba y en diagonal
-- [ ] Validar alineación en Pixel Perfect al correr, saltar, agacharse y hacer dash
+- [x] Sprites en Piskel de piernas, torso y cuerpo completo (lienzo 48×64, pies en y = 12)
+- [x] `Legs.controller`, `Torso.controller` y `FullBody.controller`
+- [x] `PlayerAnimation.Sync()` con las poses de apuntado arriba y en diagonal
+- [x] Validar alineación en Pixel Perfect al correr, saltar, agacharse y hacer dash, y la boca del cañón en cada pose
 - [ ] Mover la tabla de clips de `PlayerArtSetup.cs` a un asset `SpritesheetLayout` (4.2.1)
 - [ ] Importar `Sfx_PlayerDeath` junto con la animación de muerte (pendiente del Hito 2)
 
@@ -1945,6 +1946,7 @@ Depende de las decisiones pendientes 8, 10 y 11 (17.2).
 | Habilidades de Veyron | Taladro, láser, cuchillo y arma sónica |
 | Obtención de habilidades | Coleccionables escondidos en los niveles; los jefes no entregan habilidades. Se guardan al recogerlos |
 | Cuchillo | Reutiliza el sistema de la espada (`MeleeEffect`, `Torso_Melee`) |
+| Fogonazo del disparo | No hay; el movimiento del arma en los clips de disparo es el feedback |
 | Escalabilidad de habilidades | El efecto decide cuándo termina (`IsFinished`); obstáculos por interacción (`ObstacleInteraction`) en una sola capa; `DamageInfo` con empuje y aturdimiento; valores propios en el efecto; layout del spritesheet en un asset; selección de habilidad también desde la pausa |
 | Modos de activación | Por pulsación (granada, espada, taladro, cuchillo) y sostenida con consumo por segundo (lanzallamas, láser) |
 | Dash y habilidades | El dash cancela las sostenidas; no se puede hacer dash durante una por pulsación |
