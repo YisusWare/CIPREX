@@ -13,7 +13,7 @@ namespace Game.Player
         /// <summary>Terminó un air dash: velocidad Y en 0, sin coyote time.</summary>
         AfterAirDash,
         /// <summary>Se reanuda después de Hurt, Disabled o reaparecer: conserva la velocidad.</summary>
-        Resume
+        Resume,
     }
 
     /// <summary>
@@ -94,6 +94,18 @@ namespace Game.Player
             PendingAirborneEntry = entry;
             CarriesDashMomentum = carryDashMomentum;
             machine.ChangeState(Airborne);
+        }
+
+        /// <summary>
+        /// Rebote del tajo hacia abajo (pogo, 8.2): sube a la altura indicada, sin corte de salto, y
+        /// recarga el air dash. Solo en el aire y fuera del air dash. Devuelve true si rebotó.
+        /// </summary>
+        public bool Bounce(float height)
+        {
+            if (height <= 0f || machine.Current != Airborne) return false;
+            AirDashesLeft = ctx.Movement.airDashesPerJump;
+            Airborne.Bounce(UnityEngine.Mathf.Sqrt(2f * ctx.Movement.Gravity * height));
+            return true;
         }
 
         /// <summary>Idle o Run según el input horizontal.</summary>

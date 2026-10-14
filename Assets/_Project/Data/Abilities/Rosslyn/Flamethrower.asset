@@ -25,9 +25,13 @@ MonoBehaviour:
   moveSpeedMultiplier: 0.5
   obstacleInteractions:
   - {fileID: 11400000, guid: 1129580297895ed4881dbaecb643232c, type: 2}
-  effectPrefab: {fileID: 4880537218598963101, guid: c513b93aaae8b0f44916af4f0dfa7c92, type: 3}
+  effectPrefab: {fileID: 4532811543731500077, guid: a0e56037abfb8c943a0ce11a54785699, type: 3}
   torsoPose: 0
-  customTorsoClip: {fileID: 0}
-  customTorsoClipCrouch: {fileID: 0}
+  customTorsoClips:
+    forward: {fileID: 0}
+    diagUp: {fileID: 0}
+    up: {fileID: 0}
+    down: {fileID: 0}
+    crouch: {fileID: 0}
   activateSfx: {fileID: 0}
-  loopSfx: {fileID: 0}
+  loopSfx: {fileID: 11400000, guid: 1d1dd19e30f1ea6438e84f501a1d5603, type: 2}

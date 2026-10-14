@@ -151,9 +151,8 @@ namespace Game.Player
             var ability = action.ActiveAbility;
             if (ability != null && ability.torsoPose == AbilityTorsoPose.CustomClip)
             {
-                var clip = loco.IsCrouching && ability.customTorsoClipCrouch != null
-                    ? ability.customTorsoClipCrouch
-                    : ability.customTorsoClip;
+                // La dirección se fijó al activarla (8.2); si falta el clip, se usa Torso_Melee.
+                var clip = ability.customTorsoClips.Get(action.AbilityAim, action.AbilityCrouching);
                 if (clip != null)
                 {
                     abilityClipHash = Hash(clip.name);
@@ -164,7 +163,7 @@ namespace Game.Player
             if (action.IsInShootPose)
             {
                 if (loco.IsCrouching) return ShootCrouch;
-                // 3. Pose forzada hacia adelante (granada).
+                // 3. Pose forzada hacia adelante (ShootPoseForward; ninguna habilidad la usa por ahora).
                 if (action.ForceForwardPose) return ShootForward;
                 return action.AimDir switch
                 {

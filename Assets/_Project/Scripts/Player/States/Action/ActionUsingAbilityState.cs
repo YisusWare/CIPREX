@@ -33,6 +33,8 @@ namespace Game.Player
             fsm.ForceForwardPose = ability.torsoPose == AbilityTorsoPose.ShootPoseForward;
 
             var abilityCtx = fsm.BuildAbilityContext(ability);
+            fsm.AbilityAim = abilityCtx.aim;
+            fsm.AbilityCrouching = abilityCtx.crouching;
             effect.Begin(abilityCtx);
             SfxPlayer.Play(ability.activateSfx, abilityCtx.origin);
             if (ability.activation == AbilityActivation.Hold && ability.loopSfx != null)

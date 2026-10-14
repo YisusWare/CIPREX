@@ -38,14 +38,20 @@ namespace Game.Player
 
         void Awake() => owner = GetComponent<PlayerController>();
 
-        /// <summary>Lo llama PlayerController.Initialize con las habilidades del CharacterData.</summary>
-        public void SetAbilities(AbilityData[] abilities, PlayerEnergy playerEnergy)
+        /// <summary>
+        /// Lo llama PlayerController.Initialize con las habilidades del CharacterData. extra son las
+        /// habilidades del modo de prueba (null fuera de él); van al final del ciclo.
+        /// </summary>
+        public void SetAbilities(AbilityData[] abilities, AbilityData[] extra, PlayerEnergy playerEnergy)
         {
             energy = playerEnergy;
             all.Clear();
-            if (abilities != null)
-                foreach (var a in abilities)
+            foreach (var list in new[] { abilities, extra })
+            {
+                if (list == null) continue;
+                foreach (var a in list)
                     if (a != null && !all.Contains(a)) all.Add(a);
+            }
 
             foreach (var a in all)
             {

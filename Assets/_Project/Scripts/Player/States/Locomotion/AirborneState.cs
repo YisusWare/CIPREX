@@ -31,6 +31,7 @@ namespace Game.Player
                 case AirborneEntry.AfterAirDash:
                     Motor.SetVelocityY(0f);
                     break;
+
             }
         }
 
@@ -41,6 +42,15 @@ namespace Game.Player
             jumpCut = false;
             coyoteTimer = 0f;
             fsm.RaiseJumped();
+        }
+
+        /// <summary>Rebote del tajo hacia abajo (8.2): altura fija, sin corte de salto ni coyote time.</summary>
+        public void Bounce(float velocityY)
+        {
+            Motor.SetVelocityY(velocityY);
+            isJumping = false;
+            jumpCut = true;
+            coyoteTimer = 0f;
         }
 
         public override void Tick(float dt)

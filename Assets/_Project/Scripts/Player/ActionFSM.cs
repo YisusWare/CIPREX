@@ -36,6 +36,11 @@ namespace Game.Player
         /// <summary>La habilidad en uso (solo dentro de UsingAbility).</summary>
         public AbilityData ActiveAbility { get; internal set; }
 
+        /// <summary>Dirección fijada al activar la habilidad (el clip del tajo no cambia a mitad de camino).</summary>
+        public AimDirection AbilityAim { get; internal set; }
+        /// <summary>Si estaba agachada al activar la habilidad.</summary>
+        public bool AbilityCrouching { get; internal set; }
+
         /// <summary>
         /// La shoot pose debe mirar hacia adelante aunque se mantenga arriba (granada, torsoPose = ShootPoseForward).
         /// Sigue activa durante la shoot pose que deja la habilidad al terminar.

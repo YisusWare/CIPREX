@@ -17,9 +17,12 @@ namespace Game.Abilities
 
         public sealed override void Begin(AbilityContext ctx)
         {
-            timer = lockDuration;
+            timer = LockDurationFor(ctx);
             OnBegin(ctx);
         }
+
+        /// <summary>Duración del bloqueo de este uso. La espada la saca de la duración de su clip.</summary>
+        protected virtual float LockDurationFor(AbilityContext ctx) => lockDuration;
 
         public sealed override void Sustain(AbilityContext ctx, float dt)
         {

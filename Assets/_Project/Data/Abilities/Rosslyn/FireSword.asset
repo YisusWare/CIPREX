@@ -20,13 +20,17 @@ MonoBehaviour:
   energyPerSecond: 0
   cooldown: 0
   maxInstancesOnScreen: 0
-  usesAim: 0
+  usesAim: 1
   usableWhileCrouching: 1
   moveSpeedMultiplier: 1
   obstacleInteractions: []
-  effectPrefab: {fileID: 7736944982986374956, guid: 2328e04f9a3a71b4183b77361cc52a42, type: 3}
+  effectPrefab: {fileID: 2100662860947823043, guid: b269fc66984179a42a9b5c8f11358510, type: 3}
   torsoPose: 2
-  customTorsoClip: {fileID: 0}
-  customTorsoClipCrouch: {fileID: 0}
-  activateSfx: {fileID: 0}
+  customTorsoClips:
+    forward: {fileID: 0}
+    diagUp: {fileID: 0}
+    up: {fileID: 0}
+    down: {fileID: 0}
+    crouch: {fileID: 0}
+  activateSfx: {fileID: 11400000, guid: db588b9e036c0bb49a6bda1cfce4efe4, type: 2}
   loopSfx: {fileID: 0}

@@ -10,7 +10,8 @@ using UnityEngine.UI;
 namespace Game.EditorTools
 {
     /// <summary>
-    /// Hito 4, fase A: capas de obstáculos, personaje (CharacterData), habilidades de prueba y HUD.
+    /// Hito 4: capas de obstáculos, personaje (CharacterData), habilidades y HUD.
+    /// Las habilidades (fase B) están en GameSetup.Abilities.cs.
     /// </summary>
     public static partial class GameSetup
     {
@@ -150,108 +151,15 @@ namespace Game.EditorTools
         // ------------------------------------------------------------------ Habilidades
 
         /// <summary>
-        /// Prefabs de efecto de prueba (fase A) y los AbilityData de Rosslyn. Los AbilityData que ya
-        /// existen no se pisan: solo se rellenan referencias vacías. En la fase B cada habilidad recibe su
-        /// efecto real en effectPrefab.
+        /// Las habilidades: arte, prefabs de efecto y AbilityData (fase B, GameSetup.Abilities.cs).
+        /// Los AbilityData que ya existen no se pisan: solo se rellenan referencias vacías y se aplican
+        /// los cambios de diseño.
         /// </summary>
         static void CreateAbilityPrefabsAndData()
         {
             CreateHito4ArtAndData();
-            var bullet = AssetDatabase.LoadAssetAtPath<GameObject>(BulletPrefabPath);
-
-            // --- Efecto de prueba por pulsación: abanico de balas.
-            if (!File.Exists(TestPressPrefabPath))
-            {
-                var go = new GameObject("Test_PressEffect");
-                try
-                {
-                    var effect = go.AddComponent<TestProjectileAbilityEffect>();
-                    if (bullet != null) SetRef(effect, "projectilePrefab", bullet.GetComponent<Projectile>());
-                    PrefabUtility.SaveAsPrefabAsset(go, TestPressPrefabPath);
-                }
-                finally { Object.DestroyImmediate(go); }
-            }
-
-            // --- Efecto de prueba sostenido: rayo corto.
-            if (!File.Exists(TestHoldPrefabPath))
-            {
-                var go = new GameObject("Test_HoldEffect");
-                try
-                {
-                    var line = go.AddComponent<LineRenderer>();
-                    line.positionCount = 2;
-                    var effect = go.AddComponent<TestBeamAbilityEffect>();
-                    SetMask(effect, "targetMask", LayerMask.GetMask("EnemyHurtbox"));
-                    SetMask(effect, "solidMask", LayerMask.GetMask("Ground", "AbilityObstacle"));
-                    PrefabUtility.SaveAsPrefabAsset(go, TestHoldPrefabPath);
-                }
-                finally { Object.DestroyImmediate(go); }
-            }
-
-            var pressEffect = AssetDatabase.LoadAssetAtPath<GameObject>(TestPressPrefabPath).GetComponent<AbilityEffect>();
-            var holdEffect = AssetDatabase.LoadAssetAtPath<GameObject>(TestHoldPrefabPath).GetComponent<AbilityEffect>();
-            var melt = AssetDatabase.LoadAssetAtPath<ObstacleInteraction>(MeltPath);
-
-            // Valores de la sección 8.2 y la tabla de 8.3.
-            EnsureAbility(FlamethrowerPath, "flamethrower", "Lanzallamas", FlamethrowerIconPath, a =>
-            {
-                a.activation = AbilityActivation.Hold;
-                a.energyPerSecond = 6f;
-                a.usesAim = true;
-                a.usableWhileCrouching = true;
-                a.moveSpeedMultiplier = 0.5f;
-                a.torsoPose = AbilityTorsoPose.ShootPose;
-                a.obstacleInteractions = melt != null ? new[] { melt } : new ObstacleInteraction[0];
-            }, holdEffect);
-
-            EnsureAbility(GrenadePath, "rubber_grenade", "Granada de goma", GrenadeIconPath, a =>
-            {
-                a.activation = AbilityActivation.Press;
-                a.energyCost = 3f;
-                a.cooldown = 0.3f;
-                a.usesAim = false;
-                a.usableWhileCrouching = true;
-                a.moveSpeedMultiplier = 1f;
-                a.torsoPose = AbilityTorsoPose.ShootPoseForward;
-            }, pressEffect);
-
-            EnsureAbility(SwordPath, "fire_sword", "Espada de fuego", SwordIconPath, a =>
-            {
-                a.activation = AbilityActivation.Press;
-                a.energyCost = 2f;
-                a.usesAim = false;
-                a.usableWhileCrouching = true;
-                a.moveSpeedMultiplier = 1f;
-                a.torsoPose = AbilityTorsoPose.CustomClip;
-            }, pressEffect);
-
-            // Clips del tajo, si ya están dibujados en la hoja (Torso_Melee, Torso_Melee_Crouch).
-            var sword = AssetDatabase.LoadAssetAtPath<AbilityData>(SwordPath);
-            if (sword.customTorsoClip == null)
-                sword.customTorsoClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(PlayerArtSetup.AnimRoot + "/Torso/Torso_Melee.anim");
-            if (sword.customTorsoClipCrouch == null)
-                sword.customTorsoClipCrouch = AssetDatabase.LoadAssetAtPath<AnimationClip>(PlayerArtSetup.AnimRoot + "/Torso/Torso_Melee_Crouch.anim");
-            EditorUtility.SetDirty(sword);
-        }
-
-        /// <summary>Crea el AbilityData con sus valores iniciales; si ya existe, solo rellena lo que esté vacío.</summary>
-        static void EnsureAbility(string path, string id, string displayName, string iconPath,
-            System.Action<AbilityData> initialValues, AbilityEffect defaultEffect)
-        {
-            var a = AssetDatabase.LoadAssetAtPath<AbilityData>(path);
-            if (a == null)
-            {
-                a = ScriptableObject.CreateInstance<AbilityData>();
-                a.id = id;
-                a.displayName = displayName;
-                initialValues(a);
-                AssetDatabase.CreateAsset(a, path);
-            }
-            if (string.IsNullOrEmpty(a.id)) a.id = id;
-            if (string.IsNullOrEmpty(a.displayName)) a.displayName = displayName;
-            if (a.icon == null) a.icon = LoadSprite(iconPath);
-            if (a.effectPrefab == null) a.effectPrefab = defaultEffect;
-            EditorUtility.SetDirty(a);
+            CreatePhaseBAbilities();
+            UpdateAbilityData();
         }
 
         // ------------------------------------------------------------------ Personaje
@@ -282,6 +190,15 @@ namespace Game.EditorTools
                     AssetDatabase.LoadAssetAtPath<AbilityData>(FlamethrowerPath),
                     AssetDatabase.LoadAssetAtPath<AbilityData>(GrenadePath),
                     AssetDatabase.LoadAssetAtPath<AbilityData>(SwordPath),
+                };
+            }
+            // El taladro y el láser son de Veyron, pero en el Hito 4 se prueban con Rosslyn (modo de prueba).
+            if (c.testModeAbilities == null || c.testModeAbilities.Length == 0)
+            {
+                c.testModeAbilities = new[]
+                {
+                    AssetDatabase.LoadAssetAtPath<AbilityData>(DrillPath),
+                    AssetDatabase.LoadAssetAtPath<AbilityData>(LaserPath),
                 };
             }
             EditorUtility.SetDirty(c);

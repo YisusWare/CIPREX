@@ -1,6 +1,6 @@
 # Documento Técnico — Run & Gun 2D
 
-> **Estado:** borrador v26 (2026-10-14)
+> **Estado:** borrador v28 (2026-10-14)
 > **Motor:** Unity 6 · **Plataforma:** PC (teclado y gamepad) · **Arte:** pixel art hecho en Piskel
 > **Referencias:** Metal Slug (personaje dividido en dos mitades), Mega Man (habilidades), Mega Man X (dash)
 > Las secciones marcadas con **[DECIDIR]** son decisiones abiertas y las marcadas con **[AJUSTAR]** son valores que se afinan al probar. Todas están en la sección 17.
@@ -258,7 +258,7 @@ Cada clip empieza en una celda fija y toma las celdas **no vacías consecutivas*
 - **No mover** un clip a otra celda sin cambiar su entrada en el `SpritesheetLayout`.
 - El asset se abre con **Game → Setup → Abrir SpritesheetLayout**. Si no existe, el menú lo crea con los clips actuales. Antes de cortar la hoja, el menú revisa que no haya nombres vacíos o repetidos ni dos clips en la misma celda inicial, y avisa si una entrada apunta fuera de la hoja.
 - Cada entrada tiene: nombre del clip (debe coincidir con el que busca `PlayerAnimation`), mitad (`Legs`, `Torso` o `FullBody`), fila y columna inicial (desde 1) y si hace loop. El asset también guarda el tamaño de celda (48 × 64), el pivote (24, 12), los fps de los clips nuevos (12) y el estado inicial de cada Animator.
-- Los clips `Torso_Melee` y `Torso_Melee_Crouch` todavía no tienen celdas: se agregan como filas nuevas al final de la hoja en el Hito 4.
+- Los clips del tajo (`Torso_Melee`, `Torso_Melee_DiagUp`, `Torso_Melee_Up`, `Torso_Melee_Down` y `Torso_Melee_Crouch`) todavía no tienen celdas: se agregan como filas nuevas al final de la hoja en el Hito 4.
 - Si en algún momento la hoja crece, se agregan filas al final (la hoja puede crecer hacia abajo).
 
 **Varios personajes:** cada personaje tiene **su propio spritesheet con la misma cuadrícula y la misma tabla de clips**. Así `PlayerArtSetup` y `PlayerAnimation` funcionan igual para todos: el menú recibe el personaje, corta su hoja y genera sus clips y Animators en `Animations/Characters/<Personaje>/`. Las celdas de un clip que un personaje no usa (por ejemplo, `Torso_Melee` si no tiene espada) se dejan vacías.
@@ -306,16 +306,19 @@ El torso cambia de pose **al mantener arriba o arriba-adelante**, aunque no se e
 | `Torso_Shoot_Up` | No | *Shoot pose* hacia arriba (movimiento del arma al disparar) |
 | `Torso_Shoot_Down` | No | *Shoot pose* hacia abajo, solo en el aire |
 | `Torso_Shoot_Crouch` | No | *Shoot pose* agachado |
-| `Torso_Melee` | No | Tajo cuerpo a cuerpo (espada de fuego de Rosslyn, cuchillo de Veyron), con Animation Events para la hitbox |
-| `Torso_Melee_Crouch` | No | El mismo tajo agachado, con Animation Events para la hitbox |
+| `Torso_Melee` | No | Tajo cuerpo a cuerpo hacia adelante (espada de fuego de Rosslyn, cuchillo de Veyron). Los frames con hitbox se configuran en el efecto (8.2) |
+| `Torso_Melee_DiagUp` | No | El tajo en diagonal arriba-adelante |
+| `Torso_Melee_Up` | No | El tajo hacia arriba |
+| `Torso_Melee_Down` | No | El tajo hacia abajo, solo en el aire (rebota al golpear, 8.2) |
+| `Torso_Melee_Crouch` | No | El tajo agachado |
 
-La granada de goma, el taladro, el lanzallamas y el láser salen del cañón, así que reutilizan las poses de disparo y de apuntado. Solo las armas cuerpo a cuerpo (espada y cuchillo) necesitan clips propios del torso. Los dos clips se llaman igual en las dos hojas (`Torso_Melee`): en la de Rosslyn se dibuja la espada y en la de Veyron el cuchillo. El arma sónica de Veyron puede necesitar un clip propio **[DECIDIR]**.
+La granada de goma, el taladro, el lanzallamas y el láser salen del cañón, así que reutilizan las poses de disparo y de apuntado. Solo las armas cuerpo a cuerpo (espada y cuchillo) necesitan clips propios del torso, uno por dirección, igual que los `Torso_Shoot_*`. Todos los clips de tajo se llaman igual en las dos hojas (`Torso_Melee*`): en la de Rosslyn se dibuja la espada y en la de Veyron el cuchillo. El arma sónica de Veyron puede necesitar un clip propio **[DECIDIR]**.
 
 **Cuerpo completo** (se ocultan las mitades y se muestra el SpriteRenderer `FullBody`): `FullBody_Hurt`, `FullBody_Death`, `FullBody_Teleport_In` (al empezar el nivel y al reaparecer) y `FullBody_Teleport_Out`.
 
 **Gestos para escenas** (cuerpo completo, 15.7): por ejemplo `FullBody_Nod` (asentir), `FullBody_Point` (señalar), `FullBody_Salute` (saludo militar) y `FullBody_ArmsCrossed` (brazos cruzados, en loop) **[DECIDIR]** el set final. Cada personaje dibuja los mismos gestos en su hoja y se agregan al `SpritesheetLayout`. Para caminar en las escenas se usan `Legs_Run` + `Torso_Run`; un `Legs_Walk` es opcional **[AJUSTAR]**.
 
-**Total por personaje:** 7 clips de piernas (`Legs_Land` es opcional), 13 de torso comunes más los clips propios de sus habilidades, y 4 de cuerpo completo. Los dos clips `Torso_Melee` existen en las dos hojas (espada para Rosslyn, cuchillo para Veyron). El arte de cada habilidad está en la sección 8.8.
+**Total por personaje:** 7 clips de piernas (`Legs_Land` es opcional), 13 de torso comunes más los clips propios de sus habilidades, y 4 de cuerpo completo. Los 5 clips `Torso_Melee*` existen en las dos hojas (espada para Rosslyn, cuchillo para Veyron). El arte de cada habilidad está en la sección 8.8.
 
 ---
 
@@ -359,7 +362,7 @@ Player                  Rigidbody2D, BoxCollider2D, PlayerController,
 | `PlayerAbilities` | Habilidades desbloqueadas, habilidad seleccionada, cambio, cooldowns, activación. Evento `SelectedChanged` para el HUD | Gastar energía por su cuenta (usa `PlayerEnergy`) |
 | `PlayerEnergy` | Barra de energía compartida: `TrySpend`, `Refill`, evento `Changed` | Saber qué habilidad la usa |
 | `PlayerHealth` | Vida, i-frames tras recibir daño, eventos `Damaged` y `Died` | Cambiar estados |
-| `PlayerAnimation` | Traducir el estado a parámetros de los Animators, parpadeo de i-frames y reenviar los Animation Events | Lógica de gameplay |
+| `PlayerAnimation` | Elegir el estado de cada Animator, parpadeo de i-frames y reenviar los Animation Events (`OnFootstep`) | Lógica de gameplay |
 
 Los valores de ajuste (velocidades, alturas de salto, dash) viven en un ScriptableObject `PlayerMovementData`, para poder ajustarlos en Play Mode sin tocar código. Cada personaje tiene el suyo, referenciado desde su `CharacterData` (5.4).
 
@@ -399,12 +402,15 @@ public class CharacterData : ScriptableObject
     [Header("Ataque")]
     public BusterData buster;               // disparo básico (sección 7)
     public AbilityData[] abilities;         // en el orden del ciclo siguiente/anterior
+    public AbilityData[] testModeAbilities; // solo en el editor con el modo de prueba (Hito 4)
 }
 ```
 
 - **Un prefab por personaje**, como *Prefab Variant* de un prefab base `Player`. El variant solo cambia los sprites, los Animators y la posición de los FirePoints. Así un cambio en los componentes se aplica a todos.
 - **El jugador no se coloca en la escena.** `MissionController` instancia `GameManager.SelectedCharacter.prefab` en el punto de inicio y llama a `PlayerController.Initialize(characterData)`. Ese método reparte los datos: `movement` al motor, `buster` a `PlayerBuster`, `maxHealth` a `PlayerHealth`, `maxEnergy` a `PlayerEnergy` y `abilities` a `PlayerAbilities`. Ningún componente tiene estos valores en sus propios campos serializados.
 - La cámara (`SetTarget`, 13) y el HUD se conectan al jugador después de instanciarlo.
+- **Hasta que exista `MissionController` (Hito 6)**, lo hace `PlayerSpawner` (Hito 4): un objeto en el punto de inicio de la escena con un `CharacterData` de respaldo y la Cinemachine Camera. En `Awake` instancia el prefab, llama a `Initialize` y asigna el `CameraTarget` a la cámara; en `Start` lanza el evento estático `PlayerSpawned`, que usa el HUD para conectarse. El `MissionController` del Hito 6 lo reemplaza o lo usa por dentro.
+- Los datos de cada personaje van en `Data/Characters/<Personaje>/` (por ejemplo, `Rosslyn.asset`, `Rosslyn_Movement.asset` y `Rosslyn_Buster.asset`).
 - **Collider:** mismo tamaño para todos por defecto, para que el diseño de niveles no cambie según el personaje **[AJUSTAR]**.
 - **Diseño de niveles:** cada misión debe poder completarse con **cualquier** personaje. Si los saltos cambian entre personajes, se fija un mínimo común (por ejemplo, todos superan 3 tiles de alto y un foso de 5 tiles con salto normal) y los niveles se diseñan con ese mínimo **[AJUSTAR]**.
 - Para probar en el editor sin pasar por los menús, la escena de prueba tiene un campo con el `CharacterData` que se usa si no hay uno seleccionado.
@@ -481,7 +487,7 @@ Alive ──(Damaged)──▶ Hurt ──(fin del knockback)──▶ Alive
 | `Run` | En suelo con input horizontal | `Idle` · `Crouch` · `Airborne` · `Dash` |
 | `Crouch` | En suelo con abajo presionado | `Idle` (suelta abajo y hay espacio arriba) · `Airborne` (pierde el suelo) |
 | `Dash` | Botón de dash en el suelo | `Airborne` con impulso de dash (salto o pierde el suelo) · `Idle` / `Run` (se acaba el tiempo) |
-| `Airborne` | Salto o caída | `Idle` / `Run` al aterrizar · `AirDash` (botón de dash y hay air dash disponible) |
+| `Airborne` | Salto, caída o rebote del tajo hacia abajo (8.2) | `Idle` / `Run` al aterrizar · `AirDash` (botón de dash y hay air dash disponible) |
 | `AirDash` | Botón de dash en el aire | `Airborne` (se acaba el tiempo) · `Idle` / `Run` (aterriza) |
 
 Propiedades públicas: `IsCrouching`, `IsGrounded`, `IsDashing` (verdadero en `Dash` y `AirDash`), `FacingDir`.
@@ -610,6 +616,7 @@ public class BusterData : ScriptableObject
 - **Object pooling** obligatorio (`UnityEngine.Pool.ObjectPool<T>`).
 - Se mueven por código (`transform` + raycast, o Rigidbody2D cinemático), no con física dinámica. **Excepción:** la granada de goma usa física dinámica para rebotar.
 - Se desactivan al salir de la cámara, al chocar, al terminar su tiempo de vida o al recorrer su distancia máxima (`maxRange`, por ejemplo el disparo de Veyron).
+- **Proyectiles enemigos:** para que la espada los pueda destruir necesitan un collider trigger en la capa `EnemyProjectile` (con un `Rigidbody2D` cinemático, porque se mueven). Los especiales de los jefes marcan `indestructible` (Hito 5).
 
 ---
 
@@ -637,8 +644,8 @@ Energía máxima: **28** **[AJUSTAR]**. Todos los costos y valores son iniciales
 | Habilidad | Tipo | Activación | Dirección | Costo | Resumen |
 |---|---|---|---|---|---|
 | Lanzallamas | Área sostenida | Sostenida | 4 direcciones | 6 / s | Llama de medio alcance que daña de forma continua. **Funde muros de acero** |
-| Granada de goma | Proyectil físico | Pulsación | Adelante, en arco | 3 | Rebota hacia adelante; explota al tocar un enemigo o al acabarse la mecha |
-| Espada de fuego | Cuerpo a cuerpo | Pulsación | Adelante | 2 | Tajo de corto alcance envuelto en llamas |
+| Granada de goma | Proyectil físico | Pulsación | 4 direcciones, en arco | 3 | Rebota; explota al tocar un enemigo o al acabarse la mecha |
+| Espada de fuego | Cuerpo a cuerpo | Pulsación | 4 direcciones | 2 | Tajo de corto alcance envuelto en llamas; el tajo hacia abajo rebota |
 
 **Veyron**
 
@@ -646,29 +653,44 @@ Energía máxima: **28** **[AJUSTAR]**. Todos los costos y valores son iniciales
 |---|---|---|---|---|---|
 | Taladro | Proyectil perforante | Pulsación | 4 direcciones | 3 | Atraviesa a varios enemigos. **Rompe bloques destructibles** |
 | Láser | Rayo sostenido | Sostenida | 4 direcciones | 8 / s | Rayo de largo alcance que daña de forma continua |
-| Cuchillo | Cuerpo a cuerpo | Pulsación | Adelante | 1 | Tajo rápido y corto; reutiliza el sistema de la espada |
+| Cuchillo | Cuerpo a cuerpo | Pulsación | 4 direcciones | 1 | Tajo rápido y corto; reutiliza el sistema de la espada |
 | Arma sónica | **[DECIDIR]** | **[DECIDIR]** | **[DECIDIR]** | — | Arma nueva, por diseñar |
 
-"4 direcciones" significa las mismas del disparo básico: adelante, diagonal arriba-adelante, arriba y abajo (solo en el aire).
+"4 direcciones" significa las mismas del disparo básico: adelante, diagonal arriba-adelante, arriba y abajo (solo en el aire), más la versión agachada. Las habilidades por pulsación **fijan la dirección al activarse**: cambiar el apuntado durante el tajo o el lanzamiento no la cambia.
 
 #### Granada de goma
-- **Lanzamiento:** velocidad inicial de (6, 6) u/s hacia donde mira el jugador **[AJUSTAR]**.
-- **Física:** es la única habilidad con `Rigidbody2D` **dinámico**, con un `PhysicsMaterial2D` de rebote 0.6 y fricción baja **[AJUSTAR]**. Rebota en el suelo y en las paredes.
+- **Lanzamiento según la dirección de apuntado** (decisión del 2026-10-14). La X se multiplica por la dirección en la que mira el jugador. Valores en u/s **[AJUSTAR]**:
+
+  | Dirección | Velocidad inicial | Resultado |
+  |---|---|---|
+  | Adelante | (6, 6) | El arco normal |
+  | Diagonal arriba | (4, 9) | Arco alto, para enemigos en plataformas |
+  | Arriba | (0, 11) | Sube y cae cerca del jugador (no le hace daño) |
+  | Abajo (solo en el aire) | (3, −6) | Va directo al suelo y rebota |
+  | Agachado | (7, 3) | Arco bajo, casi rodando |
+- **Física:** es la única habilidad con `Rigidbody2D` **dinámico**, con un `PhysicsMaterial2D` de rebote 0.6 y fricción 0.1 y `gravityScale` 2 **[AJUSTAR]**. Rebota en el suelo, en las paredes y sobre las plataformas atravesables (la matriz de colisiones deja chocar `PlayerProjectile` con `Platform`).
 - **Explota** al tocar una `EnemyHurtbox` o cuando se acaba la mecha (2 s **[AJUSTAR]**).
 - **Explosión:** daño de área con `Physics2D.OverlapCircleAll`, radio de 1.5 u y 4 de daño **[AJUSTAR]**. Golpea una sola vez a cada enemigo.
 - No daña al jugador.
-- **Arco fijo:** siempre sale igual hacia adelante, sin importar la dirección que se presione.
 - **Sin límite** de granadas en pantalla. Las limitan la energía y el cooldown (0.3 s **[AJUSTAR]**).
-- **Sale del cañón** de Rosslyn: usa la pose de disparo hacia adelante (`Torso_Shoot_Forward`, o `Torso_Shoot_Crouch` agachado) y se lanza desde `FirePoint.Forward` o `FirePoint.Crouch`. No tiene animación de lanzamiento propia.
-- Como el arco es fijo, la granada **fuerza la pose hacia adelante** durante su shoot pose, aunque el jugador esté manteniendo arriba. Así el cañón siempre apunta hacia donde sale la granada.
+- **Sale del cañón** de Rosslyn: usa la pose de disparo de la dirección (`Torso_Shoot_*`, igual que el disparo básico) y se lanza desde el `FirePoint` de esa dirección. No tiene animación de lanzamiento propia.
 
 #### Espada de fuego
-- **Hitbox** rectangular frente al jugador de 1.5 × 1.5 u **[AJUSTAR]**. Solo está activa en los frames del tajo, marcados con Animation Events (`OnHitboxOn` / `OnHitboxOff`).
+- **4 direcciones** (decisión del 2026-10-14): adelante, diagonal arriba-adelante, arriba, abajo (solo en el aire) y agachada. La dirección se fija al empezar el tajo. En el suelo, abajo es agacharse, así que da el tajo agachado.
+- **Hitbox** rectangular de 1.5 × 1.5 u **[AJUSTAR]** en la dirección del tajo: frente al jugador, en diagonal, sobre la cabeza o bajo los pies. El prefab del efecto tiene un hijo con `DamageHitbox` por dirección (`Hitbox_Forward`, `Hitbox_DiagUp`, `Hitbox_Up`, `Hitbox_Down`, `Hitbox_Crouch`), colocados mirando a la derecha, y solo se activa el de la dirección elegida; se ven y se ajustan con Gizmos en el editor.
+- **Frames activos:** la hitbox solo está activa en una ventana de frames del clip (`activeFromFrame` / `activeToFrame` en `MeleeEffect`, 2–3 al empezar **[AJUSTAR]**), calculada con el *Sample Rate* del clip. No se usan Animation Events: así funciona igual con cualquier dirección, y también antes de que el clip esté dibujado (con `fallbackFrameCount` frames a 12 fps). La duración del tajo es la del clip de esa dirección.
 - 4 de daño **[AJUSTAR]**. Golpea una sola vez a cada enemigo por tajo.
 - Se puede usar en el suelo, corriendo y en el aire, porque la animación es solo del torso.
 - **Se puede usar agachado** con su propio clip, `Torso_Melee_Crouch`. La hitbox se coloca más abajo (1.5 × 1 u a la altura del torso agachado **[AJUSTAR]**), lo que sirve contra enemigos pequeños.
+- **Rebote del tajo hacia abajo (pogo)** (decisión del 2026-10-14): si el tajo hacia abajo golpea a un enemigo o destruye un proyectil enemigo, Rosslyn rebota hacia arriba, al estilo de Shovel Knight.
+  - Velocidad del rebote: la de un salto de 2.5 u de altura **[AJUSTAR]**. La altura es fija: soltar el botón de salto no la corta.
+  - Un solo rebote por tajo, aunque golpee a varios objetivos.
+  - El rebote **recarga el air dash** **[AJUSTAR]**, para poder encadenarlo con el movimiento.
+  - No rebota en el suelo, en paredes, en obstáculos (`AbilityObstacle`) ni en peligros como pinchos.
+  - Implementación: `MeleeEffect` tiene un campo `pogoJumpHeight` (0 = sin rebote). Al primer golpe del tajo hacia abajo llama a `LocomotionFSM.Bounce(altura)`, que pasa a `Airborne` con la velocidad Y calculada, sin corte de salto. Si el jugador está en `AirDash`, el rebote lo termina.
+  - Al diseñar niveles hay que tenerlo en cuenta: encadenando rebotes sobre enemigos voladores se llega más alto que con un salto.
 - **Destruye proyectiles enemigos:** la hitbox también detecta la capa `EnemyProjectile` y desactiva los proyectiles que toca. Así la espada tiene un uso defensivo. Los proyectiles especiales de los jefes pueden marcarse como `indestructible`.
-- Torso: `Torso_Melee` de pie, en el aire o corriendo, y `Torso_Melee_Crouch` agachado. Las llamas del tajo son un **VFX separado** en el `FirePoint.Forward`, porque no caben en el lienzo de 48×64.
+- Torso: el clip de la dirección (`Torso_Melee`, `Torso_Melee_DiagUp`, `Torso_Melee_Up`, `Torso_Melee_Down` o `Torso_Melee_Crouch`), de pie, corriendo o en el aire. Si a un personaje le falta el clip de una dirección, se usa `Torso_Melee` (o `Torso_Melee_Crouch` agachado), así la espada funciona mientras se dibujan los demás. Las llamas del tajo son un **VFX separado** en el `FirePoint` de la dirección, porque no caben en el lienzo de 48×64.
 
 #### Lanzallamas
 - **Sostenido:** activo mientras el botón esté presionado y haya energía.
@@ -679,7 +701,14 @@ Energía máxima: **28** **[AJUSTAR]**. Todos los costos y valores son iniciales
 - **Movimiento:** al 50% de la velocidad y se puede saltar.
 - Sigue la dirección de apuntado en tiempo real.
 - Torso: mantiene la pose de disparo de la dirección actual.
-- VFX: `Flame_Start`, `Flame_Loop` y `Flame_End`.
+- **Visual: un chorro de llamas sueltas** (decisión del 2026-10-14), en lugar de un sprite largo de llama:
+  - Mientras está activo, `FlamethrowerEffect` suelta una llama (`FlamePuff`) cada 0.03 s desde el `FirePoint`, con una dispersión de ±6° y ±10 % de velocidad al azar **[AJUSTAR]**.
+  - Cada llama viaja a 9 u/s **[AJUSTAR]** hasta el alcance (4 u, recortado por la pared al momento de salir). Vive unos 0.45 s, así que hay unas 15 llamas a la vez. Salen de un pool de 24.
+  - **Animación por vida, no por Animator:** el frame se elige según qué parte de su vida lleva (`frames[(int)(t * frames.Length)]`): pequeña al salir del cañón, grande a media distancia y humo al final. Si choca con una pared antes de tiempo, salta a los frames de humo.
+  - La llama es redonda, así que **no tiene sprites por dirección ni se rota**. Para que no se vea repetida, cada una se voltea en X o Y al azar y puede usar una de dos variantes.
+  - Las llamas viajan en el mundo, no pegadas al jugador: al moverse o cambiar de apuntado, el chorro se curva solo.
+  - Al soltar el botón ya no salen llamas nuevas y las que están en el aire terminan su vida. Eso reemplaza a una animación de apagado.
+- **Daño: una zona fija, no cada llama** (decisión del 2026-10-14). Un `DamageHitbox` por tick girado hacia la dirección de apuntado (girar una zona de daño no deforma nada; lo que no se rota son los sprites), de 0.75 u de ancho **[AJUSTAR]** y largo igual al alcance recortado por la pared. La misma zona aplica `Melt`. Las llamas son solo visuales: así el daño es predecible y fácil de ajustar.
 
 #### Taladro
 - Proyectil movido por código a 10 u/s **[AJUSTAR]**. Gira hacia la dirección de apuntado.
@@ -701,9 +730,9 @@ Energía máxima: **28** **[AJUSTAR]**. Todos los costos y valores son iniciales
 - Torso: mantiene la pose de disparo de la dirección actual.
 
 #### Cuchillo
-- **Reutiliza todo el sistema de la espada de fuego:** el mismo `MeleeEffect` (8.4), `DamageHitbox` de un golpe por objetivo, Animation Events `OnHitboxOn` / `OnHitboxOff` y los clips `Torso_Melee` / `Torso_Melee_Crouch` de la hoja de Veyron. Solo cambian los valores y el VFX.
+- **Reutiliza todo el sistema de la espada de fuego:** el mismo `MeleeEffect` (8.4), `DamageHitbox` de un golpe por objetivo, la ventana de frames activos y los clips `Torso_Melee*` de la hoja de Veyron. Solo cambian los valores y el VFX.
 - Valores iniciales **[AJUSTAR]**: hitbox de 1 × 1 u (más chica que la espada), 3 de daño, costo 1 y un tajo más rápido (clip más corto).
-- Se usa de pie, corriendo, en el aire y agachado, igual que la espada.
+- Se usa de pie, corriendo, en el aire y agachado, en las **4 direcciones** y con el **rebote del tajo hacia abajo**, igual que la espada (decisión del 2026-10-14). Necesita los mismos 5 clips `Torso_Melee*` en la hoja de Veyron.
 - **[DECIDIR]** si destruye proyectiles enemigos como la espada (17.2). Hay que darle algo que lo distinga del disparo básico de Veyron, que también es de corto alcance.
 
 #### Arma sónica
@@ -741,21 +770,31 @@ public class AbilityData : ScriptableObject
     [Header("Presentación")]
     public AbilityEffect effectPrefab;
     public AbilityTorsoPose torsoPose;           // pose de disparo según el apuntado, siempre hacia adelante o clip propio
-    public AnimationClip customTorsoClip;        // solo con CustomClip
-    public AnimationClip customTorsoClipCrouch;  // solo con CustomClip; versión agachada
+    public DirectionalClips customTorsoClips;    // solo con CustomClip: un clip por dirección
     public SfxData activateSfx;
     public SfxData loopSfx;                 // Hold: sonido en loop mientras está activa
 }
+
+[System.Serializable]
+public struct DirectionalClips
+{
+    public AnimationClip forward, diagUp, up, down, crouch;
+
+    // El clip de la dirección. Si falta, usa forward (o crouch si está agachada).
+    public AnimationClip Get(AimDirection aim, bool crouching);
+}
 ```
+
+`ShootPoseForward` (forzar la pose hacia adelante) se conserva para habilidades futuras, pero ninguna la usa desde que la granada apunta en 4 direcciones.
 
 | Habilidad | `activation` | `usesAim` | `usableWhileCrouching` | `moveSpeedMultiplier` | `obstacleInteractions` | `torsoPose` |
 |---|---|---|---|---|---|---|
-| Granada de goma | Press | No | Sí | 1 | — | `ShootPoseForward` |
-| Espada de fuego | Press | No | Sí | 1 | — | `CustomClip` (`Torso_Melee`) |
+| Granada de goma | Press | Sí | Sí | 1 | — | `ShootPose` |
+| Espada de fuego | Press | Sí | Sí | 1 | — | `CustomClip` (`Torso_Melee*`) |
 | Lanzallamas | Hold | Sí | Sí | 0.5 | `Melt` | `ShootPose` |
 | Taladro | Press | Sí | Sí | 1 | `Break` | `ShootPose` |
 | Láser | Hold | Sí | Sí | 0 | — | `ShootPose` |
-| Cuchillo | Press | No | Sí | 1 | — | `CustomClip` (`Torso_Melee`) |
+| Cuchillo | Press | Sí | Sí | 1 | — | `CustomClip` (`Torso_Melee*`) |
 | Arma sónica | **[DECIDIR]** | | | | | |
 
 **Qué va en `AbilityData` y qué va en el efecto:** `AbilityData` solo tiene lo que leen **otros sistemas** (guardado, HUD, energía, FSM, animación, obstáculos). Los valores propios de cada habilidad (daño, radio, velocidad, alcance, mecha, rebote, calor por segundo, duración del bloqueo…) son **campos serializados de su `AbilityEffect`**, en su prefab. Regla para campos nuevos: si solo lo lee el efecto, va en el efecto. Así `AbilityData` no se llena de bools para casos especiales.
@@ -803,11 +842,12 @@ public struct AbilityContext
 
 Una clase base `TimedAbilityEffect` implementa el bloqueo por tiempo y otra `HeldAbilityEffect` el botón sostenido, para no repetirlos en cada habilidad. Una habilidad que siga activa mientras el jugador hace otras cosas (un escudo, una postura) no cabe en `UsingAbility`; si la V2 la necesita, `PlayerAbilities` llevaría una lista de efectos activos aparte.
 
-- **Por pulsación (granada, taladro):** el efecto sale de un pool, se coloca en el origen, se llama `Begin` y después vive por su cuenta.
-- **Por pulsación pegada al jugador (espada, cuchillo):** el efecto es hijo del jugador y se desactiva solo al terminar el tajo.
-- **Sostenida (lanzallamas, láser):** hay una sola instancia pegada al FirePoint. `UsingAbility` llama `Sustain` cada frame y `End` al terminar.
+**Una instancia del efecto por habilidad** (implementado en el Hito 4): `PlayerAbilities` instancia el prefab de cada habilidad una sola vez, como hijo del jugador, al recibir el `CharacterData`. `UsingAbility` llama a `Begin`, `Sustain` y `End` sobre esa instancia.
+- **Lo que la habilidad lanza sale de pools del propio efecto:** granadas, explosiones, taladros y llamas (`ComponentPool<T>` o `ProjectilePool`, en un contenedor en la raíz de la escena para que no sigan al jugador). Lo lanzado vive por su cuenta aunque el efecto ya haya terminado. `ActiveInstances` cuenta lo que hay en pantalla (para `maxInstancesOnScreen`).
+- **Pegadas al jugador (espada, cuchillo):** la instancia se voltea con la dirección del jugador y activa su hitbox solo en los frames del tajo.
+- **Sostenidas (lanzallamas, láser):** la instancia se coloca cada frame en el FirePoint según el contexto.
 
-Implementaciones: `RubberGrenadeEffect`, `MeleeEffect` (espada de fuego y cuchillo, con distintos valores y VFX), `FlamethrowerEffect`, `DrillEffect`, `LaserEffect` y el del arma sónica.
+Implementaciones: `RubberGrenadeEffect` (con `RubberGrenade`), `MeleeEffect` (espada de fuego y cuchillo, con distintos valores y VFX), `FlamethrowerEffect`, `DrillEffect`, `LaserEffect` y el del arma sónica.
 
 ### 8.5 Estado `UsingAbility`
 
@@ -843,9 +883,11 @@ Las habilidades se construyen con piezas que también usan los enemigos y el dis
 | Pieza | Para qué sirve | La usan |
 |---|---|---|
 | `Projectile` | Movimiento por código, colisión con raycast, pool. Opciones: `pierceCount` y golpear una sola vez a cada objetivo | Buster, taladro, enemigos |
-| `DamageHitbox` | Trigger que daña en dos modos: **una vez por objetivo** por activación, o **por tick** cada X segundos por objetivo | Espada, lanzallamas |
+| `DamageHitbox` | Zona rectangular que daña en dos modos: **una vez por objetivo** por activación, o **por tick** cada X segundos por objetivo. No es un collider: consulta con `Physics2D.OverlapBox` usando su tamaño y su transform, así que se puede girar, voltear y activar en el mismo frame. También puede destruir proyectiles (`projectileMask`) | Espada, cuchillo, lanzallamas |
 | `BeamCaster` | Raycast con longitud variable y daño por tick a todo lo que toca | Láser |
 | `Explosion` | `OverlapCircleAll` de un solo golpe + VFX | Granada, enemigos |
+
+Otras piezas: `ComponentPool<T>` (pool genérico con `IPoolable`), `DirectionalFrames` (frames horizontal, diagonal y vertical con el volteo de cada dirección) y `IAbilityObstacle` (15.2).
 
 Para el daño por tick se lleva un registro por objetivo (`Dictionary<IDamageable, float>` con el próximo momento en que puede recibir daño). Así un enemigo dentro de la llama no recibe daño en cada frame.
 
@@ -853,17 +895,32 @@ Para el daño por tick se lleva un registro por objetivo (`Dictionary<IDamageabl
 
 Todo el arte de las habilidades usa PPU 16. En pixel art no se rotan los sprites 45°, porque los píxeles se deforman: las piezas que apuntan en diagonal tienen **su propio sprite diagonal**. La dirección hacia abajo es el sprite vertical volteado.
 
+**Archivos (Hito 4):** cada animación es un PNG en tira horizontal, con frames del mismo tamaño, en `Art/Abilities/<Habilidad>/`. El setup crea placeholders con estos nombres y tamaños; para poner el arte final se reemplaza el PNG con el mismo nombre y tamaño de frame (puede tener más frames) y se vuelve a ejecutar **Game → Setup → 2. Prefabs**, que corta la tira de nuevo (salta las celdas vacías) y asigna los frames a los prefabs:
+
+| Archivo | Frame | Frames del placeholder |
+|---|---|---|
+| `Grenade/Grenade_Spin.png` | 8×8 | 4 |
+| `Grenade/Explosion.png` | 48×48 (radio de 1.5 u) | 5 |
+| `FireSword/SwordSlash_Horizontal.png`, `_Diagonal.png`, `_Vertical.png` | 32×32 | 3 |
+| `Flamethrower/FlamePuff.png` | 16×16 | 6 (4 de fuego + 2 de humo; `smokeFrames` en el efecto) |
+| `Drill/Drill_Horizontal.png`, `_Diagonal.png`, `_Vertical.png` | 16×16 | 2 |
+| `Laser/Laser_Beam_0.png`, `Laser_Beam_1.png` | 16×6, textura (no sprite) con *Repeat* | 1 cada una; se alternan |
+| `Laser/Laser_Origin.png` | 12×12 | 2 |
+| `Laser/Laser_Impact.png` | 12×12 | 3 |
+
+Las horizontales se dibujan mirando a la derecha, las diagonales hacia arriba-derecha y las verticales hacia arriba. Los prefabs de efecto (`Prefabs/Abilities/Ability_*.prefab`) se crean una sola vez para no pisar los valores ajustados; el setup solo reasigna su arte, sus prefabs y sus sonidos.
+
 | Elemento | Sprites | Direcciones |
 |---|---|---|
 | Iconos del HUD | 7 iconos de 16×16 (3 de Rosslyn, 4 de Veyron) | — |
 | Coleccionable de habilidad | Sprite animado + versión holograma (8.9) | — |
-| Clips del torso | `Torso_Melee`, `Torso_Melee_Crouch` en cada hoja | — |
+| Clips del torso | `Torso_Melee`, `Torso_Melee_DiagUp`, `Torso_Melee_Up`, `Torso_Melee_Down`, `Torso_Melee_Crouch` en cada hoja | Las 4 + agachado |
 | Granada | Giro (4 frames) + explosión | — |
-| Espada | Tajo de llamas (VFX) | Adelante |
-| Lanzallamas | `Flame_Start`, `Flame_Loop`, `Flame_End` | Horizontal, diagonal, vertical |
+| Espada | Tajo de llamas (VFX) | Horizontal, diagonal, vertical (abajo = vertical volteado) |
+| Lanzallamas | `FlamePuff`: una llama de 16×16 con ~6 frames (2 al aparecer, 2 ardiendo, 2 de humo) + una variante opcional | Ninguna: es redonda y no se rota |
 | Taladro | Proyectil girando | Horizontal, diagonal, vertical |
 | Láser | Origen y impacto (animados) + textura del rayo que se repite | Una sola textura para todas las direcciones |
-| Cuchillo | Tajo (VFX corto) | Adelante |
+| Cuchillo | Tajo (VFX corto) | Horizontal, diagonal, vertical (abajo = vertical volteado) |
 | Arma sónica | **[DECIDIR]** | **[DECIDIR]** |
 
 **Construcción del láser con `LineRenderer`:**
@@ -940,7 +997,7 @@ Como los estados se eligen por código con `Animator.Play()`, los Animators **no
 | Dash | `Locomotion.IsDashing` | Piernas y torso |
 | Dirección de apuntado | `Action.AimDir` | Torso |
 | Shoot pose | `Action.IsInShootPose` (también activo durante habilidades sostenidas) | Torso |
-| Clip de habilidad | `AbilityData.customTorsoClip` o `customTorsoClipCrouch` de la habilidad que se acaba de usar (`torsoPose = CustomClip`) | Torso |
+| Clip de habilidad | `AbilityData.customTorsoClips.Get(dirección, agachada)` de la habilidad que se acaba de usar (`torsoPose = CustomClip`), con la dirección fijada al activarla | Torso |
 | Pose forzada hacia adelante | `AbilityData.torsoPose = ShootPoseForward` en la habilidad en curso | Torso |
 
 Los hashes de los estados se cachean (`Animator.StringToHash("Torso_Run")`). Nunca se usan strings en runtime.
@@ -950,8 +1007,8 @@ Los hashes de los estados se cachean (`Animator.StringToHash("Torso_Run")`). Nun
 Prioridad, de mayor a menor:
 
 1. Dash → `Torso_Dash`
-2. Habilidad con clip propio en curso → `Torso_Melee` o `Torso_Melee_Crouch` (hasta que termina el clip)
-3. Shoot pose con pose forzada hacia adelante (granada) → `Torso_Shoot_Crouch` si está agachada, si no `Torso_Shoot_Forward`
+2. Habilidad con clip propio en curso → el clip de su dirección: `Torso_Melee`, `Torso_Melee_DiagUp`, `Torso_Melee_Up`, `Torso_Melee_Down` o `Torso_Melee_Crouch` (hasta que termina el clip)
+3. Shoot pose con pose forzada hacia adelante (`ShootPoseForward`; ninguna habilidad la usa por ahora) → `Torso_Shoot_Crouch` si está agachada, si no `Torso_Shoot_Forward`
 4. Shoot pose + agachado → `Torso_Shoot_Crouch`
 5. Shoot pose + apuntando `Up` → `Torso_Shoot_Up`
 6. Shoot pose + apuntando `DiagUp` → `Torso_Shoot_DiagUp`
@@ -961,7 +1018,7 @@ Prioridad, de mayor a menor:
 10. Apuntando `DiagUp` (sin disparar) → `Torso_Aim_DiagUp`
 11. Estado base según la locomoción: `Torso_Idle`, `Torso_Run`, `Torso_JumpUp` / `Torso_Fall` (según la velocidad Y), `Torso_Crouch`
 
-Mientras una habilidad sostenida (lanzallamas o láser) está activa, el shoot pose se mantiene, así que el torso se queda en la pose de disparo de la dirección actual. El taladro activa un shoot pose normal, igual que el disparo básico.
+Mientras una habilidad sostenida (lanzallamas o láser) está activa, el shoot pose se mantiene, así que el torso se queda en la pose de disparo de la dirección actual. El taladro y la granada activan un shoot pose normal, igual que el disparo básico.
 
 **Implementación con `Play()` por código:** `PlayerAnimation` evalúa esta lista en cada frame y, si el estado elegido cambió, llama a `Animator.Play(hash)`. Es válido en pixel art porque no hay blend, y es mucho más fácil de depurar que una red de transiciones.
 
@@ -983,15 +1040,17 @@ Las piernas siguen el mismo patrón con su propia lista: dash → agachado → e
 ### 9.3 Configuración de los Animators
 
 - Cada Animator tiene **un estado por clip, sin flechas de transición**. El nombre del estado es igual al del clip.
-- Los clips en loop tienen *Loop Time* activado. `Torso_Melee`, `Torso_Melee_Crouch`, los `Torso_Shoot_*` y los `FullBody_*` no.
-- Para saber si `Torso_Melee` o `Torso_Melee_Crouch` terminaron, se revisa `normalizedTime >= 1` en `PlayerAnimation`.
-- No hace falta `AnimatorOverrideController`: los dos clips de habilidad son estados normales.
+- Los clips en loop tienen *Loop Time* activado. Los `Torso_Melee*`, los `Torso_Shoot_*` y los `FullBody_*` no.
+- Para saber si un clip `Torso_Melee*` terminó, se revisa `normalizedTime >= 1` en `PlayerAnimation`.
+- No hace falta `AnimatorOverrideController`: los clips de habilidad son estados normales.
 - El cambio entre poses en loop con la misma cantidad de frames (por ejemplo, `Torso_Run` y `Torso_Aim_DiagUp` corriendo) conserva el `normalizedTime`, como en el código de arriba.
 - Las poses de disparo (`Torso_Shoot_*`) no tienen loop: el movimiento del arma se reproduce una vez y se queda en el último frame hasta que termina el *shoot pose*. **Cada disparo reinicia el clip desde el frame 0** (`PlayerAnimation` escucha `PlayerBuster.Fired`), aunque el estado del torso no cambie.
 
 ### 9.4 Animation Events
 
-Los clips solo marcan **momentos**: `OnFootstep` y `OnHitboxOn` / `OnHitboxOff` (los frames activos del tajo en `Torso_Melee` y `Torso_Melee_Crouch`). `PlayerAnimation` los recibe y los reenvía como eventos C#. Los estados deciden qué hacer con ellos.
+Los clips solo marcan **momentos**: `OnFootstep`. `PlayerAnimation` lo recibe y lo reenvía como evento C#.
+
+Los frames activos del tajo **no** usan Animation Events (decisión del Hito 4): los define `MeleeEffect` con una ventana de frames (8.2). Así no hay que poner eventos en los 5 clips de cada personaje y la espada funciona aunque falte un clip.
 
 ---
 
@@ -1261,7 +1320,7 @@ Hay dos tipos de obstáculo. Cada uno pide una **interacción**, y cada habilida
 **Interacciones como datos:**
 - Cada interacción es un asset `ObstacleInteraction` (ScriptableObject vacío que solo sirve de etiqueta): `Break`, `Melt`, etc.
 - `AbilityData.obstacleInteractions` lista las que tiene cada habilidad (8.3). `AbilityObstacleTilemap` dice cuál pide y en qué modo se destruye (instantáneo o por calor).
-- Cuando un efecto toca un obstáculo, llama a `AbilityObstacleTilemap.TryInteract(celda, habilidad, dt)`. El obstáculo revisa si la habilidad tiene la interacción que pide y reacciona; si no la tiene, solo detiene el efecto.
+- Cuando un efecto toca un obstáculo, llama a `TryInteract(punto, dirección, habilidad, dt)` de la interfaz `IAbilityObstacle`, que implementa `AbilityObstacleTilemap` (la celda sale del punto de impacto y la dirección). El obstáculo revisa si la habilidad tiene la interacción que pide y reacciona; si no la tiene, solo detiene el efecto. Las habilidades ya hacen esta llamada desde el Hito 4 (taladro al chocar, lanzallamas y láser al tocar la pared), así que el Hito 5 solo implementa el obstáculo.
 - **Todos los obstáculos van en una sola capa física, `AbilityObstacle`.** Agregar un tipo nuevo (hielo, escudo de energía…) o hacer que otra habilidad rompa bloques es crear o asignar un asset, sin capas nuevas ni código en las habilidades. Solo un **modo** de destrucción nuevo (además de instantáneo y por calor) necesita código en `AbilityObstacleTilemap`.
 
 **Reglas comunes:**
@@ -1865,20 +1924,20 @@ Herramienta: menú **Game → Setup** (`Scripts/Editor/GameSetup.cs`), que crea 
 
 Ordenadas de la más sencilla a la más compleja; cada una agrega una pieza nueva al sistema. Se prueban con Rosslyn y el modo de prueba, aunque el taladro y el láser son de Veyron:
 
-- [ ] `PlayerEnergy`, `PlayerAbilities`, `AbilityData`, `AbilityEffect`, estado `UsingAbility` y cambio de habilidad
-- [ ] `AbilityEffect` con `IsFinished` y `ButtonReleased`; bases `TimedAbilityEffect` y `HeldAbilityEffect` (8.4, 8.5)
-- [ ] Valores propios de cada habilidad en su efecto, no en `AbilityData`; `torsoPose` en lugar de `forceForwardPose` (8.3)
-- [ ] `DamageInfo` con `knockback` y `stunDuration` (10.1)
-- [ ] Asset `ObstacleInteraction` (`Break`, `Melt`) y `AbilityData.obstacleInteractions`; capa `AbilityObstacle` en lugar de `Breakable` y `Meltable` (15.2). Esas dos capas ya existen en `TagManager` y en `GameSetup.cs` (matriz de colisiones y máscaras `groundMask`, `ceilingMask` y `solidMask` del motor y del proyectil): hay que reemplazarlas ahí también
-- [ ] HUD de vida, energía e icono de la habilidad
+- [x] `PlayerEnergy`, `PlayerAbilities`, `AbilityData`, `AbilityEffect`, estado `UsingAbility` y cambio de habilidad
+- [x] `AbilityEffect` con `IsFinished` y `ButtonReleased`; bases `TimedAbilityEffect` y `HeldAbilityEffect` (8.4, 8.5)
+- [x] Valores propios de cada habilidad en su efecto, no en `AbilityData`; `torsoPose` en lugar de `forceForwardPose` (8.3)
+- [x] `DamageInfo` con `knockback` y `stunDuration` (10.1)
+- [x] Asset `ObstacleInteraction` (`Break`, `Melt`) y `AbilityData.obstacleInteractions`; capa `AbilityObstacle` en lugar de `Breakable` y `Meltable` (15.2). Esas dos capas ya existen en `TagManager` y en `GameSetup.cs` (matriz de colisiones y máscaras `groundMask`, `ceilingMask` y `solidMask` del motor y del proyectil): hay que reemplazarlas ahí también
+- [x] HUD de vida, energía e icono de la habilidad
 - [ ] **Taladro:** extiende `Projectile` con `pierceCount`
-- [ ] **Granada de goma:** física con rebote + `Explosion`
-- [ ] **Espada de fuego:** `MeleeEffect` con `DamageHitbox` de un golpe + Animation Events + `Torso_Melee` y `Torso_Melee_Crouch`
-- [ ] **Lanzallamas:** modo sostenido, consumo por segundo y `DamageHitbox` por tick
+- [ ] **Granada de goma:** física con rebote + `Explosion`; arco por dirección (4 direcciones y agachada)
+- [ ] **Espada de fuego:** `MeleeEffect` con `DamageHitbox` de un golpe + ventana de frames activos + 5 clips `Torso_Melee*` (`DirectionalClips`), hitbox por dirección y rebote del tajo hacia abajo (`LocomotionFSM.Bounce`)
+- [ ] **Lanzallamas:** modo sostenido, consumo por segundo, `DamageHitbox` por tick y chorro de `FlamePuff` con pool
 - [ ] **Láser:** `BeamCaster` + `LineRenderer` pixel perfect (validar la diagonal)
-- [ ] Modo de prueba (solo en el editor) que desbloquea todas las habilidades y llena la energía
+- [x] Modo de prueba (solo en el editor) que desbloquea todas las habilidades y llena la energía: menú **Game → Modo de prueba → Todas las habilidades** y `CharacterData.testModeAbilities` (el taladro y el láser se prueban con Rosslyn)
 - [ ] `SaveSystem` base: `SaveData`, escritura segura con respaldo, versión, menú `Game/Save` del editor y guardado de habilidades desbloqueadas por personaje
-- [ ] `CharacterData` (5.4): mover vida, energía, `PlayerMovementData`, `BusterData` y habilidades al asset del personaje; `PlayerController.Initialize` y spawn del jugador desde datos
+- [x] `CharacterData` (5.4): mover vida, energía, `PlayerMovementData`, `BusterData` y habilidades al asset del personaje; `PlayerController.Initialize` y spawn del jugador desde datos
 
 ### Hito 5 — Enemigos y nivel de prueba
 - [ ] Torreta, caminante y volador, con estado `Stunned` y reacción al empuje (14.1)
@@ -1945,7 +2004,9 @@ Depende de las decisiones pendientes 8, 10 y 11 (17.2).
 | Habilidades de Rosslyn | Lanzallamas, granada de goma y espada de fuego |
 | Habilidades de Veyron | Taladro, láser, cuchillo y arma sónica |
 | Obtención de habilidades | Coleccionables escondidos en los niveles; los jefes no entregan habilidades. Se guardan al recogerlos |
-| Cuchillo | Reutiliza el sistema de la espada (`MeleeEffect`, `Torso_Melee`) |
+| Cuchillo | Reutiliza el sistema de la espada (`MeleeEffect`, `Torso_Melee*`): 4 direcciones y rebote hacia abajo |
+| Frames activos del tajo | Ventana de frames en `MeleeEffect`, sin Animation Events |
+| Instancias de los efectos | Una por habilidad, hija del jugador; lo que se lanza sale de pools del efecto |
 | Fogonazo del disparo | No hay; el movimiento del arma en los clips de disparo es el feedback |
 | Escalabilidad de habilidades | El efecto decide cuándo termina (`IsFinished`); obstáculos por interacción (`ObstacleInteraction`) en una sola capa; `DamageInfo` con empuje y aturdimiento; valores propios en el efecto; layout del spritesheet en un asset; selección de habilidad también desde la pausa |
 | Modos de activación | Por pulsación (granada, espada, taladro, cuchillo) y sostenida con consumo por segundo (lanzallamas, láser) |
@@ -1959,9 +2020,9 @@ Depende de las decisiones pendientes 8, 10 y 11 (17.2).
 | Vidas | Infinitas, con checkpoints |
 | Recarga de energía | Al morir, al empezar el nivel y con pickups de enemigos. Los checkpoints no recargan |
 | HUD | Canvas pixel perfect con escala entera |
-| Granada de goma | Sale del cañón (pose de disparo hacia adelante, también agachada); arco fijo, sin límite en pantalla |
-| Espada de fuego | Se usa de pie, en el aire y agachada (clip propio); destruye proyectiles enemigos |
-| Lanzallamas | Movimiento al 50% |
+| Granada de goma | Sale del cañón con la pose de disparo de la dirección; arco distinto en cada una de las 4 direcciones y agachada; sin límite en pantalla |
+| Espada de fuego | 4 direcciones y agachada, con un clip `Torso_Melee*` por dirección; destruye proyectiles enemigos; el tajo hacia abajo rebota al golpear (pogo) |
+| Lanzallamas | Movimiento al 50%; visual de llamas sueltas que aparecen y se disipan; daño con una zona fija |
 | Taladro | Atraviesa enemigos sin límite; rompe un bloque destructible y se detiene |
 | Obstáculos por habilidad | Bloques destructibles (taladro, Veyron) y muros de acero que se funden con calor acumulado (lanzallamas, Rosslyn). Nunca cierran el camino principal, tampoco en la misión final |
 | Repetir misiones | Sí, con cualquier personaje, para abrir caminos y buscar coleccionables |

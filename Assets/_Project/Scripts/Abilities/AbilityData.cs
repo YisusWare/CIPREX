@@ -1,5 +1,7 @@
+using System;
 using Game.Audio;
 using Game.Combat;
+using Game.Player;
 using UnityEngine;
 
 namespace Game.Abilities
@@ -12,10 +14,40 @@ namespace Game.Abilities
     {
         /// <summary>Pose de disparo según la dirección de apuntado.</summary>
         ShootPose,
-        /// <summary>Pose de disparo siempre hacia adelante (granada).</summary>
+        /// <summary>Pose de disparo siempre hacia adelante. Ninguna habilidad la usa por ahora.</summary>
         ShootPoseForward,
         /// <summary>Clip propio del torso (espada, cuchillo).</summary>
         CustomClip,
+    }
+
+    /// <summary>Un clip del torso por dirección (espada y cuchillo, sección 8.3).</summary>
+    [Serializable]
+    public struct DirectionalClips
+    {
+        [Tooltip("Torso_Melee. También se usa cuando falta el clip de otra dirección.")]
+        public AnimationClip forward;
+        [Tooltip("Torso_Melee_DiagUp")]
+        public AnimationClip diagUp;
+        [Tooltip("Torso_Melee_Up")]
+        public AnimationClip up;
+        [Tooltip("Torso_Melee_Down (solo en el aire)")]
+        public AnimationClip down;
+        [Tooltip("Torso_Melee_Crouch")]
+        public AnimationClip crouch;
+
+        /// <summary>El clip de la dirección. Si falta, usa forward (o crouch si está agachada).</summary>
+        public AnimationClip Get(AimDirection aim, bool crouching)
+        {
+            if (crouching) return crouch != null ? crouch : forward;
+            AnimationClip clip = aim switch
+            {
+                AimDirection.DiagUp => diagUp,
+                AimDirection.Up => up,
+                AimDirection.Down => down,
+                _ => forward,
+            };
+            return clip != null ? clip : forward;
+        }
     }
 
     /// <summary>
@@ -47,7 +79,7 @@ namespace Game.Abilities
         [Tooltip("¿Respeta la dirección de apuntado? Si no, siempre sale hacia adelante.")]
         public bool usesAim = true;
         public bool usableWhileCrouching = true;
-        [Tooltip("Multiplica la velocidad del jugador mientras está activa. 0 = inmoviliza en el suelo (láser).")]
+        [Tooltip("Multiplica la velocidad del jugador mientras está activa. 0 = inmoviliza (láser): en el aire solo cae.")]
         [Min(0f)] public float moveSpeedMultiplier = 1f;
 
         [Header("Mundo")]
@@ -58,10 +90,8 @@ namespace Game.Abilities
         [Tooltip("Prefab con el componente AbilityEffect.")]
         public AbilityEffect effectPrefab;
         public AbilityTorsoPose torsoPose = AbilityTorsoPose.ShootPose;
-        [Tooltip("Solo con CustomClip. El nombre del clip debe existir en el Animator del torso (p. ej. Torso_Melee).")]
-        public AnimationClip customTorsoClip;
-        [Tooltip("Solo con CustomClip. Versión agachada (p. ej. Torso_Melee_Crouch).")]
-        public AnimationClip customTorsoClipCrouch;
+        [Tooltip("Solo con CustomClip: un clip por dirección. Cada clip debe existir como estado en el Animator del torso.")]
+        public DirectionalClips customTorsoClips;
         public SfxData activateSfx;
         [Tooltip("Hold: sonido en loop mientras está activa.")]
         public SfxData loopSfx;

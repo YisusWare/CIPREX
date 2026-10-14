@@ -21,6 +21,12 @@ namespace Game.Combat
         [SerializeField] int pierceCount = 0;
         [Tooltip("Margen fuera de la cámara (en fracción de pantalla) antes de desaparecer.")]
         [SerializeField] float offscreenMargin = 0.05f;
+        [Tooltip("Empuje al golpear (u/s). 0 = ninguno (10.1).")]
+        [SerializeField] float knockback;
+        [Tooltip("Segundos de aturdimiento al golpear. 0 = ninguno (10.1).")]
+        [SerializeField] float stunDuration;
+        [Tooltip("Proyectiles enemigos: la espada no lo puede destruir (proyectiles especiales de jefes).")]
+        [SerializeField] bool indestructible;
 
         static Camera cachedCamera;
 
@@ -37,10 +43,11 @@ namespace Game.Combat
         bool released;
 
         public Vector2 Velocity => velocity;
+        public bool Indestructible => indestructible;
 
         public void SetPool(IObjectPool<Projectile> owningPool) => pool = owningPool;
 
-        void Awake()
+        protected virtual void Awake()
         {
             filter = new ContactFilter2D();
             filter.SetLayerMask(targetMask | solidMask);
@@ -57,7 +64,11 @@ namespace Game.Combat
             pierced = 0;
             released = false;
             alreadyHit.Clear();
+            OnLaunched();
         }
+
+        /// <summary>Al final de Launch (sprites por dirección del taladro, etc.).</summary>
+        protected virtual void OnLaunched() { }
 
         void Update()
         {
@@ -97,6 +108,8 @@ namespace Game.Combat
                         amount = damage,
                         direction = velocity.normalized,
                         source = owner,
+                        knockback = knockback,
+                        stunDuration = stunDuration,
                     });
 
                     if (pierceCount >= 0 && pierced++ >= pierceCount)
@@ -113,7 +126,7 @@ namespace Game.Combat
             if (IsOffscreen(pos + step)) Despawn();
         }
 
-        /// <summary>Para efectos al chocar con una pared (y, en el Hito 4, romper bloques).</summary>
+        /// <summary>Al chocar con una pared, antes de desaparecer (el taladro rompe bloques aquí).</summary>
         protected virtual void OnHitSolid(RaycastHit2D hit) { }
 
         bool IsOffscreen(Vector2 worldPos)

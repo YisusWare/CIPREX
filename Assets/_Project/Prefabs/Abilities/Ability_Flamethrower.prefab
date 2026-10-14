@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1756576317055657236
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 491088894685636820}
+  - component: {fileID: 7852778423508839184}
+  m_Layer: 0
+  m_Name: DamageZone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &491088894685636820
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756576317055657236}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2299606565265894305}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7852778423508839184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756576317055657236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 646fe610fba52ad4ea4f560ffc9d627d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Game.Combat.DamageHitbox
+  size: {x: 1, y: 1}
+  offset: {x: 0, y: 0}
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 16384
+  mode: 1
+  tickInterval: 0.15
+  projectileMask:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!1 &2708022966319717432
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2299606565265894305}
+  - component: {fileID: 4532811543731500077}
+  m_Layer: 0
+  m_Name: Ability_Flamethrower
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2299606565265894305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2708022966319717432}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 491088894685636820}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4532811543731500077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2708022966319717432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5466ac04bdadae94ca97ddfdad06649f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Game.Abilities.FlamethrowerEffect
+  damageZone: {fileID: 7852778423508839184}
+  damagePerTick: 1
+  range: 4
+  width: 0.75
+  solidMask:
+    serializedVersion: 2
+    m_Bits: 72
+  puffPrefab: {fileID: 6305590071040880656, guid: c9942002856715c49bdf435252c93788, type: 3}
+  puffFrames:
+  - {fileID: -554846516329061411, guid: a1f2f028374527a4ebeba5c302ab2efc, type: 3}
+  - {fileID: 8442599962692602402, guid: a1f2f028374527a4ebeba5c302ab2efc, type: 3}
+  - {fileID: -3973904821579823018, guid: a1f2f028374527a4ebeba5c302ab2efc, type: 3}
+  - {fileID: 3031785551565117779, guid: a1f2f028374527a4ebeba5c302ab2efc, type: 3}
+  - {fileID: 4428184314163314900, guid: a1f2f028374527a4ebeba5c302ab2efc, type: 3}
+  - {fileID: 1014235426837898948, guid: a1f2f028374527a4ebeba5c302ab2efc, type: 3}
+  puffFramesVariant: []
+  smokeFrames: 2
+  smokeDuration: 0.12
+  spawnInterval: 0.03
+  puffSpeed: 9
+  spreadDegrees: 6
+  speedVariation: 0.1

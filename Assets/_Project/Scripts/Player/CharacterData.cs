@@ -30,5 +30,8 @@ namespace Game.Player
         public BusterData buster;
         [Tooltip("Habilidades del personaje, en el orden del ciclo siguiente/anterior (8.1).")]
         public AbilityData[] abilities;
+        [Tooltip("Solo en el editor, con el modo de prueba activado: habilidades extra para probarlas con este " +
+                 "personaje (Hito 4: el taladro y el láser de Veyron se prueban con Rosslyn).")]
+        public AbilityData[] testModeAbilities;
     }
 }

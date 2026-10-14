@@ -17,10 +17,10 @@ namespace Game.Player
         protected InputSnapshot Input => ctx.Input;
         protected PlayerMotor Motor => ctx.Motor;
         protected PlayerMovementData Data => ctx.Movement;
-        /// <summary>moveSpeedMultiplier de la habilidad activa (sección 6.4); 1 si no hay ninguna.</summary>
         /// <summary>No se puede hacer dash durante una habilidad por pulsación (8.5).</summary>
         protected bool DashBlocked => ctx.Action != null && ctx.Action.BlocksDash;
 
+        /// <summary>moveSpeedMultiplier de la habilidad activa (sección 6.4); 1 si no hay ninguna.</summary>
         protected float SpeedMultiplier => ctx.Action != null ? ctx.Action.MoveSpeedMultiplier : 1f;
 
         public virtual void Enter() { }

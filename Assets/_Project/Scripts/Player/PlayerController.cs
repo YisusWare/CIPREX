@@ -111,7 +111,7 @@ namespace Game.Player
             buster.SetData(character.buster);
             health.SetMaxHealth(character.maxHealth);
             energy.SetMax(character.maxEnergy);
-            abilities.SetAbilities(character.abilities, energy);
+            abilities.SetAbilities(character.abilities, AbilityTestMode.Enabled ? character.testModeAbilities : null, energy);
 
             Context = new PlayerContext
             {

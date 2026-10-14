@@ -114,3 +114,6 @@ MonoBehaviour:
   maxLifetime: 2
   pierceCount: 0
   offscreenMargin: 0.05
+  knockback: 0
+  stunDuration: 0
+  indestructible: 0

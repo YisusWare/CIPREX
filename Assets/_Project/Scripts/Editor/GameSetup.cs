@@ -20,7 +20,7 @@ namespace Game.EditorTools
     /// <summary>
     /// Arma el contenido de prueba de los hitos 1, 2 y 4 (sección 16): sprites placeholder, tiles,
     /// datos, matriz de colisiones, prefabs, personaje, habilidades, HUD y la escena Test_Movement.
-    /// Lo del Hito 4 (personaje, habilidades, HUD, capas) está en GameSetup.Hito4.cs.
+    /// Lo del Hito 4 está en GameSetup.Hito4.cs (personaje, HUD, capas) y GameSetup.Abilities.cs (habilidades).
     /// Menú: Game/Setup. Se puede volver a ejecutar; los PNG y los assets de datos que ya existen
     /// no se sobrescriben (para no perder arte ni valores ajustados).
     /// </summary>
@@ -227,6 +227,7 @@ namespace Game.EditorTools
                 collide.Add((s, "PlayerProjectile")); // granada con física (Hito 4)
                 collide.Add((s, "EnemyProjectile"));
             }
+            collide.Add(("Platform", "PlayerProjectile")); // la granada rebota sobre las plataformas atravesables
             collide.Add(("Player", "Pickup"));
             collide.Add(("PlayerHurtbox", "Enemy"));
             collide.Add(("PlayerHurtbox", "Hazard"));

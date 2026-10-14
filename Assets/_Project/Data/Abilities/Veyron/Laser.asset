@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1701e77ab03246439295a0b72b8cea1, type: 3}
+  m_Name: Laser
+  m_EditorClassIdentifier: Game.Gameplay::Game.Abilities.AbilityData
+  id: laser
+  displayName: "L\xE1ser"
+  icon: {fileID: 21300000, guid: f3bcd9e16baa46946aa85e8108f09d29, type: 3}
+  activation: 1
+  energyCost: 0
+  energyPerSecond: 8
+  cooldown: 0
+  maxInstancesOnScreen: 0
+  usesAim: 1
+  usableWhileCrouching: 1
+  moveSpeedMultiplier: 0
+  obstacleInteractions: []
+  effectPrefab: {fileID: 2082530361034918230, guid: b62fff22649b6254dae0cb73b6bd93af, type: 3}
+  torsoPose: 0
+  customTorsoClips:
+    forward: {fileID: 0}
+    diagUp: {fileID: 0}
+    up: {fileID: 0}
+    down: {fileID: 0}
+    crouch: {fileID: 0}
+  activateSfx: {fileID: 11400000, guid: 2da277833faf6974eb64d950dbdcde83, type: 2}
+  loopSfx: {fileID: 11400000, guid: 803d293ee9e492f4aae9659bea1e5d04, type: 2}
