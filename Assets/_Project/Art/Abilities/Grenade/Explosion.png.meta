@@ -221,6 +221,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Explosion_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8598681756494124f87176dad01feb0b
+      internalID: -1890703885
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -240,6 +262,7 @@ TextureImporter:
       Explosion_2: 3815954189206336483
       Explosion_3: -3690502768834906923
       Explosion_4: -49130668184793455
+      Explosion_5: -1890703885
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

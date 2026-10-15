@@ -66,7 +66,7 @@ namespace Game.Player
                 effects[a] = effect;
             }
 
-            // Hasta el Hito 4 (SaveSystem) no hay progreso guardado: el modo de prueba desbloquea todo.
+            // Modo de prueba: todo desbloqueado. Si no, el progreso guardado lo aplica GameManager.BindPlayer.
             if (AbilityTestMode.Enabled)
                 foreach (var a in all) unlocked.Add(a);
 
@@ -74,6 +74,15 @@ namespace Game.Player
         }
 
         public bool IsUnlocked(AbilityData ability) => ability != null && unlocked.Contains(ability);
+
+        /// <summary>La habilidad del personaje con ese id (guardado), o null.</summary>
+        public AbilityData FindById(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var a in all)
+                if (a.id == id) return a;
+            return null;
+        }
 
         /// <summary>Desbloquea una habilidad (coleccionable, guardado). Por defecto la deja seleccionada (8.9).</summary>
         public void Unlock(AbilityData ability, bool select = true)

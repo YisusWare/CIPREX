@@ -37,6 +37,8 @@ namespace Game.Level
             Player = Instantiate(character.prefab, transform.position, Quaternion.identity);
             Player.name = character.displayName;
             Player.Initialize(character);
+            // Progreso guardado (habilidades desbloqueadas) y guardado al desbloquear (15.4).
+            GameManager.Instance.BindPlayer(Player);
 
             if (playerCamera != null)
             {

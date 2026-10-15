@@ -1,6 +1,6 @@
 # Documento Técnico — Run & Gun 2D
 
-> **Estado:** borrador v28 (2026-10-14)
+> **Estado:** borrador v30 (2026-10-14)
 > **Motor:** Unity 6 · **Plataforma:** PC (teclado y gamepad) · **Arte:** pixel art hecho en Piskel
 > **Referencias:** Metal Slug (personaje dividido en dos mitades), Mega Man (habilidades), Mega Man X (dash)
 > Las secciones marcadas con **[DECIDIR]** son decisiones abiertas y las marcadas con **[AJUSTAR]** son valores que se afinan al probar. Todas están en la sección 17.
@@ -1306,7 +1306,8 @@ Una lista de `MissionData` en un asset `MissionCatalog` define qué misiones apa
 
 - **Checkpoints:** al morir se reaparece en el último checkpoint activado.
 - **Peligros:** pinchos y fosos (muerte instantánea), plataformas móviles y plataformas que caen.
-- Tilemaps de Unity con grid de 1 unidad (16 px), *Tilemap Collider 2D* + *Composite Collider 2D* para el suelo.
+- Tilemaps de Unity con grid de 1 unidad (16 px), *Tilemap Collider 2D* (*Composite Operation = Merge*) + *Composite Collider 2D* para el suelo.
+- **El suelo usa *Geometry Type = Polygons*** (sólido), no *Outlines*: con *Outlines* el collider es solo un contorno hueco y, si el jugador queda un poco metido en el suelo, la física no lo empuja hacia fuera y lo atraviesa. Las plataformas atravesables sí usan *Outlines*. `PlayerPhysicsMonitor` (en el prefab del jugador, solo en el editor y en builds de desarrollo) avisa en la consola si el jugador se hunde en un tile sólido o cae fuera del nivel, con el historial de los últimos pasos de física (F9 lo muestra en cualquier momento).
 
 #### Obstáculos que se destruyen con habilidades
 
@@ -1487,13 +1488,24 @@ Si el juego se cierra o se va la luz justo mientras escribe, el archivo puede qu
 
 Los sistemas del juego (habilidades, selección de misiones) **leen y modifican el estado a través de `GameManager`**, nunca leen archivos directamente.
 
+**Implementación del Hito 4** (antes de la escena `Boot` y de la pantalla de slots):
+- `GameManager` se crea solo la primera vez que se usa (`GameManager.Instance`, `DontDestroyOnLoad`). En el Hito 6 pasa a vivir en la escena `Boot`.
+- Al jugar sin pasar por los menús, `EnsureGameLoaded` carga el slot `settings.lastUsedSlot` (o el 1) y, si está vacío, crea una partida nueva.
+- `PlayerSpawner` llama a `GameManager.BindPlayer(player)` después de `Initialize`: aplica las habilidades desbloqueadas y la seleccionada del personaje, guarda en el acto cuando se desbloquea una (`PlayerAbilities.AbilityUnlocked`), recuerda la seleccionada y cuenta las muertes (en memoria, se escriben en el siguiente guardado).
+- **Con el modo de prueba de habilidades activado no se lee ni se escribe el progreso de habilidades**, para no mezclar las de prueba con las de la partida.
+- Un slot dañado o de una versión más nueva se marca de solo lectura (`IsReadOnly`): se juega con una partida en memoria y no se escribe nada.
+- Al cerrar el juego se guarda el tiempo de juego (`OnApplicationQuit`).
+- `GameManager.Saved` muestra el icono de guardado en el HUD (abajo a la derecha, 1 s).
+
 #### Herramientas de depuración (solo en el editor)
 
 Menú `Game/Save` en el editor de Unity:
 - **Abrir carpeta de guardado** (`EditorUtility.RevealInFinder`).
 - **Borrar todos los guardados.**
-- **Crear guardado de prueba:** todas las misiones completadas y todas las habilidades de todos los personajes desbloqueadas.
-- **Cargar un JSON específico**, para reproducir problemas reportados.
+- **Crear guardado de prueba** (slot 1): todas las habilidades de todos los personajes desbloqueadas; las misiones completadas se agregan cuando exista `MissionCatalog` (Hito 6).
+- **Cargar un JSON específico**, para reproducir problemas reportados (se copia como `slot_1.json`).
+- **Mostrar los slots en la consola** (estado y contenido de cada uno).
+- **Desbloquear la siguiente habilidad (Play)**: simula un coleccionable mientras no existan (Hito 5). Solo con el modo de prueba de habilidades apagado.
 
 ### 15.5 Audio
 
@@ -1930,11 +1942,11 @@ Ordenadas de la más sencilla a la más compleja; cada una agrega una pieza nuev
 - [x] `DamageInfo` con `knockback` y `stunDuration` (10.1)
 - [x] Asset `ObstacleInteraction` (`Break`, `Melt`) y `AbilityData.obstacleInteractions`; capa `AbilityObstacle` en lugar de `Breakable` y `Meltable` (15.2). Esas dos capas ya existen en `TagManager` y en `GameSetup.cs` (matriz de colisiones y máscaras `groundMask`, `ceilingMask` y `solidMask` del motor y del proyectil): hay que reemplazarlas ahí también
 - [x] HUD de vida, energía e icono de la habilidad
-- [ ] **Taladro:** extiende `Projectile` con `pierceCount`
-- [ ] **Granada de goma:** física con rebote + `Explosion`; arco por dirección (4 direcciones y agachada)
-- [ ] **Espada de fuego:** `MeleeEffect` con `DamageHitbox` de un golpe + ventana de frames activos + 5 clips `Torso_Melee*` (`DirectionalClips`), hitbox por dirección y rebote del tajo hacia abajo (`LocomotionFSM.Bounce`)
-- [ ] **Lanzallamas:** modo sostenido, consumo por segundo, `DamageHitbox` por tick y chorro de `FlamePuff` con pool
-- [ ] **Láser:** `BeamCaster` + `LineRenderer` pixel perfect (validar la diagonal)
+- [x] **Taladro:** extiende `Projectile` con `pierceCount`
+- [x] **Granada de goma:** física con rebote + `Explosion`; arco por dirección (4 direcciones y agachada)
+- [x] **Espada de fuego:** `MeleeEffect` con `DamageHitbox` de un golpe + ventana de frames activos + 5 clips `Torso_Melee*` (`DirectionalClips`), hitbox por dirección y rebote del tajo hacia abajo (`LocomotionFSM.Bounce`). Falta dibujar los clips `Torso_Melee*` y el arte final de las habilidades (8.8)
+- [x] **Lanzallamas:** modo sostenido, consumo por segundo, `DamageHitbox` por tick y chorro de `FlamePuff` con pool
+- [x] **Láser:** `BeamCaster` + `LineRenderer` pixel perfect (validar la diagonal)
 - [x] Modo de prueba (solo en el editor) que desbloquea todas las habilidades y llena la energía: menú **Game → Modo de prueba → Todas las habilidades** y `CharacterData.testModeAbilities` (el taladro y el láser se prueban con Rosslyn)
 - [ ] `SaveSystem` base: `SaveData`, escritura segura con respaldo, versión, menú `Game/Save` del editor y guardado de habilidades desbloqueadas por personaje
 - [x] `CharacterData` (5.4): mover vida, energía, `PlayerMovementData`, `BusterData` y habilidades al asset del personaje; `PlayerController.Initialize` y spawn del jugador desde datos

@@ -1,0 +1,137 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5f50a187a1ec174c86e063f684e2ff4, type: 3}
+  m_Name: SpritesheetLayout
+  m_EditorClassIdentifier: Game.Gameplay::Game.Player.SpritesheetLayout
+  cellWidth: 48
+  cellHeight: 64
+  pivotPixels: {x: 24, y: 12}
+  defaultFps: 12
+  defaultLegsClip: Legs_Idle
+  defaultTorsoClip: Torso_Idle
+  defaultFullBodyClip: FullBody_Hurt
+  clips:
+  - clipName: Torso_Idle
+    part: 1
+    row: 1
+    startColumn: 1
+    loop: 1
+  - clipName: Legs_Idle
+    part: 0
+    row: 2
+    startColumn: 1
+    loop: 1
+  - clipName: Torso_Run
+    part: 1
+    row: 3
+    startColumn: 1
+    loop: 1
+  - clipName: Legs_Run
+    part: 0
+    row: 4
+    startColumn: 1
+    loop: 1
+  - clipName: Torso_JumpUp
+    part: 1
+    row: 5
+    startColumn: 1
+    loop: 1
+  - clipName: Torso_Fall
+    part: 1
+    row: 5
+    startColumn: 2
+    loop: 1
+  - clipName: Torso_Crouch
+    part: 1
+    row: 5
+    startColumn: 3
+    loop: 1
+  - clipName: Torso_Dash
+    part: 1
+    row: 5
+    startColumn: 4
+    loop: 1
+  - clipName: Torso_Aim_Up
+    part: 1
+    row: 5
+    startColumn: 6
+    loop: 1
+  - clipName: Torso_Aim_DiagUp
+    part: 1
+    row: 5
+    startColumn: 7
+    loop: 1
+  - clipName: Legs_JumpUp
+    part: 0
+    row: 6
+    startColumn: 1
+    loop: 1
+  - clipName: Legs_Fall
+    part: 0
+    row: 6
+    startColumn: 2
+    loop: 1
+  - clipName: Legs_Crouch
+    part: 0
+    row: 6
+    startColumn: 3
+    loop: 1
+  - clipName: Legs_Dash
+    part: 0
+    row: 6
+    startColumn: 4
+    loop: 1
+  - clipName: Torso_Shoot_Forward
+    part: 1
+    row: 8
+    startColumn: 1
+    loop: 0
+  - clipName: Torso_Shoot_Up
+    part: 1
+    row: 8
+    startColumn: 6
+    loop: 0
+  - clipName: Torso_Shoot_DiagUp
+    part: 1
+    row: 8
+    startColumn: 11
+    loop: 0
+  - clipName: Torso_Shoot_Crouch
+    part: 1
+    row: 8
+    startColumn: 16
+    loop: 0
+  - clipName: Torso_Shoot_Down
+    part: 1
+    row: 9
+    startColumn: 1
+    loop: 0
+  - clipName: FullBody_Hurt
+    part: 2
+    row: 10
+    startColumn: 1
+    loop: 0
+  - clipName: FullBody_Death
+    part: 2
+    row: 11
+    startColumn: 1
+    loop: 0
+  - clipName: FullBody_Teleport_In
+    part: 2
+    row: 12
+    startColumn: 1
+    loop: 0
+  - clipName: FullBody_Teleport_Out
+    part: 2
+    row: 13
+    startColumn: 1
+    loop: 0

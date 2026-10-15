@@ -33,6 +33,7 @@ namespace Game.EditorTools
         const string GrenadePath = RosslynAbilitiesDir + "/RubberGrenade.asset";
         const string SwordPath = RosslynAbilitiesDir + "/FireSword.asset";
         const string HudSegmentPath = UIArtDir + "/HUD_Segment.png";
+        const string HudSavingPath = UIArtDir + "/HUD_Saving.png";
         const string FlamethrowerIconPath = IconsDir + "/Icon_Flamethrower.png";
         const string GrenadeIconPath = IconsDir + "/Icon_RubberGrenade.png";
         const string SwordIconPath = IconsDir + "/Icon_FireSword.png";
@@ -114,6 +115,15 @@ namespace Game.EditorTools
             // Segmento blanco para las barras del HUD (se tiñe por código).
             CreateSpriteIfMissing(HudSegmentPath, 4, 4, new Vector2(0.5f, 0.5f), px =>
                 FillRect(px, 4, 0, 0, 3, 3, new Color32(255, 255, 255, 255)));
+
+            // Icono de guardado (8×8): un disquete.
+            CreateSpriteIfMissing(HudSavingPath, 8, 8, new Vector2(0.5f, 0.5f), px =>
+            {
+                FillRect(px, 8, 0, 0, 7, 7, new Color32(20, 18, 30, 255));
+                FillRect(px, 8, 1, 1, 6, 6, new Color32(90, 160, 230, 255));
+                FillRect(px, 8, 2, 4, 5, 6, new Color32(235, 240, 250, 255));
+                FillRect(px, 8, 4, 5, 4, 6, new Color32(20, 18, 30, 255));
+            });
 
             // Iconos placeholder de 16×16 (sección 8.8).
             CreateIcon(FlamethrowerIconPath, new Color32(255, 140, 40, 255), new Color32(255, 230, 120, 255));
@@ -240,11 +250,19 @@ namespace Game.EditorTools
             text.horizontalOverflow = HorizontalWrapMode.Overflow;
             text.raycastTarget = false;
 
+            // Icono de guardado, abajo a la derecha (320×180).
+            var saveGO = UiChild(canvasGO.transform, "SaveIcon", new Vector2(304, -164), new Vector2(8, 8));
+            var saveIcon = saveGO.AddComponent<Image>();
+            saveIcon.sprite = LoadSprite(HudSavingPath);
+            saveIcon.raycastTarget = false;
+            saveIcon.enabled = false;
+
             var hud = canvasGO.AddComponent<PlayerHUD>();
             SetRef(hud, "healthBar", health);
             SetRef(hud, "energyBar", energy);
             SetRef(hud, "abilityIcon", icon);
             SetRef(hud, "abilityName", text);
+            SetRef(hud, "saveIcon", saveIcon);
         }
 
         static SegmentedBar CreateBar(Transform parent, string name, Vector2 position, Sprite segment, Color full, Color empty)

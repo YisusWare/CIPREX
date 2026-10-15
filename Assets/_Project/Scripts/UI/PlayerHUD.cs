@@ -18,16 +18,33 @@ namespace Game.UI
         [SerializeField] Text abilityName;
         [Tooltip("Segundos que se ve el nombre al cambiar de habilidad.")]
         [SerializeField] float nameDuration = 1.5f;
+        [Tooltip("Icono que aparece unos instantes al guardar (15.4).")]
+        [SerializeField] Image saveIcon;
+        [SerializeField] float saveIconDuration = 1f;
 
         PlayerController player;
         float nameTimer;
+        float saveTimer;
 
-        void OnEnable() => PlayerSpawner.PlayerSpawned += Bind;
+        void OnEnable()
+        {
+            PlayerSpawner.PlayerSpawned += Bind;
+            GameManager.Saved += OnSaved;
+            if (saveIcon != null) saveIcon.enabled = false;
+        }
 
         void OnDisable()
         {
             PlayerSpawner.PlayerSpawned -= Bind;
+            GameManager.Saved -= OnSaved;
             Unbind();
+        }
+
+        void OnSaved()
+        {
+            if (saveIcon == null) return;
+            saveIcon.enabled = true;
+            saveTimer = saveIconDuration;
         }
 
         public void Bind(PlayerController target)
@@ -59,6 +76,13 @@ namespace Game.UI
 
         void Update()
         {
+            if (saveTimer > 0f)
+            {
+                // Tiempo sin escala: el icono también se apaga en pausa.
+                saveTimer -= Time.unscaledDeltaTime;
+                if (saveTimer <= 0f && saveIcon != null) saveIcon.enabled = false;
+            }
+
             if (nameTimer > 0f)
             {
                 nameTimer -= Time.deltaTime;

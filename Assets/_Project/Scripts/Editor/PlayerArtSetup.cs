@@ -52,6 +52,9 @@ namespace Game.EditorTools
 
         static ClipDef[] Layout;
 
+        /// <summary>Mientras la herramienta corta la hoja (el aviso de corte manual no aplica).</summary>
+        public static bool IsSlicing { get; private set; }
+
         [MenuItem("Game/Setup/4. Personaje animado (spritesheet)", priority = 23)]
         public static void Run()
         {
@@ -73,8 +76,14 @@ namespace Game.EditorTools
             Layout = layout.clips.Select(e => new ClipDef(e)).ToArray();
 
             var frames = DetectFrames();
-            SliceSheet(frames);
-            var clips = WriteClips(frames);
+            Dictionary<SpritesheetPart, List<AnimationClip>> clips;
+            IsSlicing = true;
+            try
+            {
+                SliceSheet(frames);
+                clips = WriteClips(frames);
+            }
+            finally { IsSlicing = false; }
 
             EnsureFolder(AnimRoot);
             WriteController(LegsControllerPath, clips[SpritesheetPart.Legs], layout.DefaultClipFor(SpritesheetPart.Legs));
