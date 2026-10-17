@@ -27,10 +27,10 @@ MonoBehaviour:
   effectPrefab: {fileID: 2100662860947823043, guid: b269fc66984179a42a9b5c8f11358510, type: 3}
   torsoPose: 2
   customTorsoClips:
-    forward: {fileID: 0}
+    forward: {fileID: 7400000, guid: e2401c9d5c1ee454bb0748f38d2d9570, type: 2}
     diagUp: {fileID: 0}
-    up: {fileID: 0}
-    down: {fileID: 0}
-    crouch: {fileID: 0}
+    up: {fileID: 7400000, guid: 5e199bd68cbdde54f92ffba36b90dd32, type: 2}
+    down: {fileID: 7400000, guid: 41cc607a377bbb94aaf56e1f3a11f018, type: 2}
+    crouch: {fileID: 7400000, guid: 798e2168ef39869478c10668bb8e9858, type: 2}
   activateSfx: {fileID: 11400000, guid: db588b9e036c0bb49a6bda1cfce4efe4, type: 2}
   loopSfx: {fileID: 0}

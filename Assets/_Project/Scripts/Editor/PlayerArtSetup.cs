@@ -77,11 +77,18 @@ namespace Game.EditorTools
 
             var frames = DetectFrames();
             Dictionary<SpritesheetPart, List<AnimationClip>> clips;
+            var stripReport = new List<string>();
             IsSlicing = true;
             try
             {
                 SliceSheet(frames);
                 clips = WriteClips(frames);
+                foreach (var strip in layout.strips)
+                {
+                    var clip = WriteStripClip(strip, out int count);
+                    stripReport.Add($"{strip.clipName}: {count} frames ({strip.fileName})");
+                    if (clip != null) clips[strip.part].Add(clip);
+                }
             }
             finally { IsSlicing = false; }
 
@@ -94,7 +101,7 @@ namespace Game.EditorTools
             // El prefab del jugador usa los Animators si existen.
             GameSetup.CreatePrefabs();
 
-            var report = string.Join("\n", Layout.Select(l => $"{l.name}: {frames[l.name].Count} frames"));
+            var report = string.Join("\n", Layout.Select(l => $"{l.name}: {frames[l.name].Count} frames").Concat(stripReport));
             Debug.Log("[Personaje animado] Listo.\n" + report);
         }
 
@@ -104,16 +111,39 @@ namespace Game.EditorTools
         static SpritesheetLayout LoadOrCreateLayout()
         {
             var asset = AssetDatabase.LoadAssetAtPath<SpritesheetLayout>(LayoutPath);
-            if (asset != null) return asset;
+            if (asset != null)
+            {
+                AddDefaultStrips(asset);
+                return asset;
+            }
 
             EnsureFolder(Path.GetDirectoryName(LayoutPath).Replace('\\', '/'));
             asset = ScriptableObject.CreateInstance<SpritesheetLayout>();
             asset.clips = SpritesheetLayout.DefaultEntries();
+            AddDefaultStrips(asset);
             AssetDatabase.CreateAsset(asset, LayoutPath);
             AssetDatabase.SaveAssets();
             Debug.Log($"[Personaje animado] Se creó {LayoutPath} con los {asset.clips.Count} clips actuales.");
             return asset;
         }
+
+        /// <summary>Agrega las tiras por defecto cuyo PNG existe y que el layout todavía no tiene.</summary>
+        static void AddDefaultStrips(SpritesheetLayout asset)
+        {
+            bool changed = false;
+            foreach (var strip in SpritesheetLayout.DefaultStrips())
+            {
+                if (asset.strips.Any(s => s.clipName == strip.clipName)) continue;
+                if (!File.Exists(StripPath(strip))) continue;
+                asset.strips.Add(strip);
+                changed = true;
+                Debug.Log($"[Personaje animado] Tira agregada al layout: {strip.clipName} ({strip.fileName}).");
+            }
+            if (changed) EditorUtility.SetDirty(asset);
+        }
+
+        static string StripPath(SpritesheetLayout.Strip strip) =>
+            Path.GetDirectoryName(SheetPath).Replace('\\', '/') + "/" + strip.fileName;
 
         [MenuItem("Game/Setup/Abrir SpritesheetLayout", priority = 24)]
         static void SelectLayout()
@@ -268,6 +298,96 @@ namespace Game.EditorTools
             if (isNew) AssetDatabase.CreateAsset(clip, path);
             else EditorUtility.SetDirty(clip);
             return clip;
+        }
+
+        // ------------------------------------------------------------------ Tiras aparte
+
+        /// <summary>
+        /// Corta una tira (frames de frameSize, de izquierda a derecha y de arriba hacia abajo, saltando
+        /// las celdas vacías) con el pivote de los pies, y escribe su clip. Devuelve null si falta el PNG.
+        /// </summary>
+        static AnimationClip WriteStripClip(SpritesheetLayout.Strip strip, out int count)
+        {
+            count = 0;
+            string path = StripPath(strip);
+            if (!File.Exists(path))
+            {
+                Debug.LogWarning($"[Personaje animado] {strip.clipName}: no se encontró {path}.");
+                return null;
+            }
+
+            int fw = strip.frameSize.x, fh = strip.frameSize.y;
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            tex.LoadImage(File.ReadAllBytes(path));
+            int texW = tex.width, texH = tex.height;
+            var pixels = tex.GetPixels32();
+            Object.DestroyImmediate(tex);
+
+            var cells = new List<RectInt>();
+            for (int row = 0; row < texH / fh; row++)
+                for (int col = 0; col < texW / fw; col++)
+                {
+                    int x0 = col * fw, y0 = texH - (row + 1) * fh;
+                    bool any = false;
+                    for (int y = y0; y < y0 + fh && !any; y++)
+                        for (int x = x0; x < x0 + fw && !any; x++)
+                            if (pixels[y * texW + x].a > 0) any = true;
+                    if (any) cells.Add(new RectInt(x0, y0, fw, fh));
+                }
+            if (cells.Count == 0)
+            {
+                Debug.LogWarning($"[Personaje animado] {strip.clipName}: {path} no tiene frames de {fw}×{fh}.");
+                return null;
+            }
+
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            importer.spritePixelsPerUnit = 16;
+            importer.filterMode = FilterMode.Point;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.mipmapEnabled = false;
+            importer.alphaIsTransparency = true;
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            settings.spriteMeshType = SpriteMeshType.FullRect;
+            importer.SetTextureSettings(settings);
+            importer.SaveAndReimport();
+
+            var factory = new SpriteDataProviderFactories();
+            factory.Init();
+            var provider = factory.GetSpriteEditorDataProviderFromObject(importer);
+            provider.InitSpriteEditorDataProvider();
+            var existing = provider.GetSpriteRects().GroupBy(r => r.name).ToDictionary(g => g.Key, g => g.First().spriteID);
+
+            var pivot = new Vector2((float)strip.pivotPixels.x / fw, (float)strip.pivotPixels.y / fh);
+            var rects = new List<SpriteRect>();
+            for (int i = 0; i < cells.Count; i++)
+            {
+                string name = $"{strip.clipName}_{i}";
+                rects.Add(new SpriteRect
+                {
+                    name = name,
+                    spriteID = existing.TryGetValue(name, out var id) ? id : GUID.Generate(),
+                    rect = new Rect(cells[i].x, cells[i].y, fw, fh),
+                    alignment = SpriteAlignment.Custom,
+                    pivot = pivot,
+                });
+            }
+            provider.SetSpriteRects(rects.ToArray());
+            provider.GetDataProvider<ISpriteNameFileIdDataProvider>()
+                ?.SetNameFileIdPairs(rects.Select(r => new SpriteNameFileIdPair(r.name, r.spriteID)));
+            provider.Apply();
+            importer.SaveAndReimport();
+
+            var sprites = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().ToDictionary(s => s.name);
+            var clipSprites = new Sprite[cells.Count];
+            for (int i = 0; i < cells.Count; i++) clipSprites[i] = sprites[$"{strip.clipName}_{i}"];
+
+            string dir = $"{AnimRoot}/{strip.part}";
+            EnsureFolder(dir);
+            count = cells.Count;
+            return WriteClip($"{dir}/{strip.clipName}.anim", clipSprites, strip.loop);
         }
 
         // ------------------------------------------------------------------ Animators

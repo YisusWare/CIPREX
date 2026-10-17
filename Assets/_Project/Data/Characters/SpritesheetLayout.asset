@@ -135,3 +135,28 @@ MonoBehaviour:
     row: 13
     startColumn: 1
     loop: 0
+  strips:
+  - clipName: Torso_Melee
+    part: 1
+    fileName: RosslynFireSlash_horizontal.png
+    frameSize: {x: 100, y: 64}
+    pivotPixels: {x: 51, y: 14}
+    loop: 0
+  - clipName: Torso_Melee_Crouch
+    part: 1
+    fileName: RosslynFireSlash_crouch.png
+    frameSize: {x: 100, y: 48}
+    pivotPixels: {x: 46, y: 7}
+    loop: 0
+  - clipName: Torso_Melee_Up
+    part: 1
+    fileName: RosslynFireSlash_Up.png
+    frameSize: {x: 48, y: 100}
+    pivotPixels: {x: 27, y: 20}
+    loop: 0
+  - clipName: Torso_Melee_Down
+    part: 1
+    fileName: rosslynFireSlash_down.png
+    frameSize: {x: 48, y: 100}
+    pivotPixels: {x: 24, y: 30}
+    loop: 0

@@ -1,6 +1,6 @@
 # Documento Técnico — Run & Gun 2D
 
-> **Estado:** borrador v30 (2026-10-14)
+> **Estado:** borrador v31 (2026-10-16)
 > **Motor:** Unity 6 · **Plataforma:** PC (teclado y gamepad) · **Arte:** pixel art hecho en Piskel
 > **Referencias:** Metal Slug (personaje dividido en dos mitades), Mega Man (habilidades), Mega Man X (dash)
 > Las secciones marcadas con **[DECIDIR]** son decisiones abiertas y las marcadas con **[AJUSTAR]** son valores que se afinan al probar. Todas están en la sección 17.
@@ -258,7 +258,7 @@ Cada clip empieza en una celda fija y toma las celdas **no vacías consecutivas*
 - **No mover** un clip a otra celda sin cambiar su entrada en el `SpritesheetLayout`.
 - El asset se abre con **Game → Setup → Abrir SpritesheetLayout**. Si no existe, el menú lo crea con los clips actuales. Antes de cortar la hoja, el menú revisa que no haya nombres vacíos o repetidos ni dos clips en la misma celda inicial, y avisa si una entrada apunta fuera de la hoja.
 - Cada entrada tiene: nombre del clip (debe coincidir con el que busca `PlayerAnimation`), mitad (`Legs`, `Torso` o `FullBody`), fila y columna inicial (desde 1) y si hace loop. El asset también guarda el tamaño de celda (48 × 64), el pivote (24, 12), los fps de los clips nuevos (12) y el estado inicial de cada Animator.
-- Los clips del tajo (`Torso_Melee`, `Torso_Melee_DiagUp`, `Torso_Melee_Up`, `Torso_Melee_Down` y `Torso_Melee_Crouch`) todavía no tienen celdas: se agregan como filas nuevas al final de la hoja en el Hito 4.
+- **Clips en PNG aparte (`SpritesheetLayout.strips`):** los clips que no caben en la celda de 48×64 van en su propio PNG, en la misma carpeta que la hoja: tira horizontal con frames de un tamaño propio y el pivote de los pies en píxeles (para que el torso encaje con las piernas). El menú **4. Personaje animado** los corta y genera sus clips igual que los de la hoja. Los usa el tajo de la espada de Rosslyn: `RosslynFireSlash_horizontal.png` (100×64, `Torso_Melee`), `RosslynFireSlash_crouch.png` (100×48, `Torso_Melee_Crouch`), `RosslynFireSlash_Up.png` (48×100, `Torso_Melee_Up`) y `rosslynFireSlash_down.png` (48×100, `Torso_Melee_Down`). No hay `Torso_Melee_DiagUp`: el tajo diagonal usa el frontal.
 - Si en algún momento la hoja crece, se agregan filas al final (la hoja puede crecer hacia abajo).
 
 **Varios personajes:** cada personaje tiene **su propio spritesheet con la misma cuadrícula y la misma tabla de clips**. Así `PlayerArtSetup` y `PlayerAnimation` funcionan igual para todos: el menú recibe el personaje, corta su hoja y genera sus clips y Animators en `Animations/Characters/<Personaje>/`. Las celdas de un clip que un personaje no usa (por ejemplo, `Torso_Melee` si no tiene espada) se dejan vacías.
@@ -690,7 +690,8 @@ Energía máxima: **28** **[AJUSTAR]**. Todos los costos y valores son iniciales
   - Implementación: `MeleeEffect` tiene un campo `pogoJumpHeight` (0 = sin rebote). Al primer golpe del tajo hacia abajo llama a `LocomotionFSM.Bounce(altura)`, que pasa a `Airborne` con la velocidad Y calculada, sin corte de salto. Si el jugador está en `AirDash`, el rebote lo termina.
   - Al diseñar niveles hay que tenerlo en cuenta: encadenando rebotes sobre enemigos voladores se llega más alto que con un salto.
 - **Destruye proyectiles enemigos:** la hitbox también detecta la capa `EnemyProjectile` y desactiva los proyectiles que toca. Así la espada tiene un uso defensivo. Los proyectiles especiales de los jefes pueden marcarse como `indestructible`.
-- Torso: el clip de la dirección (`Torso_Melee`, `Torso_Melee_DiagUp`, `Torso_Melee_Up`, `Torso_Melee_Down` o `Torso_Melee_Crouch`), de pie, corriendo o en el aire. Si a un personaje le falta el clip de una dirección, se usa `Torso_Melee` (o `Torso_Melee_Crouch` agachado), así la espada funciona mientras se dibujan los demás. Las llamas del tajo son un **VFX separado** en el `FirePoint` de la dirección, porque no caben en el lienzo de 48×64.
+- Torso: el clip de la dirección (`Torso_Melee`, `Torso_Melee_Up`, `Torso_Melee_Down` o `Torso_Melee_Crouch`), de pie, corriendo o en el aire. **La llama del tajo está dibujada en el mismo clip** (tiras más grandes que la celda, 4.2.1), así que la espada de Rosslyn no usa VFX aparte; el campo de VFX de `MeleeEffect` queda para el cuchillo u otras armas. Si falta el clip de una dirección (Rosslyn no tiene diagonal), el tajo y su hitbox usan los de adelante.
+- Valores medidos sobre el arte (5 frames a 12 fps, 0.42 s): golpe en los frames 1–3; hitboxes (u, desde los pies, mirando a la derecha) adelante centro (0.94, 1.28) y 3.5 × 1.69, agachada (1.25, 1.06) y 3.5 × 2, arriba (0, 2.5) y 2.13 × 2.5, abajo (0.19, 0.06) y 2 × 1.38 **[AJUSTAR]**.
 
 #### Lanzallamas
 - **Sostenido:** activo mientras el botón esté presionado y haya energía.
@@ -1948,7 +1949,7 @@ Ordenadas de la más sencilla a la más compleja; cada una agrega una pieza nuev
 - [x] **Lanzallamas:** modo sostenido, consumo por segundo, `DamageHitbox` por tick y chorro de `FlamePuff` con pool
 - [x] **Láser:** `BeamCaster` + `LineRenderer` pixel perfect (validar la diagonal)
 - [x] Modo de prueba (solo en el editor) que desbloquea todas las habilidades y llena la energía: menú **Game → Modo de prueba → Todas las habilidades** y `CharacterData.testModeAbilities` (el taladro y el láser se prueban con Rosslyn)
-- [ ] `SaveSystem` base: `SaveData`, escritura segura con respaldo, versión, menú `Game/Save` del editor y guardado de habilidades desbloqueadas por personaje
+- [x] `SaveSystem` base: `SaveData`, escritura segura con respaldo, versión, menú `Game/Save` del editor y guardado de habilidades desbloqueadas por personaje
 - [x] `CharacterData` (5.4): mover vida, energía, `PlayerMovementData`, `BusterData` y habilidades al asset del personaje; `PlayerController.Initialize` y spawn del jugador desde datos
 
 ### Hito 5 — Enemigos y nivel de prueba

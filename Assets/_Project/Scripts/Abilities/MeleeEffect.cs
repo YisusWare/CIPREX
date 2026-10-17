@@ -82,6 +82,7 @@ namespace Game.Abilities
         /// <summary>Duración del clip de esta dirección, o la de respaldo.</summary>
         protected override float LockDurationFor(AbilityContext ctx)
         {
+            ResolveDirection(ref ctx);
             var clip = Data != null ? Data.customTorsoClips.Get(ctx.aim, ctx.crouching) : null;
             float fps = clip != null && clip.frameRate > 0f ? clip.frameRate : fallbackFps;
             float length = clip != null ? clip.length : fallbackFrameCount / fps;
@@ -92,8 +93,16 @@ namespace Game.Abilities
             return length;
         }
 
+        /// <summary>Si falta el clip de una dirección se usa el frontal, y la hitbox lo sigue.</summary>
+        void ResolveDirection(ref AbilityContext ctx)
+        {
+            if (Data == null) return;
+            Data.customTorsoClips.Resolve(ref ctx.aim, ref ctx.crouching);
+        }
+
         protected override void OnBegin(AbilityContext ctx)
         {
+            ResolveDirection(ref ctx);
             elapsed = 0f;
             pogoDone = false;
             down = ctx.aim == AimDirection.Down && !ctx.crouching;

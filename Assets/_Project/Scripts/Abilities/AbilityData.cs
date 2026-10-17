@@ -26,7 +26,7 @@ namespace Game.Abilities
     {
         [Tooltip("Torso_Melee. También se usa cuando falta el clip de otra dirección.")]
         public AnimationClip forward;
-        [Tooltip("Torso_Melee_DiagUp")]
+        [Tooltip("Torso_Melee_DiagUp. Si falta, se usa el de arriba.")]
         public AnimationClip diagUp;
         [Tooltip("Torso_Melee_Up")]
         public AnimationClip up;
@@ -35,10 +35,37 @@ namespace Game.Abilities
         [Tooltip("Torso_Melee_Crouch")]
         public AnimationClip crouch;
 
-        /// <summary>El clip de la dirección. Si falta, usa forward (o crouch si está agachada).</summary>
+        /// <summary>
+        /// La dirección que de verdad se va a ver: si falta el clip de la pedida, la de forward.
+        /// Así la hitbox coincide con el dibujo (por ejemplo, sin clip diagonal, el tajo diagonal es el frontal).
+        /// </summary>
+        public void Resolve(ref AimDirection aim, ref bool crouching)
+        {
+            if (crouching)
+            {
+                if (crouch == null) { crouching = false; aim = AimDirection.Forward; }
+                return;
+            }
+            // Sin clip diagonal, el tajo diagonal es el de arriba (y si tampoco hay, el frontal).
+            if (aim == AimDirection.DiagUp && diagUp == null && up != null) aim = AimDirection.Up;
+            bool has = aim switch
+            {
+                AimDirection.DiagUp => diagUp != null,
+                AimDirection.Up => up != null,
+                AimDirection.Down => down != null,
+                _ => true,
+            };
+            if (!has && forward != null) aim = AimDirection.Forward;
+        }
+
+        /// <summary>
+        /// El clip de la dirección. Si falta, usa forward (o crouch si está agachada); sin diagonal,
+        /// usa el de arriba.
+        /// </summary>
         public AnimationClip Get(AimDirection aim, bool crouching)
         {
             if (crouching) return crouch != null ? crouch : forward;
+            if (aim == AimDirection.DiagUp && diagUp == null && up != null) return up;
             AnimationClip clip = aim switch
             {
                 AimDirection.DiagUp => diagUp,

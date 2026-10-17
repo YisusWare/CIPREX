@@ -206,9 +206,33 @@ namespace Game.EditorTools
             }, go =>
             {
                 var effect = go.GetComponent<MeleeEffect>();
-                AssignDirectional(effect, "vfxFrames", SlashHPath, SlashDPath, SlashVPath);
+                // Sin VFX aparte: la llama va en el clip del torso.
+                var so = new SerializedObject(effect);
+                foreach (var dir in new[] { "horizontal", "diagonal", "vertical" })
+                    so.FindProperty("vfxFrames." + dir).arraySize = 0;
+                // Ventana de golpe: frames 1–3 del tajo dibujado (antes 1–2).
+                var to = so.FindProperty("activeToFrame");
+                if (so.FindProperty("activeFromFrame").intValue == 1 && to.intValue == 2) to.intValue = 3;
+                so.ApplyModifiedPropertiesWithoutUndo();
                 SetRef(effect, "deflectSfx", EnsureSfx("Sfx_SwordDeflect"));
+
+                // Hitboxes medidas sobre la llama del arte (en unidades, mirando a la derecha, pies en 0).
+                // Solo se cambian si siguen con los valores provisionales.
+                MigrateHitbox(go, "Hitbox_Forward", new Vector2(1.0f, 1.1f), new Vector2(0.9375f, 1.28125f), new Vector2(3.5f, 1.6875f));
+                MigrateHitbox(go, "Hitbox_Crouch", new Vector2(1.0f, 0.5f), new Vector2(1.25f, 1.0625f), new Vector2(3.5f, 2f));
+                MigrateHitbox(go, "Hitbox_Up", new Vector2(0.125f, 2.6f), new Vector2(0f, 2.5f), new Vector2(2.125f, 2.5f));
+                MigrateHitbox(go, "Hitbox_Down", new Vector2(0.125f, -0.5f), new Vector2(0.1875f, 0.0625f), new Vector2(2f, 1.375f));
             });
+        }
+
+        static void MigrateHitbox(GameObject root, string name, Vector2 oldPosition, Vector2 newPosition, Vector2 newSize)
+        {
+            var t = root.transform.Find(name);
+            if (t == null || ((Vector2)t.localPosition - oldPosition).sqrMagnitude > 0.0001f) return;
+            t.localPosition = newPosition;
+            var so = new SerializedObject(t.GetComponent<DamageHitbox>());
+            so.FindProperty("size").vector2Value = newSize;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         static DamageHitbox MeleeHitbox(GameObject parent, string name, Vector2 position, float angle, Vector2 size)
@@ -634,10 +658,8 @@ namespace Game.EditorTools
                 else Ring(set, 23.5f, 23.5f, radius[f] - 3f, radius[f], inner);
             });
 
-            // Tajo de la espada: 32×32, 3 frames, en 3 direcciones (8.8).
-            EnsureStrip(SlashHPath, 32, 32, 3, (f, get, set) => Slash(set, f, 0f));
-            EnsureStrip(SlashDPath, 32, 32, 3, (f, get, set) => Slash(set, f, 45f));
-            EnsureStrip(SlashVPath, 32, 32, 3, (f, get, set) => Slash(set, f, 90f));
+            // La espada de Rosslyn no usa VFX aparte: la llama está dibujada en los clips Torso_Melee*
+            // (tiras en Art/Characters/Player, ver SpritesheetLayout.strips). El VFX queda para el cuchillo.
 
             // Llama del lanzallamas: 16×16, 4 de fuego (de pequeña a grande) + 2 de humo.
             EnsureStrip(FlamePuffPath, 16, 16, 6, (f, get, set) =>

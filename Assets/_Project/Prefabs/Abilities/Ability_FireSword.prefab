@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 1384800514646499358}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0.9375, y: 1.28125, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 646fe610fba52ad4ea4f560ffc9d627d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Combat.DamageHitbox
-  size: {x: 1.5, y: 1.5}
+  size: {x: 3.5, y: 1.6875}
   offset: {x: 0, y: 0}
   targetMask:
     serializedVersion: 2
@@ -80,7 +80,7 @@ Transform:
   m_GameObject: {fileID: 3297188572683622273}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 0.5, z: 0}
+  m_LocalPosition: {x: 1.25, y: 1.0625, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 646fe610fba52ad4ea4f560ffc9d627d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Combat.DamageHitbox
-  size: {x: 1.5, y: 1}
+  size: {x: 3.5, y: 2}
   offset: {x: 0, y: 0}
   targetMask:
     serializedVersion: 2
@@ -134,7 +134,7 @@ Transform:
   m_GameObject: {fileID: 4364759165754598935}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.125, y: 2.6, z: 0}
+  m_LocalPosition: {x: 0, y: 2.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 646fe610fba52ad4ea4f560ffc9d627d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Combat.DamageHitbox
-  size: {x: 1.5, y: 1.5}
+  size: {x: 2.125, y: 2.5}
   offset: {x: 0, y: 0}
   targetMask:
     serializedVersion: 2
@@ -188,7 +188,7 @@ Transform:
   m_GameObject: {fileID: 5305351544983773469}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.125, y: -0.5, z: 0}
+  m_LocalPosition: {x: 0.1875, y: 0.0625, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 646fe610fba52ad4ea4f560ffc9d627d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Game.Combat.DamageHitbox
-  size: {x: 1.5, y: 1.5}
+  size: {x: 2, y: 1.375}
   offset: {x: 0, y: 0}
   targetMask:
     serializedVersion: 2
@@ -329,24 +329,15 @@ MonoBehaviour:
   damage: 4
   knockback: 0
   activeFromFrame: 1
-  activeToFrame: 2
+  activeToFrame: 3
   fallbackFrameCount: 4
   fallbackFps: 12
   pogoJumpHeight: 2.5
   vfx: {fileID: 2236547641867164177}
   vfxFrames:
-    horizontal:
-    - {fileID: 8324780630522048593, guid: bb9e4115ddf5562499753b65113473d8, type: 3}
-    - {fileID: 6866956594944201730, guid: bb9e4115ddf5562499753b65113473d8, type: 3}
-    - {fileID: 3306263772790957368, guid: bb9e4115ddf5562499753b65113473d8, type: 3}
-    diagonal:
-    - {fileID: -2605847793957963849, guid: a5dc70b77531c0b4bb2c218eaac23edc, type: 3}
-    - {fileID: -7400876937344127736, guid: a5dc70b77531c0b4bb2c218eaac23edc, type: 3}
-    - {fileID: -1725018124709899311, guid: a5dc70b77531c0b4bb2c218eaac23edc, type: 3}
-    vertical:
-    - {fileID: 7922995144966297123, guid: d5d8e32f554a6bf449cb35950fad6bde, type: 3}
-    - {fileID: -8758090399501986806, guid: d5d8e32f554a6bf449cb35950fad6bde, type: 3}
-    - {fileID: 7467343300701893502, guid: d5d8e32f554a6bf449cb35950fad6bde, type: 3}
+    horizontal: []
+    diagonal: []
+    vertical: []
   deflectSfx: {fileID: 11400000, guid: 515612e5f6715b8418537ba78b5b1166, type: 2}
 --- !u!1 &8679159367957999978
 GameObject:
