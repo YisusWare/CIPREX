@@ -1,6 +1,6 @@
 # Documento Técnico — Run & Gun 2D
 
-> **Estado:** borrador v31 (2026-10-16)
+> **Estado:** borrador v40 (2026-10-28)
 > **Motor:** Unity 6 · **Plataforma:** PC (teclado y gamepad) · **Arte:** pixel art hecho en Piskel
 > **Referencias:** Metal Slug (personaje dividido en dos mitades), Mega Man (habilidades), Mega Man X (dash)
 > Las secciones marcadas con **[DECIDIR]** son decisiones abiertas y las marcadas con **[AJUSTAR]** son valores que se afinan al probar. Todas están en la sección 17.
@@ -9,7 +9,7 @@
 
 ## 1. Visión general
 
-Juego de acción 2D de scroll lateral para PC. Antes de cada misión, el jugador **elige entre 2 personajes**, y cada uno tiene sus propias estadísticas, su disparo básico y sus habilidades. Los dos corren, saltan, se agachan, hacen dash y disparan en varias direcciones al mismo tiempo. Las habilidades especiales se usan con un botón propio y comparten una sola barra de energía.
+Juego de acción 2D de scroll lateral para PC, con **10 niveles que se juegan en orden**. Antes de cada nivel, el jugador **elige entre los personajes que tenga disponibles (5 en total)**, y cada uno tiene sus propias estadísticas, su disparo básico, sus habilidades y, algunos, una pasiva. Todos corren, saltan, se agachan, hacen dash y disparan en varias direcciones al mismo tiempo. Las habilidades especiales se usan con un botón propio y comparten una sola barra de energía. En algunos niveles se pueden pilotear **vehículos** al estilo Metal Slug (sección 18).
 
 ### 1.1 Mecánicas del jugador
 
@@ -23,10 +23,10 @@ Todos los personajes comparten estas mecánicas de movimiento. Lo que cambia ent
 | Dash | En el suelo y en el aire (uno por salto). El dash jump conserva el impulso. Sin invulnerabilidad. **No se puede disparar durante el dash** |
 | Disparo básico | Un disparo por pulsación, sin carga y sin límite de balas en pantalla. Hacia adelante, en diagonal arriba-adelante, hacia arriba y hacia abajo (solo en el aire) |
 | Vida | 28 puntos (cada personaje define la suya), vidas infinitas, reaparece en el último checkpoint |
-| Personajes | **2 personajes jugables** en la versión 1, que se eligen en una pantalla antes de cada misión (15.1). Cada uno tiene sus estadísticas, su disparo básico y sus habilidades. En la versión 2 se agrega **el comandante** como tercer personaje al completar todas las misiones (18.4) |
-| Progresión | Una partida nueva empieza con la **Misión 0**, un entrenamiento en simulador con Rosslyn (15.1). Después vienen 5 misiones de selección libre, cada una con un jefe. Al completarlas se abre la misión final. Las habilidades **no las dan los jefes**: se encuentran como **coleccionables escondidos en los niveles** (8.9) |
-| Historia | Dos soldados espaciales cumplen las misiones que les da su comandante, quien resulta ser un traidor y es el jefe final (ver 1.4). Cada misión tiene un diálogo corto al inicio y al final, el mismo para los dos personajes |
-| Habilidades | Cada personaje tiene **su propio juego de habilidades** y su propio progreso de desbloqueo. **Rosslyn:** lanzallamas, granada de goma y espada de fuego. **Veyron:** taladro, láser, cuchillo y arma sónica. Se obtienen como coleccionables en el escenario; el taladro y el lanzallamas abren caminos opcionales, lo que invita a rejugar cada nivel con los dos personajes (8.9). Se cambian con botones de siguiente y anterior. Todas las de un personaje gastan de **una sola barra de energía compartida**, ya sea por uso o por segundo (las sostenidas). La habilidad seleccionada solo se muestra con un icono en el HUD |
+| Personajes | **5 personajes jugables**: Rosslyn, Veyron, Aquamarine, Agente X y Neotisleo (el General). Se eligen en una pantalla antes de cada nivel (15.1). Cada uno tiene sus estadísticas, su disparo básico, 3 habilidades y, algunos, una pasiva (5.4). Rosslyn y Veyron están desde el inicio; Aquamarine se une después del Bosque en llamas y Agente X después del Tren militar; Neotisleo se une antes de la misión final si se **rescató a todos los prisioneros** (15.2) |
+| Progresión | **10 niveles en orden** (15.1). El primero es el **Simulador de combate** (Misión 0), con Rosslyn. Los niveles 2 a 10 tienen un jefe cada uno; el último es Coliel en la Torre alienígena. Los niveles completados se pueden repetir. Las habilidades **no las dan los jefes**: se encuentran como **coleccionables escondidos en los niveles** (8.9) |
+| Historia | Un escuadrón cumple las misiones que le da el General Neotisleo, contra una amenaza alienígena cuyo líder, Coliel, es el jefe final (ver 1.4). Cada nivel tiene escenas cortas al inicio, antes del jefe y al final, las mismas sin importar el personaje elegido |
+| Habilidades | Cada personaje tiene **3 habilidades propias** y su propio progreso de desbloqueo (8.2). Se obtienen como coleccionables en el escenario; el taladro (Veyron) y el lanzallamas (Rosslyn) abren caminos opcionales, lo que invita a rejugar cada nivel con distintos personajes (8.9). Se cambian con botones de siguiente y anterior. Todas las de un personaje gastan de **una sola barra de energía compartida**, ya sea por uso o por segundo (las sostenidas). La habilidad seleccionada solo se muestra con un icono en el HUD |
 
 ### 1.2 Pilares técnicos
 
@@ -38,32 +38,41 @@ Todos los personajes comparten estas mecánicas de movimiento. Lo que cambia ent
 
 ### 1.3 Fuera de alcance (por ahora)
 
-Disparo cargado, melee fuera de la espada de fuego, armas que se recogen, wall jump, cambio de color del personaje por habilidad, cooperativo.
+Disparo cargado **para los personajes** (el Exoesqueleto sí lo tiene, 18.3), armas que se recogen, wall jump, cambio de color del personaje por habilidad, cooperativo.
 
-**Planeado para la versión 2** (sección 18): vehículos estilo Metal Slug, más misiones y el comandante como tercer personaje jugable.
+**Planeado para la versión 2** (sección 19): más niveles.
 
 ### 1.4 Historia
 
-Los protagonistas son **dos soldados espaciales** del mismo escuadrón: Rosslyn y Veyron. En cada misión, su **comandante** les da información sobre un **objetivo a neutralizar** (el jefe de la misión). Al completar las 5 misiones se abre la misión final, donde descubren que **el comandante es un traidor** y se enfrentan a él como jefe final.
+Un **escuadrón** recibe misiones del **General Neotisleo** para enfrentar una **amenaza alienígena**. El recorrido va de un simulador de entrenamiento a un bosque, unas minas y una montaña, pasa por un bosque en llamas, un laboratorio, un tren militar y un castillo, y termina en **Coleópolis**, la ciudad alienígena, y su **torre**, donde espera **Coliel**, el jefe final.
+
+**La misión final:** el comando quiere **bombardear Coleópolis** para detener a Coliel. Si el jugador rescató a **todos los prisioneros**, estos convencen a Neotisleo de pelear junto a Rosslyn para detener a Coliel **sin destruir la ciudad**, y Neotisleo se vuelve jugable. Hay **un solo final**: los prisioneros agregan a Neotisleo y su escena, pero no cambian el desenlace.
+
+El resto del detalle de la historia llega con el guion **[DECIDIR]**.
 
 | Personaje | Papel |
 |---|---|
-| Rosslyn | Soldado espacial, protagonista y personaje jugable |
-| Veyron | Compañero de escuadrón y segundo personaje jugable |
-| Comandante | Da los briefings y habla en los diálogos de cada misión. Es el jefe final. En la versión 2 se vuelve personaje jugable (18.4) |
-| 5 objetivos | Jefes de las misiones |
+| Rosslyn | Soldado espacial, protagonista y personaje jugable desde el inicio |
+| Veyron | Compañero de escuadrón, jugable desde el inicio |
+| Aquamarine | Se une al escuadrón después del Bosque en llamas (nivel 5); jugable desde el Laboratorio |
+| Agente X | Se une al escuadrón después del Tren militar (nivel 7); jugable desde el Castillo |
+| Goldo | Otro general. En la misión final, si se juega con Neotisleo, da las órdenes por radio en su lugar (15.7) |
+| Neotisleo (el General) | Da los briefings y habla en las escenas. Si se rescató a todos los prisioneros, estos lo convencen de pelear junto a Rosslyn en la misión final y se vuelve jugable (15.2) |
+| Prisioneros | 3 escondidos en cada nivel (15.2) |
+| Jefes | Uno por nivel, del 2 al 10 (14.2) |
+| Coliel | Jefe final, en la Torre alienígena |
 
-**Los dos soldados van a cada misión.** Dentro del lore, ambos participan en todas las misiones aunque el jugador solo controle a uno. Por eso **los diálogos son los mismos** sin importar el personaje elegido: los dos pueden hablar en ellos y el texto nunca supone cuál se está jugando.
+**El escuadrón va a cada misión.** Dentro del lore, los miembros disponibles participan aunque el jugador solo controle a uno. Por eso **las escenas y los diálogos son los mismos** sin importar el personaje elegido: el texto nunca supone cuál se está jugando (15.7).
 
-**Excepción: la Misión 0.** Es un entrenamiento de Rosslyn en un **simulador** y solo ella participa. Es lo primero que ve el jugador y sirve como misión de introducción, al estilo de la primera misión de Mega Man X (15.1).
+**Excepción: el Simulador (Misión 0).** Es un entrenamiento de Rosslyn y solo ella participa. Es lo primero que ve el jugador y sirve como misión de introducción, al estilo de la primera misión de Mega Man X (15.1).
 
-**Cómo se cuenta con el sistema de escenas y diálogos (15.7):** como en Mega Man X, los diálogos van acompañados de **escenas cortas dentro del nivel**: los personajes entran, caminan, hacen gestos y se teletransportan mientras hablan.
-- **Inicio de misión:** el comandante describe el objetivo y los soldados responden.
-- **Cierre de misión:** el comandante felicita a los soldados o comenta el resultado.
-- **Pistas de la traición:** conviene sembrar detalles pequeños en los diálogos de cierre, para que la revelación no salga de la nada. Por ejemplo, algo que dice un objetivo, un dato que no cuadra o una orden extraña del comandante. Como las misiones se juegan en cualquier orden, cada pista debe entenderse por sí sola.
-- **Misión final:** la revelación de la traición (ver la decisión pendiente sobre cuándo ocurre, en 17.2).
+**Cómo se cuenta con el sistema de escenas y diálogos (15.7):** los diálogos son escenas de **novela visual**, al estilo de *Sonic Battle*: una ilustración de la situación en el centro, hasta 4 personajes a los lados con retratos por emoción y el cuadro de texto abajo.
+- **Inicio de nivel:** el General describe el objetivo y el escuadrón responde.
+- **Sala del jefe:** diálogo corto con el jefe antes de la pelea (14.2).
+- **Cierre de nivel:** el General comenta el resultado y da paso al siguiente nivel.
+- **Incorporaciones:** las escenas de cierre presentan a Aquamarine y a Agente X cuando se unen.
 
-**Estilo visual:** ciencia ficción. Escenarios como estaciones espaciales, naves, planetas y bases. El disparo básico es un bláster.
+**Estilo visual:** ciencia ficción con escenarios naturales y militares (bosque, minas, montaña, laboratorio, tren, castillo) que terminan en una ciudad alienígena. El disparo básico de Rosslyn es un bláster.
 
 ---
 
@@ -75,6 +84,7 @@ Los protagonistas son **dos soldados espaciales** del mismo escuadrón: Rosslyn 
 | Render pipeline | URP con Renderer 2D | Plantilla *Universal 2D* de Unity Hub |
 | Cámara | Cinemachine 3 + Pixel Perfect Camera (URP) | |
 | Input | Input System (paquete nuevo) | Teclado y gamepad; remapeo de controles |
+| Idiomas | Paquete *Localization* de Unity | **Español e inglés**, desde el inicio (15.3) |
 | Física | Physics 2D (Rigidbody2D) | Ver sección 11 |
 | Animación | Animator + clips de sprites | Sin rig de huesos |
 | Arte | Piskel → PNG spritesheet | Ver sección 4 |
@@ -160,7 +170,8 @@ Game/                               ← raíz del repositorio
     │   │   ├── Enemies/
     │   │   ├── Projectiles/
     │   │   ├── Tiles/
-    │   │   ├── Portraits/          ← retratos de diálogo (48×48)
+    │   │   ├── Portraits/          ← retratos de busto por emoción (15.7)
+    │   │   ├── Illustrations/      ← ilustraciones de las escenas, por nivel
     │   │   ├── UI/                 ← iconos de habilidades, barras, cuadro de diálogo
     │   │   └── VFX/
     │   ├── Animations/
@@ -191,7 +202,7 @@ Game/                               ← raíz del repositorio
     │       ├── Level/              ← checkpoints, peligros, cámara
     │       ├── Game/               ← GameManager, flujo de escenas
     │       ├── Save/               ← SaveData, SettingsData, SaveSystem, SaveMigrator
-    │       ├── Cutscenes/          ← CutsceneRunner, pasos de escena, CutsceneActor, DialogueBox
+    │       ├── Cutscenes/          ← CutsceneRunner, pasos de escena, VisualNovelView, DialogueBox
     │       ├── Audio/              ← MusicPlayer, SfxPlayer, VolumeSettings
     │       └── UI/
     └── Plugins/
@@ -263,12 +274,11 @@ Cada clip empieza en una celda fija y toma las celdas **no vacías consecutivas*
 
 **Varios personajes:** cada personaje tiene **su propio spritesheet con la misma cuadrícula y la misma tabla de clips**. Así `PlayerArtSetup` y `PlayerAnimation` funcionan igual para todos: el menú recibe el personaje, corta su hoja y genera sus clips y Animators en `Animations/Characters/<Personaje>/`. Las celdas de un clip que un personaje no usa (por ejemplo, `Torso_Melee` si no tiene espada) se dejan vacías.
 - Hoy la hoja de Rosslyn está en `Art/Characters/Player/` y sus clips en `Animations/Player/`. Se mueven a la carpeta del personaje cuando se agregue el segundo (Hito 7).
-- Si alguna habilidad de Veyron no sale de un cañón, puede necesitar filas propias en la hoja **[DECIDIR]** junto con su diseño.
 
 ### 4.3 Tiles y otros sprites
 
 - Tiles: 16×16 px, exportados como una hoja (*tileset*), *slice* por grid de 16×16 y pivote centrado.
-- Obstáculos por habilidad: bloque destructible (1 tile + VFX al romperse) y muro de acero en **3 etapas de calor** (normal, caliente, al rojo vivo) + VFX de metal fundido. Deben distinguirse a simple vista del suelo normal, para que el jugador sepa que se pueden destruir.
+- Obstáculos por habilidad: bloque destructible (1 tile + VFX al romperse), muro de acero en **3 etapas de calor** (normal, caliente, al rojo vivo) + VFX de metal fundido, y **fuego** (tile animado en loop + VFX de vapor al apagarse). Deben distinguirse a simple vista del suelo normal, para que el jugador sepa que se pueden destruir.
 - Enemigos: un solo sprite de cuerpo completo, con pivote en los pies.
 - Iconos de habilidades: 16×16 px **[AJUSTAR]**.
 - Paleta: usa una paleta fija para todo el juego, guardada en Piskel (*Palettes → Create/Import*). Así el arte mantiene coherencia.
@@ -312,11 +322,9 @@ El torso cambia de pose **al mantener arriba o arriba-adelante**, aunque no se e
 | `Torso_Melee_Down` | No | El tajo hacia abajo, solo en el aire (rebota al golpear, 8.2) |
 | `Torso_Melee_Crouch` | No | El tajo agachado |
 
-La granada de goma, el taladro, el lanzallamas y el láser salen del cañón, así que reutilizan las poses de disparo y de apuntado. Solo las armas cuerpo a cuerpo (espada y cuchillo) necesitan clips propios del torso, uno por dirección, igual que los `Torso_Shoot_*`. Todos los clips de tajo se llaman igual en las dos hojas (`Torso_Melee*`): en la de Rosslyn se dibuja la espada y en la de Veyron el cuchillo. El arma sónica de Veyron puede necesitar un clip propio **[DECIDIR]**.
+La granada de goma, el taladro, el lanzallamas y el láser salen del cañón, así que reutilizan las poses de disparo y de apuntado. Solo las armas cuerpo a cuerpo (espada y cuchillo) necesitan clips propios del torso, uno por dirección, igual que los `Torso_Shoot_*`. Todos los clips de tajo se llaman igual en las dos hojas (`Torso_Melee*`): en la de Rosslyn se dibuja la espada y en la de Veyron el cuchillo. El arma sónica y la ráfaga de burbujas usan la pose de disparo, como las demás.
 
 **Cuerpo completo** (se ocultan las mitades y se muestra el SpriteRenderer `FullBody`): `FullBody_Hurt`, `FullBody_Death`, `FullBody_Teleport_In` (al empezar el nivel y al reaparecer) y `FullBody_Teleport_Out`.
-
-**Gestos para escenas** (cuerpo completo, 15.7): por ejemplo `FullBody_Nod` (asentir), `FullBody_Point` (señalar), `FullBody_Salute` (saludo militar) y `FullBody_ArmsCrossed` (brazos cruzados, en loop) **[DECIDIR]** el set final. Cada personaje dibuja los mismos gestos en su hoja y se agregan al `SpritesheetLayout`. Para caminar en las escenas se usan `Legs_Run` + `Torso_Run`; un `Legs_Walk` es opcional **[AJUSTAR]**.
 
 **Total por personaje:** 7 clips de piernas (`Legs_Land` es opcional), 13 de torso comunes más los clips propios de sus habilidades, y 4 de cuerpo completo. Los 5 clips `Torso_Melee*` existen en las dos hojas (espada para Rosslyn, cuchillo para Veyron). El arte de cada habilidad está en la sección 8.8.
 
@@ -412,8 +420,26 @@ public class CharacterData : ScriptableObject
 - **Hasta que exista `MissionController` (Hito 6)**, lo hace `PlayerSpawner` (Hito 4): un objeto en el punto de inicio de la escena con un `CharacterData` de respaldo y la Cinemachine Camera. En `Awake` instancia el prefab, llama a `Initialize` y asigna el `CameraTarget` a la cámara; en `Start` lanza el evento estático `PlayerSpawned`, que usa el HUD para conectarse. El `MissionController` del Hito 6 lo reemplaza o lo usa por dentro.
 - Los datos de cada personaje van en `Data/Characters/<Personaje>/` (por ejemplo, `Rosslyn.asset`, `Rosslyn_Movement.asset` y `Rosslyn_Buster.asset`).
 - **Collider:** mismo tamaño para todos por defecto, para que el diseño de niveles no cambie según el personaje **[AJUSTAR]**.
-- **Diseño de niveles:** cada misión debe poder completarse con **cualquier** personaje. Si los saltos cambian entre personajes, se fija un mínimo común (por ejemplo, todos superan 3 tiles de alto y un foso de 5 tiles con salto normal) y los niveles se diseñan con ese mínimo **[AJUSTAR]**.
+- **Diseño de niveles:** cada misión debe poder completarse con **cualquier** personaje. Como la velocidad y el salto cambian entre personajes (Veyron es el más lento, Agente X salta más), las distancias de los fosos se diseñan con los valores del más lento y el salto más bajo. Se fija un mínimo común (por ejemplo, todos superan 3 tiles de alto y un foso de 5 tiles con salto normal) y los niveles se diseñan con ese mínimo **[AJUSTAR]**.
 - Para probar en el editor sin pasar por los menús, la escena de prueba tiene un campo con el `CharacterData` que se usa si no hay uno seleccionado.
+
+#### Los 5 personajes
+
+| Personaje | Disparo básico (7) | Habilidades (8.2) | Pasiva |
+|---|---|---|---|
+| Rosslyn | Bláster normal | Granada de goma, lanzallamas, espada de fuego | — |
+| Veyron | Más potente, mucho menos alcance | Taladro, arma sónica, cuchillo | — (es **más lento**: conserva la velocidad original de 6 u/s y Rosslyn sube a ~7 u/s) |
+| Aquamarine | Pistola de burbujas: como el normal pero más lento | Ráfaga de burbujas, chorro de agua, rayo congelante | **Burbuja:** al mantener salto en el aire, cae más lento (6.3) |
+| Agente X | Pistola láser: bala más rápida, menos daño | Láser, dron, granada incendiaria | **Salto más alto** |
+| Neotisleo | Bláster normal | Disco de energía, espada de luz, munición eléctrica | **Más energía** que los demás |
+
+#### Pasivas
+
+Dos de las tres pasivas son solo **valores** y no necesitan código:
+- **Agente X, salto más alto:** `PlayerMovementData.jumpHeight` mayor. Los niveles se siguen diseñando con el mínimo común de salto, así que su salto solo abre atajos.
+- **Neotisleo, más energía:** `CharacterData.maxEnergy` mayor.
+
+La de Aquamarine sí es una mecánica: el **planeo con burbuja** (6.3). Se activa con un campo de `PlayerMovementData` (`canGlide` y sus valores), así que cualquier personaje podría tenerlo sin código nuevo.
 
 ---
 
@@ -471,13 +497,19 @@ Alive ──(Damaged)──▶ Hurt ──(fin del knockback)──▶ Alive
   │
   ├──(Died)──▶ Dead ──(timer)──▶ Respawning ──▶ Alive
   │
-  └──(Cinemática / jefe derrotado)──▶ Disabled ──▶ Alive
+  ├──(Cinemática / jefe derrotado)──▶ Disabled ──▶ Alive
+  │
+  ├──(Atrapado por un enemigo)──▶ Grabbed ──(se suelta)──▶ Alive
+  │
+  └──(Sube a un vehículo)──▶ Piloting ──(baja o el vehículo se destruye)──▶ Alive
 ```
 
 - En `Hurt`, `Dead` y `Respawning`, ambas FSM se desactivan y se muestra `FullBody`.
-- En `Disabled` las FSM también se desactivan, pero el personaje queda en manos de las escenas (15.7): se ven las mitades en `Idle`, los pasos de escena pueden moverlo (con `Run`) o reproducir un clip de cuerpo completo (gestos, teletransporte).
+- En `Disabled` las FSM también se desactivan: se ven las mitades en `Idle`, y las escenas (15.7) pueden reproducir un clip de cuerpo completo (teletransporte). Lo usan las escenas, el jefe vencido y el rescate de habilidades.
 - En `Hurt` se aplica un knockback hacia atrás y se activan los i-frames. Al volver a `Alive`, los i-frames siguen corriendo (el personaje parpadea), pero ya se puede controlar.
-- La versión 2 agrega un estado `Piloting` para los vehículos (18.1). Por eso esta FSM se implementa como las demás (`StateMachine` + `IState`) y no con `if` o `bool` sueltos.
+- **`Grabbed`:** un enemigo atrapa al jugador (la Mantis atea, 14.1). Las FSM se desactivan y el jugador recibe daño por tick. Para soltarse hay que **presionar disparo repetidamente**: cada pulsación llena una barra de escape; al llenarse, el jugador se suelta con i-frames cortos. Si muere atrapado, pasa a `Dead` **[AJUSTAR]** el daño y las pulsaciones.
+- **`Piloting`:** el jugador maneja un vehículo (18). Sus FSM se desactivan, sus sprites y colliders se ocultan y el `InputSnapshot` se le pasa al vehículo.
+- Esta FSM se implementa como las demás (`StateMachine` + `IState`) y no con `if` o `bool` sueltos, para poder agregar estados como estos.
 
 ### 6.3 FSM de locomoción
 
@@ -498,7 +530,7 @@ Valores iniciales en unidades (1 unidad = 1 tile = 16 px):
 
 | Parámetro | Valor inicial |
 |---|---|
-| Velocidad de correr | 6 u/s **[AJUSTAR]** |
+| Velocidad de correr | 7 u/s para Rosslyn; 6 u/s para Veyron **[AJUSTAR]** |
 | Altura máxima de salto | 3.5 u (≈ 3.5 tiles) **[AJUSTAR]** |
 | Tiempo hasta la cima | 0.4 s **[AJUSTAR]** |
 | Multiplicador de gravedad al caer | 1.5 **[AJUSTAR]** |
@@ -508,6 +540,13 @@ Valores iniciales en unidades (1 unidad = 1 tile = 16 px):
 - La gravedad y la velocidad inicial del salto se **calculan** a partir de la altura y el tiempo hasta la cima. Así se ajusta pensando en tiles y no en fuerzas.
 - Altura variable: si se suelta el botón mientras sube, se reduce la velocidad Y.
 - **Control en el aire libre:** se puede cambiar de dirección y velocidad en el aire, como en Mega Man. Se puede usar la misma aceleración que en el suelo o una un poco menor **[AJUSTAR]**.
+
+#### Planeo con burbuja (pasiva de Aquamarine)
+
+- En `Airborne`, si el personaje **está cayendo** (velocidad Y ≤ 0) y **mantiene salto**, aparece una burbuja a su alrededor y su velocidad de caída se limita a `glideMaxFallSpeed` (por ejemplo, 2 u/s) **[AJUSTAR]**. Al soltar el botón, la caída vuelve a la normal.
+- No interfiere con la altura variable del salto: mientras sube, mantener el botón sigue siendo el salto normal.
+- Se puede disparar y usar habilidades mientras planea. El air dash cancela el planeo; al terminar el dash se puede volver a planear.
+- Solo se activa para personajes con `PlayerMovementData.canGlide`. La burbuja es un VFX encima del personaje; no hace falta otro clip de piernas o torso.
 
 #### Dash
 
@@ -575,19 +614,24 @@ public enum AimDirection { Forward, DiagUp, Up, Down }
 
 ## 7. Disparo básico
 
-Cada personaje tiene su propio `BusterData`, referenciado desde su `CharacterData` (5.4). Esta sección describe el bláster de Rosslyn.
+Cada personaje tiene su propio `BusterData`, referenciado desde su `CharacterData` (5.4). Todos son proyectiles con valores distintos, así que no hace falta otro sistema. Esta sección describe el bláster de Rosslyn; la tabla resume los cinco. Valores iniciales **[AJUSTAR]**:
 
-**Disparo básico de Veyron:** más potente que el bláster, pero con **mucho menos alcance**. Sigue siendo un proyectil, así que no hace falta otro sistema: es otro `BusterData` con más `damage` y un `maxRange` corto (7.1). Valores iniciales **[AJUSTAR]**:
+| Valor | Rosslyn | Veyron | Aquamarine | Agente X | Neotisleo |
+|---|---|---|---|---|---|
+| Daño | 1 | 2–3 | 1 | 1 | 1 |
+| Velocidad del proyectil | 18 u/s | 18 u/s | ~10 u/s (burbujas lentas) | ~28 u/s | 18 u/s |
+| Alcance (`maxRange`) | Hasta salir de la cámara | ~4–5 u | Hasta salir de la cámara | Hasta salir de la cámara | Hasta salir de la cámara |
+| Arte | Bláster | Disparo pesado | Burbuja | Bala láser | Bláster |
 
-| Valor | Rosslyn | Veyron |
-|---|---|---|
-| Daño | 1 | 2–3 |
-| Alcance (`maxRange`) | Sin límite (hasta salir de la cámara) | ~4–5 u (un cuarto de pantalla) |
-| Cadencia, direcciones y shoot pose | Iguales | Iguales |
+Cadencia, direcciones y shoot pose son iguales para los cinco.
 
+**Disparo básico de Veyron:** más potente que el bláster, pero con **mucho menos alcance** (`maxRange` corto).
 - Al llegar a `maxRange`, el proyectil se desactiva con un VFX corto de disipación, para que el jugador vea dónde termina el alcance.
 - **Diseño de enemigos y jefes:** con poco alcance, Veyron tiene que acercarse. Torretas lejanas, enemigos sobre plataformas altas y jefes que se quedan lejos deben poder alcanzarse sin recibir daño inevitable (14.2).
-- Si el sprite del proyectil es distinto al de Rosslyn, solo cambia el prefab referenciado en su `BusterData`.
+
+**Daño de Agente X:** hace 1 de daño, igual que el bláster; su ventaja es la velocidad de la bala.
+
+Si el sprite del proyectil es distinto, solo cambia el prefab referenciado en su `BusterData`.
 
 ### 7.1 BusterData (ScriptableObject)
 
@@ -624,11 +668,11 @@ public class BusterData : ScriptableObject
 
 ### 8.1 Modelo
 
-- **Cada personaje tiene su propia lista de habilidades** (`CharacterData.abilities`): 3 de Rosslyn y 4 de Veyron (8.2). Todas usan el mismo sistema (`AbilityData` + `AbilityEffect`).
+- **Cada personaje tiene su propia lista de habilidades** (`CharacterData.abilities`): 3 por personaje, 15 en total (8.2). Todas usan el mismo sistema (`AbilityData` + `AbilityEffect`), y la mayoría de las nuevas reutiliza efectos existentes.
 - **El progreso es por personaje:** las habilidades que desbloquea un personaje no las tiene el otro (15.4).
 - **Se obtienen como coleccionables** escondidos en los niveles, no al vencer jefes (8.9).
 - **Una sola barra de energía compartida** para todas las habilidades del personaje. Su máximo depende del personaje (`CharacterData.maxEnergy`).
-- La habilidad seleccionada se cambia con **siguiente y anterior** (en un ciclo que solo incluye las desbloqueadas) o **eligiéndola directamente en el menú de pausa**, como en Mega Man. Con 3 o 4 habilidades basta con el ciclo, pero el menú evita que se vuelva lento si en la V2 cada personaje tiene más.
+- La habilidad seleccionada se cambia con **siguiente y anterior** (en un ciclo que solo incluye las desbloqueadas) o **eligiéndola directamente en el menú de pausa**, como en Mega Man. Con 3 habilidades basta con el ciclo, pero el menú evita que se vuelva lento si en la V2 cada personaje tiene más.
 - El botón de disparo siempre usa el disparo básico. El botón de habilidad usa la seleccionada.
 - **El personaje no cambia de color.** La habilidad seleccionada solo se indica con su **icono en el HUD**.
 - Hay dos modos de activación:
@@ -637,26 +681,47 @@ public class BusterData : ScriptableObject
 
 ### 8.2 Lista de habilidades
 
-Energía máxima: **28** **[AJUSTAR]**. Todos los costos y valores son iniciales **[AJUSTAR]**.
+Energía máxima: **28** **[AJUSTAR]** (más para Neotisleo). Todos los costos y valores son iniciales **[AJUSTAR]**. La columna "Reutiliza" indica de qué efecto sale cada habilidad nueva (8.10).
 
 **Rosslyn**
 
 | Habilidad | Tipo | Activación | Dirección | Costo | Resumen |
 |---|---|---|---|---|---|
-| Lanzallamas | Área sostenida | Sostenida | 4 direcciones | 6 / s | Llama de medio alcance que daña de forma continua. **Funde muros de acero** |
 | Granada de goma | Proyectil físico | Pulsación | 4 direcciones, en arco | 3 | Rebota; explota al tocar un enemigo o al acabarse la mecha |
+| Lanzallamas | Área sostenida | Sostenida | 4 direcciones | 6 / s | Llama de medio alcance que daña de forma continua. **Funde muros de metal** |
 | Espada de fuego | Cuerpo a cuerpo | Pulsación | 4 direcciones | 2 | Tajo de corto alcance envuelto en llamas; el tajo hacia abajo rebota |
 
 **Veyron**
 
 | Habilidad | Tipo | Activación | Dirección | Costo | Resumen |
 |---|---|---|---|---|---|
-| Taladro | Proyectil perforante | Pulsación | 4 direcciones | 3 | Atraviesa a varios enemigos. **Rompe bloques destructibles** |
-| Láser | Rayo sostenido | Sostenida | 4 direcciones | 8 / s | Rayo de largo alcance que daña de forma continua |
+| Taladro | Proyectil perforante | Pulsación | 4 direcciones | 3 | Atraviesa a varios enemigos. **Rompe muros especiales** (bloques destructibles) |
+| Arma sónica | Área corta (escopeta) | Pulsación | 4 direcciones | 3 | Como la escopeta de Metal Slug: un **boom sónico** de corto alcance que golpea fuerte a todo lo que está en un área frente a él |
 | Cuchillo | Cuerpo a cuerpo | Pulsación | 4 direcciones | 1 | Tajo rápido y corto; reutiliza el sistema de la espada |
-| Arma sónica | **[DECIDIR]** | **[DECIDIR]** | **[DECIDIR]** | — | Arma nueva, por diseñar |
 
-"4 direcciones" significa las mismas del disparo básico: adelante, diagonal arriba-adelante, arriba y abajo (solo en el aire), más la versión agachada. Las habilidades por pulsación **fijan la dirección al activarse**: cambiar el apuntado durante el tajo o el lanzamiento no la cambia.
+**Aquamarine**
+
+| Habilidad | Tipo | Activación | Costo | Reutiliza | Resumen |
+|---|---|---|---|---|---|
+| Ráfaga de burbujas | Área corta (escopeta) | Pulsación | 3 | `BlastEffect` (el del arma sónica) | La misma escopeta, representada como una **ráfaga de burbujas** |
+| Chorro de agua | Proyectil físico | Pulsación | 3 | `RubberGrenadeEffect` | Sale en arco como la granada, pero **se deshace al tocar el suelo** en lugar de rebotar. **Apaga el fuego** |
+| Rayo congelante | Rayo sostenido | Sostenida | 8 / s | `LaserEffect` | Como el láser, pero **congela** a los enemigos (10.1) |
+
+**Agente X**
+
+| Habilidad | Tipo | Activación | Costo | Reutiliza | Resumen |
+|---|---|---|---|---|---|
+| Láser | Rayo sostenido | Sostenida | 8 / s | — (ya existe) | Rayo de largo alcance que daña de forma continua (antes era de Veyron) |
+| Dron | Compañero | Pulsación | 6 | Nuevo: `DroneEffect` + `CompanionDrone` | Crea un dron que acompaña al jugador y ataca solo a los enemigos cercanos; se destruye cuando el jugador recibe daño |
+| Granada incendiaria | Proyectil físico + área | Pulsación | 4 | `RubberGrenadeEffect` + `DamageZone` | Granada que, al explotar, deja un área de fuego en el suelo que daña por tick |
+
+**Neotisleo**
+
+| Habilidad | Tipo | Activación | Costo | Reutiliza | Resumen |
+|---|---|---|---|---|---|
+| Disco de energía | Proyectil perforante | Pulsación | 3 | `DrillEffect` | Como el taladro, **sin romper muros** (sin interacción `Break`) |
+| Espada de luz | Cuerpo a cuerpo | Pulsación | 2 | `MeleeEffect` | Como la espada de fuego, **con más alcance** (hitbox más grande) |
+| Munición eléctrica | Proyectil + explosión | Pulsación | 3 | `Projectile` + `Explosion` | Bola de energía que **explota al golpear** un enemigo o un muro; la explosión daña en área |
 
 #### Granada de goma
 - **Lanzamiento según la dirección de apuntado** (decisión del 2026-10-14). La X se multiplica por la dirección en la que mira el jugador. Valores en u/s **[AJUSTAR]**:
@@ -734,11 +799,55 @@ Energía máxima: **28** **[AJUSTAR]**. Todos los costos y valores son iniciales
 - **Reutiliza todo el sistema de la espada de fuego:** el mismo `MeleeEffect` (8.4), `DamageHitbox` de un golpe por objetivo, la ventana de frames activos y los clips `Torso_Melee*` de la hoja de Veyron. Solo cambian los valores y el VFX.
 - Valores iniciales **[AJUSTAR]**: hitbox de 1 × 1 u (más chica que la espada), 3 de daño, costo 1 y un tajo más rápido (clip más corto).
 - Se usa de pie, corriendo, en el aire y agachado, en las **4 direcciones** y con el **rebote del tajo hacia abajo**, igual que la espada (decisión del 2026-10-14). Necesita los mismos 5 clips `Torso_Melee*` en la hoja de Veyron.
-- **[DECIDIR]** si destruye proyectiles enemigos como la espada (17.2). Hay que darle algo que lo distinga del disparo básico de Veyron, que también es de corto alcance.
+- **Destruye proyectiles enemigos**, como la espada. Eso lo distingue del disparo básico de Veyron, que también es de corto alcance.
 
 #### Arma sónica
-- Arma nueva de Veyron. Tipo, activación, dirección, costo y efecto están por definir **[DECIDIR]** (17.2).
-- Si encaja en las piezas de 8.7 (`Projectile`, `DamageHitbox`, `BeamCaster`, `Explosion`), se arma con ellas. Si no, se agrega una pieza nueva.
+- Funciona como la **escopeta de Metal Slug**: un disparo de **corto alcance** que golpea **una vez a todo lo que está en un área** frente al personaje, con mucho daño y poca cadencia. En Veyron se ve como un **boom sónico**.
+- **Área:** un abanico que se abre desde el FirePoint, de unas 3.5 u de largo y unas 2.5 u de ancho al final **[AJUSTAR]**. Se aproxima con 2 o 3 `DamageHitbox` rectangulares escalonados, activos unos pocos frames, en modo **una vez por objetivo**.
+- **Daño:** alto, por ejemplo 4 por objetivo **[AJUSTAR]**. Atraviesa enemigos: golpea a todos los del área, no solo al primero.
+- **Cooldown:** ~0.5 s **[AJUSTAR]**, para que no reemplace al disparo básico.
+- **Direcciones:** las 4 de las habilidades (adelante, diagonal arriba, arriba, abajo en el aire) y agachado. La dirección se fija al activarse.
+- Las paredes cortan el área (no golpea a través de `Ground` ni de `AbilityObstacle`). No rompe ni abre obstáculos.
+- **Efecto compartido:** `BlastEffect`. La **ráfaga de burbujas** de Aquamarine es el mismo efecto con otro arte (burbujas en abanico que revientan) y sus propios valores **[AJUSTAR]**.
+- Encaja con Veyron: refuerza su estilo de corto alcance (disparo pesado, cuchillo) con un golpe de área para grupos de enemigos.
+
+#### Ráfaga de burbujas (Aquamarine)
+- Mismo `BlastEffect` que el arma sónica, con el arte de una **ráfaga de burbujas** en abanico.
+- Los valores pueden diferir (por ejemplo, un poco más de alcance y menos daño) **[AJUSTAR]**.
+
+#### Chorro de agua (Aquamarine)
+- Mismo `RubberGrenadeEffect` que la granada de goma, con un campo nuevo `destroyOnGround`: al tocar el suelo, el chorro se deshace con un VFX de salpicadura en lugar de rebotar. Daña al tocar un enemigo.
+- Tiene la interacción `Extinguish`: al tocar un tile de fuego lo **apaga** y se deshace (15.2).
+- Arco por dirección igual que la granada.
+
+#### Rayo congelante (Aquamarine)
+- Mismo `LaserEffect` (y `BeamCaster`) que el láser, con otro arte y menos daño **[AJUSTAR]**.
+- En cada tick agrega **congelamiento** al enemigo (`DamageInfo.freezeBuildup`, 10.1). Al acumular lo suficiente, el enemigo pasa al estado `Frozen` (14.1).
+- Movimiento como el láser (quieto en el suelo) **[AJUSTAR]**.
+
+#### Láser (Agente X)
+- Es el láser descrito arriba, que pasa de Veyron a Agente X. No cambia nada del efecto.
+
+#### Dron (Agente X)
+- Al activarse aparece un **dron** (`CompanionDrone`) que flota cerca del jugador, siguiéndolo con retraso.
+- Busca al enemigo más cercano dentro de un radio (por ejemplo, 6 u) y le dispara proyectiles pequeños cada cierto tiempo **[AJUSTAR]**. Usa `Projectile` y el pool del efecto.
+- **Se destruye cuando el jugador recibe daño** (escucha `PlayerHealth.Damaged`), al morir y al terminar el nivel.
+- Solo puede haber **1 dron**. Si ya hay uno, la habilidad no se activa y no gasta energía.
+- Es la primera habilidad que deja algo vivo por su cuenta: `IsFinished` es verdadero en cuanto aparece el dron, y el dron vive fuera de `UsingAbility`.
+
+#### Granada incendiaria (Agente X)
+- Mismo `RubberGrenadeEffect` que la granada de goma. Al explotar, además de la `Explosion`, crea una **`DamageZone`** de fuego en el suelo (8.7): un área que dura unos segundos y daña por tick a los enemigos que la pisan **[AJUSTAR]**.
+- No funde muros de metal: las interacciones van por habilidad, no por elemento (15.2).
+
+#### Disco de energía (Neotisleo)
+- Mismo `DrillEffect` que el taladro, con otro arte y **sin la interacción `Break`**: atraviesa enemigos, pero se detiene en los bloques destructibles sin romperlos.
+
+#### Espada de luz (Neotisleo)
+- Mismo `MeleeEffect` que la espada de fuego, con una hitbox más grande (por ejemplo, 2 × 1.5 u) **[AJUSTAR]**. Usa los clips `Torso_Melee*` de su hoja.
+
+#### Munición eléctrica (Neotisleo)
+- Proyectil de energía (`Projectile`) que al golpear un enemigo o un muro crea una `Explosion` eléctrica (radio ~1.5 u) **[AJUSTAR]**. **Aturde** a los enemigos que alcanza (`stunDuration`).
+- No rompe bloques destructibles.
 
 ### 8.3 AbilityData (ScriptableObject)
 
@@ -794,9 +903,16 @@ public struct DirectionalClips
 | Espada de fuego | Press | Sí | Sí | 1 | — | `CustomClip` (`Torso_Melee*`) |
 | Lanzallamas | Hold | Sí | Sí | 0.5 | `Melt` | `ShootPose` |
 | Taladro | Press | Sí | Sí | 1 | `Break` | `ShootPose` |
-| Láser | Hold | Sí | Sí | 0 | — | `ShootPose` |
+| Láser (Agente X) | Hold | Sí | Sí | 0 | — | `ShootPose` |
 | Cuchillo | Press | Sí | Sí | 1 | — | `CustomClip` (`Torso_Melee*`) |
-| Arma sónica | **[DECIDIR]** | | | | | |
+| Arma sónica / Ráfaga de burbujas | Press | Sí | Sí | 1 | — | `ShootPose` |
+| Chorro de agua | Press | Sí | Sí | 1 | `Extinguish` | `ShootPose` |
+| Rayo congelante | Hold | Sí | Sí | 0 | — | `ShootPose` |
+| Dron | Press | No | Sí | 1 | — | `ShootPose` |
+| Granada incendiaria | Press | Sí | Sí | 1 | — | `ShootPose` |
+| Disco de energía | Press | Sí | Sí | 1 | — | `ShootPose` |
+| Espada de luz | Press | Sí | Sí | 1 | — | `CustomClip` (`Torso_Melee*`) |
+| Munición eléctrica | Press | Sí | Sí | 1 | — | `ShootPose` |
 
 **Qué va en `AbilityData` y qué va en el efecto:** `AbilityData` solo tiene lo que leen **otros sistemas** (guardado, HUD, energía, FSM, animación, obstáculos). Los valores propios de cada habilidad (daño, radio, velocidad, alcance, mecha, rebote, calor por segundo, duración del bloqueo…) son **campos serializados de su `AbilityEffect`**, en su prefab. Regla para campos nuevos: si solo lo lee el efecto, va en el efecto. Así `AbilityData` no se llena de bools para casos especiales.
 
@@ -848,7 +964,7 @@ Una clase base `TimedAbilityEffect` implementa el bloqueo por tiempo y otra `Hel
 - **Pegadas al jugador (espada, cuchillo):** la instancia se voltea con la dirección del jugador y activa su hitbox solo en los frames del tajo.
 - **Sostenidas (lanzallamas, láser):** la instancia se coloca cada frame en el FirePoint según el contexto.
 
-Implementaciones: `RubberGrenadeEffect` (con `RubberGrenade`), `MeleeEffect` (espada de fuego y cuchillo, con distintos valores y VFX), `FlamethrowerEffect`, `DrillEffect`, `LaserEffect` y el del arma sónica.
+Implementaciones: `RubberGrenadeEffect` (con `RubberGrenade`), `MeleeEffect` (espada de fuego y cuchillo, con distintos valores y VFX), `FlamethrowerEffect`, `DrillEffect`, `LaserEffect` y `BlastEffect` (arma sónica y ráfaga de burbujas).
 
 ### 8.5 Estado `UsingAbility`
 
@@ -886,7 +1002,9 @@ Las habilidades se construyen con piezas que también usan los enemigos y el dis
 | `Projectile` | Movimiento por código, colisión con raycast, pool. Opciones: `pierceCount` y golpear una sola vez a cada objetivo | Buster, taladro, enemigos |
 | `DamageHitbox` | Zona rectangular que daña en dos modos: **una vez por objetivo** por activación, o **por tick** cada X segundos por objetivo. No es un collider: consulta con `Physics2D.OverlapBox` usando su tamaño y su transform, así que se puede girar, voltear y activar en el mismo frame. También puede destruir proyectiles (`projectileMask`) | Espada, cuchillo, lanzallamas |
 | `BeamCaster` | Raycast con longitud variable y daño por tick a todo lo que toca | Láser |
-| `Explosion` | `OverlapCircleAll` de un solo golpe + VFX | Granada, enemigos |
+| `Explosion` | `OverlapCircleAll` de un solo golpe + VFX | Granadas, munición eléctrica, enemigos (Mr. Bombastic) |
+| `DamageZone` | Área que **se queda** en el suelo un tiempo y daña por tick a una capa (enemigos o jugador). Con su sprite animado y su tiempo de vida | Granada incendiaria; charcos de ácido (Alterado, Mr. Bombastic) y gotas de veneno (Gosarou) |
+| `CompanionDrone` | Entidad que sigue al jugador, busca un objetivo cercano y le dispara con `Projectile` | Dron de Agente X |
 
 Otras piezas: `ComponentPool<T>` (pool genérico con `IPoolable`), `DirectionalFrames` (frames horizontal, diagonal y vertical con el volteo de cada dirección) y `IAbilityObstacle` (15.2).
 
@@ -913,8 +1031,8 @@ Las horizontales se dibujan mirando a la derecha, las diagonales hacia arriba-de
 
 | Elemento | Sprites | Direcciones |
 |---|---|---|
-| Iconos del HUD | 7 iconos de 16×16 (3 de Rosslyn, 4 de Veyron) | — |
-| Coleccionable de habilidad | Sprite animado + versión holograma (8.9) | — |
+| Iconos del HUD | 15 iconos de 16×16 (3 por personaje) | — |
+| Coleccionable de habilidad | Sprite animado (8.9) | — |
 | Clips del torso | `Torso_Melee`, `Torso_Melee_DiagUp`, `Torso_Melee_Up`, `Torso_Melee_Down`, `Torso_Melee_Crouch` en cada hoja | Las 4 + agachado |
 | Granada | Giro (4 frames) + explosión | — |
 | Espada | Tajo de llamas (VFX) | Horizontal, diagonal, vertical (abajo = vertical volteado) |
@@ -922,7 +1040,16 @@ Las horizontales se dibujan mirando a la derecha, las diagonales hacia arriba-de
 | Taladro | Proyectil girando | Horizontal, diagonal, vertical |
 | Láser | Origen y impacto (animados) + textura del rayo que se repite | Una sola textura para todas las direcciones |
 | Cuchillo | Tajo (VFX corto) | Horizontal, diagonal, vertical (abajo = vertical volteado) |
-| Arma sónica | **[DECIDIR]** | **[DECIDIR]** |
+| Arma sónica | Boom sónico: onda que se abre en abanico (3–4 frames) | Horizontal, diagonal, vertical |
+| Ráfaga de burbujas | Abanico de burbujas que revientan (3–4 frames) | Horizontal, diagonal, vertical |
+| Chorro de agua | Gota en vuelo + salpicadura + vapor al apagar fuego | — |
+| Rayo congelante | Como el láser: origen, impacto y textura del rayo | Una sola textura |
+| Dron | Dron flotando (2–4 frames), su bala y su destrucción | — |
+| Granada incendiaria | Granada + explosión + fuego en el suelo (loop) | — |
+| Disco de energía | Disco girando | Horizontal, diagonal, vertical |
+| Espada de luz | Tajo (VFX) | Horizontal, diagonal, vertical |
+| Munición eléctrica | Bola de energía + explosión eléctrica | — |
+| Enemigo congelado | Bloque de hielo encima del sprite (genérico, escalable por tamaño) | — |
 
 **Construcción del láser con `LineRenderer`:**
 
@@ -941,28 +1068,30 @@ Funciona en pixel art porque la Pixel Perfect Camera usa *Upscale Render Texture
 
 ### 8.9 Obtención: coleccionables en el escenario
 
-Las habilidades **no las entregan los jefes**. Cada habilidad es un **coleccionable único** (`AbilityPickup`) escondido en alguna misión: 7 en total, 3 de Rosslyn y 4 de Veyron. Dónde va cada uno está por definir **[DECIDIR]** (17.2).
+Las habilidades **no las entregan los jefes**. Cada habilidad es un **coleccionable único** (`AbilityPickup`) escondido en algún nivel: **15 en total**, 3 por personaje, repartidos entre los niveles 2 a 10. Dónde va cada uno está por definir **[DECIDIR]** (17.2).
+
+**Cualquier personaje recoge cualquier coleccionable.** La habilidad se desbloquea **para su dueño**: si Rosslyn toma el taladro, el taladro queda desbloqueado para Veyron. Así se pueden poner coleccionables detrás de obstáculos de otros personajes (por ejemplo, el taladro detrás de un muro de fuego que solo apaga Aquamarine). Los coleccionables de personajes que aún no se unen también se pueden recoger: quedan guardados para cuando lleguen.
 
 **El ciclo entre personajes:**
-- El **taladro (Veyron)** rompe bloques destructibles y el **lanzallamas (Rosslyn)** funde muros de acero (15.2). Cada uno abre caminos opcionales que el otro personaje no puede abrir.
-- Detrás de esos caminos hay coleccionables, sobre todo **del otro personaje**: al abrir un muro con Rosslyn se descubre algo para Veyron, y al revés. Para ver todo un nivel hay que **rejugarlo con los dos**.
+- El **taladro (Veyron)** rompe bloques destructibles, el **lanzallamas (Rosslyn)** funde muros de acero y el **chorro de agua (Aquamarine)** apaga el fuego (15.2). Cada uno abre caminos opcionales que los demás personajes no pueden abrir.
+- Detrás de esos caminos hay coleccionables y prisioneros de cualquier personaje. Para ver todo un nivel hay que **rejugarlo con varios personajes**.
+- Aquamarine se une después del Bosque en llamas, así que los muros de fuego de los niveles 2 a 5 solo se abren al repetirlos con ella.
 
 **Reglas de diseño:**
-- **El taladro y el lanzallamas deben estar en lugares accesibles sin ninguna habilidad.** Si quedan detrás de un obstáculo, el ciclo no puede empezar.
-- Ningún coleccionable puede quedar detrás de un obstáculo que solo abre una habilidad que a su vez está detrás de él (dependencia circular). Conviene llevar, por misión, una tabla con cada coleccionable y lo que hace falta para llegar a él.
+- **Las habilidades que abren caminos** (taladro, lanzallamas y chorro de agua) pueden estar detrás de obstáculos de otros personajes, pero **al menos una debe poder alcanzarse sin ninguna habilidad**; si no, la cadena no puede empezar.
+- **Sin dependencias circulares:** ninguna habilidad puede quedar detrás de un obstáculo que solo se abre con ella misma, directa o indirectamente (por ejemplo, el taladro tras un fuego y el chorro tras un bloque).
+- Cada `AbilityPickup` y cada `Prisoner` declara qué interacciones hacen falta para llegar a él (`requires`: `Break`, `Melt`, `Extinguish`). `Game/Validate` simula el orden de los niveles y avisa si algo no se puede alcanzar.
 - Como todos los coleccionables son opcionales, ninguna misión ni jefe puede depender de tener alguno (14.2).
 
-**Quién lo puede recoger [DECIDIR]** (17.2). Recomendación: **solo su dueño**. Si se juega con el otro personaje, el coleccionable aparece como un **holograma** con el icono de su dueño y no se puede tomar. Así el jugador sabe que hay algo que volver a buscar con el otro personaje.
-
 **Al recogerlo:**
-1. El jugador pasa a `Disabled` un momento (1–1.5 s **[AJUSTAR]**): suena un jingle, aparecen el icono y el nombre de la habilidad.
-2. Se desbloquea en `PlayerAbilities`, queda seleccionada y la energía se llena.
+1. El jugador pasa a `Disabled` un momento (1–1.5 s **[AJUSTAR]**): suena un jingle, aparecen el icono, el nombre de la habilidad y su dueño ("Taladro — Veyron").
+2. Se desbloquea para su dueño. Si el dueño es el personaje que se está jugando, queda seleccionada y la energía se llena.
 3. **Se guarda en ese momento** (15.4). Solo se guarda el progreso, no el estado del nivel. Así no se pierde aunque el jugador abandone la misión o cierre el juego.
 
-**Ya recogido:** el coleccionable no vuelve a aparecer para su dueño. Para el otro personaje sigue viéndose como holograma (o se oculta) **[AJUSTAR]**.
+**Ya recogido:** el coleccionable no vuelve a aparecer, se juegue con quien se juegue.
 
 **Componentes y datos:**
-- `AbilityPickup` (en la escena): referencia a un `AbilityData`. Al cargar la escena revisa en `GameManager` si el dueño ya lo tiene y con qué personaje se está jugando, y se muestra normal, como holograma u oculto.
+- `AbilityPickup` (en la escena): referencia a un `AbilityData`. Al cargar la escena revisa en `GameManager` si el dueño ya lo tiene; si es así, no aparece.
 - El dueño de una habilidad es el `CharacterData` que la tiene en `abilities`. Cada `AbilityData` pertenece a un solo personaje.
 - `MissionData.abilityPickups` lista los coleccionables de esa misión, para que la pantalla de selección muestre cuáles faltan sin cargar la escena (15.1).
 - **Validación en el editor** (menú `Game/Validate`): cada `AbilityData` está en exactamente un `MissionData.abilityPickups`, y cada escena tiene un `AbilityPickup` por cada habilidad de su lista.
@@ -1080,12 +1209,14 @@ public struct DamageInfo
     public bool instantKill;     // fosos, pinchos
     public float knockback;      // fuerza de empuje (u/s); 0 = ninguno
     public float stunDuration;   // segundos de aturdimiento; 0 = ninguno
+    public float freezeBuildup;  // congelamiento que suma este golpe; 0 = ninguno
 }
 ```
 
 - `knockback` y `stunDuration` son **opcionales**: casi todo el daño los deja en 0. Los valores salen de quien hace el daño (el campo del efecto o del proyectil).
 - **Cada receptor decide cómo reacciona.** `EnemyData` tiene `knockbackResistance` (0–1) y `canBeStunned` (14.1). Los jefes, por defecto, ignoran el empuje y el aturdimiento **[AJUSTAR]**. El jugador ya tiene su knockback fijo en `Hurt` (6.2) y lo usa en lugar de estos campos.
-- Si en la V2 hace falta otro efecto (congelar, quemar en el tiempo…), se agrega aquí un campo opcional igual. Si llegan a ser muchos, se migra a una lista de efectos de estado.
+- **Congelamiento** (rayo congelante, 8.2): cada golpe con `freezeBuildup` suma a un medidor del enemigo, que baja solo con el tiempo. Al llegar a su umbral (`EnemyData.freezeThreshold`), el enemigo pasa a `Frozen` (14.1) durante unos segundos **[AJUSTAR]**. Los jefes no se congelan.
+- Si hace falta otro efecto (quemar en el tiempo, envenenar…), se agrega aquí un campo opcional igual. Si llegan a ser muchos, se migra a una lista de efectos de estado.
 
 ### 10.2 Pickups
 
@@ -1162,7 +1293,7 @@ Action Map `Dialogue`: `Advance` (Espacio, J, Enter / A, X) y `Skip` (Esc / Star
 ## 13. Cámara
 
 - Cinemachine Camera con *Position Composer* y *dead zone* horizontal.
-- El objetivo de la cámara se asigna por código (`SetTarget`), no se deja fijo al jugador en el editor. Así se puede cambiar a un vehículo en la versión 2 (18.3).
+- El objetivo de la cámara se asigna por código (`SetTarget`), no se deja fijo al jugador en el editor. Así se puede cambiar a un vehículo (18.4).
 - *Look ahead* ligero en la dirección en la que mira el jugador, más notorio durante el dash **[AJUSTAR]**.
 - `CinemachineConfiner2D` por sección del nivel.
 - **Puertas de jefe:** al entrar a la sala del jefe, la cámara se fija a la sala (20 tiles de ancho = una pantalla).
@@ -1174,89 +1305,162 @@ Action Map `Dialogue`: `Advance` (Espacio, J, Enter / A, X) y `Skip` (Esc / Star
 
 ### 14.1 Enemigos
 
-Usan el mismo núcleo de `StateMachine` con una sola FSM: `Idle/Patrol` → `Alert` → `Attack` → `Dead` (con un flash de daño al recibir golpes, sin estado propio). El estado `Stunned` se activa desde cualquiera de los anteriores cuando el daño trae `stunDuration` y el enemigo puede aturdirse (10.1); al terminar vuelve a `Alert`.
+El arte de los enemigos básicos y de los vehículos está en `Enemies.png` (raíz del proyecto). Un sprite completo por enemigo, sin dividir, con pivote en los pies y PPU 16. Los más grandes (escarabajo, tank, araña) siguen la misma regla.
 
-`EnemyData`: vida, daño por contacto, velocidad, rango de detección, tabla de pickups, `knockbackResistance` y `canBeStunned`. Un sprite completo por enemigo, sin dividir, con pivote en los pies y el mismo PPU de 16.
+#### Lista
 
-**Primeros enemigos:**
-1. Torreta fija que dispara en línea recta.
-2. Caminante que patrulla entre dos puntos.
-3. Volador que persigue al jugador.
+| Enemigo | Comportamiento | Lo que necesita |
+|---|---|---|
+| **Soldados** | Varias variantes; cada una con un disparo distinto | `EnemyWeaponData` por variante |
+| **Soldado carreta** | Uno empuja la carreta de un lado a otro mientras el otro dispara desde ella. Si uno muere, el otro sigue disparando | Enemigo compuesto (dos partes independientes) |
+| **Abuelita** | Camina despacio hacia el jugador; al tenerlo de frente le dispara con su andadera y el retroceso la lanza y la mata | Muerte por su propio ataque |
+| **Soldado carreola** | Avanza despacio; al acercarse al jugador, el soldado sale de la carreola y dispara | Enemigo compuesto (la carreola suelta al soldado) |
+| **Furro** | Dispara de lejos; si el jugador se acerca, ataca cuerpo a cuerpo con la navaja del rifle | Cambio de ataque por distancia |
+| **Escarabajo** | Lanza cañonazos en parábola; si el jugador se acerca, ataca con las patas delanteras | Proyectil en parábola + cuerpo a cuerpo |
+| **Robo-dron** | Lanza misiles al abrir el pecho. Al morir, la cabeza se separa y sigue disparando balas láser | Al morir, crea otro enemigo (la cabeza) |
+| **El de las recargas** | Intenta arrollar al jugador, se detiene y dispara | Embestida + disparo |
+| **Mantis atea** | Lanza balas de la boca y salta hacia el jugador. Si lo atrapa, lo estrangula; el jugador se suelta presionando disparo repetidamente | Estado `Grabbed` del jugador (6.2) |
+| **Araña cañón** | Dispara cañonazos y se mueve muy rápido hacia adelante y atrás | Movimiento de vaivén rápido |
+| **Araña spawner** | Genera cabezas de robo-dron | Generador de enemigos con límite |
+| **Tank** | Dispara en línea recta en horizontal, diagonal y hacia arriba | Arma con 3 direcciones |
+| **Robot con escudo** | El escudo es una entidad aparte. El robot ataca cada cierto tiempo y expone su cuerpo; el escudo también se puede destruir para dejarlo expuesto | Enemigo compuesto (escudo con vida propia que bloquea balas) |
+| **Robot volador** | Se mueve entre varios puntos de vuelo y dispara desde sus manos | Vuelo por puntos |
+| **Alterado** | Camina despacio hacia el jugador y escupe ácido que deja un charco que daña | `DamageZone` (8.7) |
+| **Mr. Bombastic** | Al acercarse mucho al jugador se infla y explota; la explosión daña y deja un charco de ácido | Autodestrucción + `Explosion` + `DamageZone` |
+| **Fire bat** | Volador que lanza bolas de fuego | Vuelo + disparo |
+| **Mole** | Persigue al jugador y, al tenerlo cerca, intenta aplastarlo con los brazos | Persecución + cuerpo a cuerpo |
+| **Medusa** | Vuela hacia el jugador; daña al contacto con los tentáculos, pero se puede **rebotar en su cabeza** | Superficie de rebote (`BounceTop`) |
+| **Oruga** | Se arrastra por el suelo o por el techo; las del techo se dejan caer cuando el jugador pasa debajo. Dañan al contacto | Movimiento por el techo + caída |
+| **Moto** | Como el de las recargas, con disparo más rápido | Variante de datos del de las recargas |
+| **Torreta** | Apunta en 8 direcciones y dispara hacia el jugador | Arma que apunta en 8 direcciones |
+
+Qué enemigos van en cada nivel está por definir **[DECIDIR]** (17.2).
+
+#### Arquitectura: enemigos por piezas
+
+Con 22 enemigos, cada uno no puede ser una clase hecha a mano. Se arman con **piezas reutilizables**, igual que las habilidades:
+
+- **`EnemyData`** (ScriptableObject): vida, daño por contacto, velocidad, rango de detección, tabla de pickups, `knockbackResistance`, `canBeStunned`, `canBeFrozen` y `freezeThreshold`.
+- **`EnemyWeaponData`** (ScriptableObject): proyectil, daño, cadencia, ráfaga y **modo de apuntado**: fijo hacia adelante, 3 direcciones (tank), 8 direcciones hacia el jugador (torreta), directo al jugador o en parábola (escarabajo). Los soldados son el mismo enemigo con distinto `EnemyWeaponData`.
+- **Biblioteca de estados** para la FSM de cada enemigo: `Patrol`, `Chase`, `Charge` (embestida), `FlyToPoints`, `Shoot`, `Melee`, `Jump`, `CeilingCrawl` / `Drop`, `SelfDestruct`, `Stunned`, `Frozen` y `Dead`. Cada prefab elige sus estados y transiciones; un enemigo nuevo es casi siempre una combinación de estados existentes.
+- **Al morir** (`OnDeath`, configurable): soltar pickups, `Explosion`, dejar una `DamageZone` (Mr. Bombastic) o **crear otro enemigo** (la cabeza del robo-dron).
+- **Enemigos compuestos** (`EnemyGroup`): varias partes, cada una con su propia vida (`IDamageable`). El grupo coordina el comportamiento y decide qué pasa cuando muere una parte. Lo usan el soldado carreta, el soldado carreola y el robot con escudo (el escudo bloquea proyectiles y se puede destruir).
+- **Generadores** (`EnemySpawner`): crean enemigos del pool con un máximo vivo al mismo tiempo (araña spawner).
+- **`BounceTop`**: si el jugador cae sobre la parte de arriba, rebota con `LocomotionFSM.Bounce` (el mismo del tajo hacia abajo) y no recibe daño (medusa).
+- **`Grab`**: atrapa al jugador y lo pasa al estado `Grabbed` (6.2) (mantis atea).
+
+**Estados especiales:**
+- `Stunned`: se activa cuando el daño trae `stunDuration` y el enemigo puede aturdirse (10.1); al terminar vuelve a `Alert`.
+- `Frozen`: se activa al llenar el medidor de congelamiento (10.1). El enemigo no se mueve ni ataca, y se ve un bloque de hielo encima. Al descongelarse vuelve a `Alert`. Un enemigo congelado **sirve de plataforma**, como en Mega Man: su collider se vuelve sólido para el jugador mientras dura el congelamiento.
 
 ### 14.2 Jefes
 
+| Nivel | Jefe | Patrones |
+|---|---|---|
+| 2. Bosque | **Excavadora de combate** | Un cañón dispara granadas en parábola cada cierto tiempo. La garra cae sobre el jugador; al levantarla saca una roca que deja caer sobre él, y el ciclo vuelve a empezar |
+| 3. Minas | **Ayahuastli** | Criatura con poderes eléctricos que alterna entre: cubrirse de energía y correr hacia el jugador; lanzar bolas de energía que al tocar el suelo explotan en un rayo vertical; lanzar una onda de energía que avanza por el suelo |
+| 4. Montaña | **Robot de batalla** | **[DECIDIR]** (en diseño) |
+| 5. Bosque en llamas | **Wolfang** | Hombre lobo del espacio: saca un tentáculo de la boca y ataca en horizontal; gira como el demonio de Tasmania cargando contra el jugador; arranca pedazos del suelo y los lanza; se hace bola y va por el suelo o rebota |
+| 6. Laboratorio | **Gosarou** | Insecto alienígena: suelta insectos pequeños que disparan; si el jugador se acerca, ataca con las patas traseras; lanza gotas de veneno que quedan en el suelo y dañan; lanza sus navajas |
+| 7. Tren militar | **Zaipoc** | Ser de energía pura: se convierte en láser y rebota contra las paredes (inmune en ese estado); se vuelve bola de energía y lanza ráfagas; lanza cristales que se clavan en el suelo como picos que el jugador debe romper para despejar la zona |
+| 8. Castillo | **Grallet** | **[DECIDIR]** (en diseño) |
+| 9. Ciudad alienígena | **Narabee** | **[DECIDIR]** (en diseño) |
+| 10. Torre alienígena | **Coliel** (jefe final) | **[DECIDIR]** (en diseño) |
+
+El Simulador (nivel 1) no tiene jefe: termina en una línea de meta (15.1).
+
+**Piezas que piden los jefes** (se suman a las de los enemigos):
+- **Estado inmune** (`invulnerable` en la fase o estado): Zaipoc en forma de láser.
+- **Objetos que el jugador debe destruir** durante la pelea: los cristales de Zaipoc son pequeños enemigos (`IDamageable`) que bloquean zonas del suelo.
+- **Invocaciones:** los insectos de Gosarou usan `EnemySpawner`.
+- **Áreas en el suelo:** veneno de Gosarou y onda de Ayahuastli (`DamageZone` y `Projectile` por el suelo).
+- **Objetos que caen:** roca de la Excavadora, pedazos de suelo de Wolfang (proyectiles con gravedad).
+- **Rebote contra paredes:** Zaipoc y Wolfang en bola.
+
+**Reglas comunes:**
 - FSM con **fases** según su vida (por ejemplo, cambia de patrón por debajo del 50%).
-- **5 jefes**, uno por misión. **Ya no entregan habilidades**: se encuentran en el escenario (8.9).
+- **Ya no entregan habilidades**: se encuentran en el escenario (8.9).
 - **Sin debilidades:** todos los jefes reciben el mismo daño de cada fuente. El reto está en sus patrones, no en elegir la habilidad correcta.
-- **Las misiones se eligen en cualquier orden** y las habilidades son opcionales, así que no se sabe cuáles tiene el jugador al llegar a un jefe. Todos los jefes deben poder vencerse **solo con el disparo básico de cualquier personaje**; las habilidades ayudan, pero nunca son obligatorias. Por el alcance corto de Veyron (sección 7), cada jefe debe tener momentos en los que se pueda llegar cerca de él sin recibir daño inevitable.
+- Las habilidades son opcionales y por personaje, así que no se sabe cuáles tiene el jugador al llegar a un jefe. Todos los jefes deben poder vencerse **solo con el disparo básico de cualquier personaje**; las habilidades ayudan, pero nunca son obligatorias. Por el alcance corto de Veyron (sección 7), cada jefe debe tener momentos en los que se pueda llegar cerca de él sin recibir daño inevitable.
+- Los jefes **no se congelan ni se aturden**.
 - **Escena del jefe** (`MissionData.bossCutscene`): al cruzar la puerta de la sala, la cámara se fija y empieza una escena con el mismo sistema de 15.7:
-  1. El jefe aparece y hay un **diálogo corto** entre él y **los dos soldados**, que están en la sala (y, si hace falta, el comandante por radio). Como en el resto de las escenas, el que no se juega aparece como no jugable (15.7).
-  2. **Fundido a negro:** mientras la pantalla está en negro, desaparece el soldado que no se juega y el jugador queda en su posición de pelea. La pantalla vuelve.
-  3. El jefe hace su pose de presentación (`Boss_Intro`) mientras se llena su barra de vida, como en Mega Man. Empieza la pelea.
-- **Al reintentar:** si el jugador muere en la pelea y vuelve desde el checkpoint, la escena se repite **sin el diálogo y sin el otro soldado**: solo aparición, pose y barra. El diálogo completo se ve una vez por intento de misión. Los pasos de diálogo se marcan como `firstTimeOnly` (15.7).
+  1. La cámara muestra al jefe en la sala (`CameraStep`).
+  2. Se abre la novela visual con un **diálogo corto** entre el jefe y el escuadrón (y, si hace falta, el General por radio).
+  3. Se cierra la novela visual y, ya en el nivel, el jefe hace su pose de presentación (`Boss_Intro`) mientras se llena su barra de vida, como en Mega Man. Empieza la pelea.
+- **Al reintentar:** si el jugador muere en la pelea y vuelve desde el checkpoint, la escena se repite **sin el diálogo**: solo cámara, pose y barra. El diálogo completo se ve una vez por intento de nivel. Los pasos de diálogo se marcan como `firstTimeOnly` (15.7).
 - Toda la escena se puede saltar. Al saltarla se llega directo al inicio de la pelea, con la barra llena.
-- Cada jefe tiene su `SpeakerData` (nombre y retrato de 48×48) y un clip `Boss_Intro`.
+- Cada jefe tiene su `SpeakerData` (nombre y retratos por emoción, 15.7), una ilustración para su escena y un clip `Boss_Intro`.
 - **Música:** durante el diálogo suena una pista de tensión o silencio **[AJUSTAR]**; el tema del jefe (`bossMusic`) empieza cuando se llena la barra.
-- Al vencerlo: el jugador pasa a `Disabled`, se marca la misión como completada, sigue la escena de cierre y se guarda la partida.
+- Al vencerlo: el jugador pasa a `Disabled`, se marca el nivel como completado, sigue la escena de cierre y se guarda la partida.
 
 ---
 
 ## 15. Juego, misiones y guardado
 
-### 15.1 Progresión: misiones de selección libre
+### 15.1 Progresión: 10 niveles en orden
 
-En la historia, los protagonistas son **dos soldados espaciales**, Rosslyn y Veyron, y cada nivel es una **misión** que les asigna su comandante: neutralizar a un objetivo (ver 1.4). Las 5 misiones se eligen **en cualquier orden** desde una pantalla de selección, como en Mega Man. Al completar las 5 se desbloquea la misión final.
+Los niveles se juegan **en orden**. Cada uno es una misión que asigna el General Neotisleo (1.4). Al completar un nivel se abre el siguiente, y los completados se pueden repetir.
+
+| # | Nivel | Jefe (14.2) | Vehículo (18) | Notas |
+|---|---|---|---|---|
+| 1 | Simulador de combate (Misión 0) | — (termina en una línea de meta) | — | — |
+| 2 | Bosque | Excavadora de combate | — | — |
+| 3 | Minas | Ayahuastli | Exoesqueleto | — |
+| 4 | Montaña | Robot de batalla | Robotanque | — |
+| 5 | Bosque en llamas | Wolfang | — | Después se une Aquamarine |
+| 6 | Laboratorio | Gosarou | Exoesqueleto | — |
+| 7 | Tren militar | Zaipoc | Exoesqueleto | Después se une Agente X |
+| 8 | Castillo | Grallet | — | — |
+| 9 | Ciudad alienígena (Coleópolis) | Narabee | — | Después, si están los 24 prisioneros, escena en la que se une Neotisleo |
+| 10 | Torre alienígena | Coliel (jefe final) | Robotanque | — |
 
 ```
-Boot → Menú principal → Partida nueva → Misión 0 (simulador, Rosslyn) → Selección de misiones
-                     └── Continuar / Cargar → Selección de misiones ⇄ Selección de personaje → Misión → Selección de misiones
-                                    └── (5 misiones completadas) → Misión final (el comandante) → Créditos
+Boot → Menú principal → Partida nueva → Simulador (Misión 0, Rosslyn) → Selección de nivel
+                     └── Continuar / Cargar → Selección de nivel ⇄ Selección de personaje → Nivel → Selección de nivel
+                                    └── (Torre alienígena completada) → Créditos
 
-Misión: Escena de inicio → Nivel (coleccionables opcionales) → Escena del jefe (diálogo + pose) → Jefe → Escena de cierre
+Nivel: Escena de inicio → Nivel (coleccionables opcionales, vehículos en algunos) → Escena del jefe (diálogo + pose) → Jefe → Escena de cierre
 ```
 
 #### Misión 0: el simulador
 
 Es lo **primero que ve el jugador** al empezar una partida nueva. En la historia, Rosslyn entrena en un **simulador** antes de recibir misiones reales. En el juego es una **misión de introducción al estilo de la primera de Mega Man X**: un nivel corto y real, **sin tutorial explícito**, que enseña con el diseño del nivel.
 
-- **Arranque:** al crear una partida nueva se carga directo la Misión 0, sin pasar por la selección de misiones ni la de personaje.
-- **Personaje fijo:** siempre se juega con **Rosslyn** (`MissionData.forcedCharacter`).
+- **Es un nivel más.** No se puede saltar: al crear una partida nueva se carga directo, sin pasar por la selección de nivel ni la de personaje.
+- **Personaje:** la primera vez se juega con **Rosslyn** (`MissionData.forcedCharacter`). Al repetirlo desde la selección de nivel, se elige personaje como en cualquier otro **[AJUSTAR]**.
 - **Sin carteles ni textos de controles.** Cada mecánica aparece primero en una situación segura y luego en una con riesgo. Por ejemplo, un escalón de 3 tiles antes del primer foso, un enemigo sobre el jugador para invitar a disparar hacia arriba, o un pasillo largo con un foso ancho al final que pide un dash jump. Orden sugerido: correr y disparar, saltar, disparar hacia arriba y en diagonal, agacharse, dash y dash jump **[AJUSTAR]**.
 - **Corta y con ritmo:** unos pocos minutos, para que el jugador llegue rápido a la acción.
 - Los controles se pueden consultar en el menú de pausa y en las opciones, nunca en pantalla durante el juego.
 - **Estilo visual:** escenario holográfico de simulador, con enemigos holográficos (los mismos enemigos con otra paleta o material). Puede reutilizar la estética de la cuadrícula de prueba del Hito 1 **[AJUSTAR]**.
-- **Habilidades [DECIDIR]:** como en Mega Man X, lo natural es jugarla solo con el disparo básico. La alternativa es prestar una habilidad temporal que no se guarda como desbloqueada.
+- Sin habilidades prestadas: se juega con el disparo básico.
 - **Sin coleccionables** (`abilityPickups` vacío).
-- **Final [DECIDIR]:** un jefe holográfico al final. Se puede imitar a Mega Man X, donde la pelea contra Vile no se puede ganar y sirve para presentar a la historia: por ejemplo, el simulador se descontrola o el comandante la detiene, y así se siembra la primera pista de su traición (1.4).
-- **Escenas:** el comandante guía el entrenamiento en la escena de inicio y en la de cierre. Es la única misión en la que solo participa Rosslyn. El diálogo de cierre puede presentar a Veyron y dar paso a las misiones reales.
-- **Al completarla:** se guarda como misión completada y se abre la selección de misiones. **No cuenta** entre las misiones necesarias para la misión final.
-- **Si se cierra el juego antes de completarla:** al continuar ese slot se vuelve a cargar la Misión 0, porque la selección de misiones aún no está disponible.
-- **Repetirla [DECIDIR]:** si aparece en la selección de misiones como "Simulador" para volver a practicar. Si se repite, sigue siendo con Rosslyn.
-- **Saltarla [DECIDIR]:** si se puede saltar al empezar una partida nueva (útil al jugar por segunda vez).
+- **Final:** no tiene jefe. Termina al llegar a una **línea de meta**.
+- **Escenas:** el General guía el entrenamiento en la escena de inicio y en la de cierre. Es el único nivel en el que solo participa Rosslyn. El diálogo de cierre puede presentar a Veyron y dar paso a las misiones reales.
+- **Al completarla:** se guarda como completada y se abre la selección de nivel con el Bosque disponible.
+- **Si se cierra el juego antes de completarla:** al continuar ese slot se vuelve a cargar la Misión 0, porque la selección de nivel aún no está disponible.
+- Se puede **repetir** desde la selección de nivel, como cualquier nivel.
 
 
-- **Pantalla de selección de misiones:** muestra las 5 misiones con su nombre, imagen y un **briefing** corto (el objetivo de la misión dentro de la historia). Las completadas se marcan como resueltas. Cada misión muestra los **iconos de sus coleccionables**: los encontrados a color y los que faltan como silueta, con el personaje dueño de cada uno (8.9).
-- **Dificultad:** como no hay un orden fijo, las 5 misiones deben tener una dificultad parecida. Opcionalmente, el briefing puede mostrar un nivel de amenaza para orientar al jugador **[DECIDIR]**.
-- **Misión final:** se desbloquea al completar las 5 misiones. Su jefe es **el comandante**, después de revelarse como traidor. **[DECIDIR]** si es un solo nivel o varios (como la fortaleza de Wily en Mega Man).
-  - Como las habilidades son coleccionables opcionales, **tampoco aquí se garantiza tener alguna**. Los obstáculos de 15.2 no cierran su camino principal y el comandante debe poder vencerse con el disparo básico de cualquier personaje.
-  - **[DECIDIR]** cuándo ocurre la revelación (ver 17.2).
-- **Repetir misiones:** las misiones completadas **se pueden volver a jugar** desde la pantalla de selección, con cualquier personaje, y siguen marcadas como completadas. Es la base del ciclo de 8.9: volver con el otro personaje, o con el taladro o el lanzallamas recién encontrados, para abrir los caminos de 15.2 y buscar los coleccionables que faltan.
-- Desde el menú principal se puede **continuar** (carga el último slot usado y va a la selección de misiones), **cargar** otro slot o empezar una **partida nueva** en un slot (ver 15.4).
+- **Pantalla de selección de nivel:** muestra los niveles en orden con su nombre, imagen y un **briefing** corto. Los completados se marcan como resueltos y se pueden repetir; el siguiente está disponible; los demás se ven bloqueados **[AJUSTAR]**. Cada nivel muestra los **iconos de sus coleccionables**: los encontrados a color y los que faltan como silueta, con el personaje dueño de cada uno (8.9), y los **prisioneros rescatados** (por ejemplo, 2/3).
+- **Dificultad:** sube de nivel en nivel, porque el orden es fijo.
+- **Nivel final:** la Torre alienígena (10), con Coliel. Como las habilidades son coleccionables opcionales, **tampoco aquí se garantiza tener alguna**: los obstáculos de 15.2 no cierran su camino principal y Coliel debe poder vencerse con el disparo básico de cualquier personaje. Al vencerlo siguen los créditos.
+- **Repetir niveles:** los niveles completados **se pueden volver a jugar** desde la pantalla de selección, con cualquier personaje disponible, y siguen marcados como completados. Es la base del ciclo de 8.9: volver con otro personaje para abrir los caminos de 15.2 y buscar los coleccionables que faltan.
+- Desde el menú principal se puede **continuar** (carga el último slot usado y va a la selección de nivel), **cargar** otro slot o empezar una **partida nueva** en un slot (ver 15.4).
 - `GameManager` persistente (escena `Boot` cargada una vez) con el estado de la partida.
 - Carga de escenas con `SceneManager.LoadSceneAsync` y una pantalla de transición.
-- Menú de pausa con la lista de habilidades desbloqueadas del personaje actual (se puede **seleccionar** una desde ahí, 8.1) y la opción de **abandonar la misión** (vuelve a la selección sin completarla).
+- Menú de pausa con la lista de habilidades desbloqueadas del personaje actual (se puede **seleccionar** una desde ahí, 8.1) los prisioneros rescatados en el nivel actual y la opción de **abandonar la misión** (vuelve a la selección de nivel sin completarlo).
 
 #### Pantalla de selección de personaje
 
-Aparece **cada vez** que se elige una misión, antes de cargarla. Incluye las misiones repetidas y la misión final. La única excepción es la Misión 0, que tiene personaje fijo (`forcedCharacter`).
+Aparece **cada vez** que se elige un nivel, antes de cargarlo, incluidos los repetidos. La única excepción es la primera vez del Simulador, que se juega con Rosslyn (`forcedCharacter`).
 
 - Muestra los personajes disponibles del `CharacterCatalog`: retrato, nombre, una descripción corta, sus estadísticas resumidas en barras (vida, velocidad, salto, energía) **[AJUSTAR]**, su disparo básico y los iconos de sus habilidades desbloqueadas.
 - El cursor empieza en el **último personaje usado** en ese slot (`lastCharacter`, 15.4).
-- *Cancelar* regresa a la selección de misiones.
+- *Cancelar* regresa a la selección de nivel.
 - Al confirmar, `GameManager.SelectedCharacter` guarda la elección y se carga la escena de la misión, donde `MissionController` instancia al personaje (5.4).
 - **No se cambia de personaje dentro de una misión**, ni al morir. Para cambiar hay que abandonar la misión desde la pausa.
-- Si solo hay un personaje disponible, la pantalla se salta. En la versión 1 no pasa (los 2 están disponibles desde el inicio), pero la lógica queda lista.
-- **Personajes bloqueados** (versión 2): **[DECIDIR]** si el comandante aparece como silueta con "???" o no aparece hasta desbloquearse.
+- Si solo hay un personaje disponible, la pantalla se salta. Después del Simulador no pasa (Rosslyn y Veyron están disponibles), pero la lógica queda lista.
+- **Personajes que aún no se unen:** aparecen como **silueta con "???"**.
 
 #### CharacterData y CharacterCatalog
 
@@ -1274,10 +1478,11 @@ public struct CharacterEntry
 {
     public CharacterData character;
     public MissionData[] requiredMissions;  // vacío = disponible desde el inicio
+    public bool requiresAllPrisoners;       // Neotisleo: todos los prisioneros rescatados (15.2)
 }
 ```
 
-Los dos personajes de la versión 1 tienen `requiredMissions` vacío. En la versión 2, el comandante lleva la misión final (18.4). Los personajes disponibles **no se guardan**: se calculan a partir del catálogo y de las misiones completadas del slot.
+Rosslyn y Veyron tienen `requiredMissions` vacío. Aquamarine lleva el Bosque en llamas y Agente X el Tren militar en `requiredMissions`. Neotisleo lleva la Ciudad alienígena en `requiredMissions` y `requiresAllPrisoners`: se une cuando se cumplen las dos. Los personajes disponibles **no se guardan**: se calculan a partir del catálogo, de las misiones completadas y de los prisioneros rescatados del slot.
 
 #### MissionData (ScriptableObject)
 
@@ -1297,11 +1502,11 @@ public class MissionData : ScriptableObject
     public MusicTrack bossMusic;        // tema de la sala del jefe
     public CutsceneData bossCutscene;   // al entrar a la sala del jefe: diálogo y pose (14.2)
     public bool isFinal;
-    public CharacterData forcedCharacter; // si no es null, se salta la selección de personaje (Misión 0)
+    public CharacterData forcedCharacter; // la primera vez se juega con este personaje (Simulador)
 }
 ```
 
-Una lista de `MissionData` en un asset `MissionCatalog` define qué misiones aparecen en la pantalla de selección, cuál es la final, qué misiones se requieren para desbloquearla y cuál es la **misión inicial** (`firstMission`, la Misión 0) que se carga al crear una partida nueva. La Misión 0 no está en la lista de misiones requeridas para la final. La pantalla de selección se arma a partir de ese catálogo, y `abilityPickups` puede estar vacío. Esto deja listo el sistema para agregar misiones en la versión 2 (ver 18.2).
+Una lista de `MissionData` en un asset `MissionCatalog` define **el orden de los niveles** (cada uno se abre al completar el anterior), cuál es el final y cuál es el **nivel inicial** (`firstMission`, el Simulador) que se carga al crear una partida nueva. La pantalla de selección se arma a partir de ese catálogo, y `abilityPickups` puede estar vacío. Esto deja listo el sistema para agregar niveles en la versión 2 (ver 19.1).
 
 ### 15.2 Niveles
 
@@ -1312,24 +1517,33 @@ Una lista de `MissionData` en un asset `MissionCatalog` define qué misiones apa
 
 #### Obstáculos que se destruyen con habilidades
 
-Hay dos tipos de obstáculo. Cada uno pide una **interacción**, y cada habilidad declara qué interacciones tiene:
+Hay tres tipos de obstáculo. Cada uno pide una **interacción**, y cada habilidad declara qué interacciones tiene:
 
 | Obstáculo | Interacción que pide | Habilidad que la tiene | Cómo se destruye |
 |---|---|---|---|
 | Bloque destructible | `Break` | Taladro (Veyron) | Al instante: un taladro rompe un bloque y se detiene |
 | Muro de acero | `Melt` | Lanzallamas (Rosslyn) | Con calor acumulado: hay que mantener la llama sobre el bloque hasta que se funde |
+| Fuego | `Extinguish` | Chorro de agua (Aquamarine) | Al instante: un chorro apaga un tile de fuego y se deshace |
+
+**Fuego:**
+- Funciona como los muros: es **sólido** y cierra el paso. Además **daña al tocarlo** (`ContactDamage` en su Tilemap), así que no se puede atravesar recibiendo daño.
+- Un chorro apaga un tile. Una pared de fuego de varios tiles cuesta varios chorros, como los bloques con el taladro.
+- Al apagarse se borra el tile y sale un VFX de vapor.
+- Encaja de forma natural en el Bosque en llamas, pero puede aparecer en cualquier nivel.
+- El lanzallamas, la espada de fuego y la granada incendiaria **no** crean ni avivan fuego de obstáculo: las interacciones van por habilidad, no por elemento.
 
 **Interacciones como datos:**
-- Cada interacción es un asset `ObstacleInteraction` (ScriptableObject vacío que solo sirve de etiqueta): `Break`, `Melt`, etc.
+- Cada interacción es un asset `ObstacleInteraction` (ScriptableObject vacío que solo sirve de etiqueta): `Break`, `Melt`, `Extinguish`, etc.
 - `AbilityData.obstacleInteractions` lista las que tiene cada habilidad (8.3). `AbilityObstacleTilemap` dice cuál pide y en qué modo se destruye (instantáneo o por calor).
 - Cuando un efecto toca un obstáculo, llama a `TryInteract(punto, dirección, habilidad, dt)` de la interfaz `IAbilityObstacle`, que implementa `AbilityObstacleTilemap` (la celda sale del punto de impacto y la dirección). El obstáculo revisa si la habilidad tiene la interacción que pide y reacciona; si no la tiene, solo detiene el efecto. Las habilidades ya hacen esta llamada desde el Hito 4 (taladro al chocar, lanzallamas y láser al tocar la pared), así que el Hito 5 solo implementa el obstáculo.
 - **Todos los obstáculos van en una sola capa física, `AbilityObstacle`.** Agregar un tipo nuevo (hielo, escudo de energía…) o hacer que otra habilidad rompa bloques es crear o asignar un asset, sin capas nuevas ni código en las habilidades. Solo un **modo** de destrucción nuevo (además de instantáneo y por calor) necesita código en `AbilityObstacleTilemap`.
 
 **Reglas comunes:**
 - Cada tipo va en su **propio Tilemap** (todos en la capa `AbilityObstacle`), con su propio collider. Para todo lo demás son paredes sólidas.
-- **Cada personaje abre un tipo:** Veyron rompe bloques con el taladro y Rosslyn funde acero con el lanzallamas. Lo que hay detrás suelen ser coleccionables del otro personaje (8.9).
+- **Tres personajes abren obstáculos:** Veyron rompe bloques con el taladro, Rosslyn funde metal con el lanzallamas y Aquamarine apaga el fuego con el chorro de agua. Lo que hay detrás suelen ser coleccionables y prisioneros (8.9, abajo). Como Aquamarine se une más tarde, los caminos de fuego de los primeros niveles se abren al repetirlos con ella. El disco de energía, la munición eléctrica y la granada incendiaria **no** rompen ni funden nada.
+- Los vehículos **no** rompen obstáculos (18.1).
 - Las interacciones van **por habilidad, no por elemento**: la espada de fuego **no** funde el acero aunque sea de fuego, y el láser no rompe ni funde nada.
-- Como el jugador puede llegar a cualquier misión sin la habilidad necesaria, estos obstáculos **nunca** deben cerrar el camino principal, tampoco en la misión final. Solo sirven para caminos secretos, atajos, pickups y coleccionables de habilidad. Al repetir misiones con el otro personaje o con nuevas habilidades, el jugador puede volver por ellos.
+- Como el jugador puede llegar a cualquier misión sin la habilidad necesaria, estos obstáculos **nunca** deben cerrar el camino principal, tampoco en el nivel final. Solo sirven para caminos secretos, atajos, pickups y coleccionables de habilidad. Al repetir misiones con el otro personaje o con nuevas habilidades, el jugador puede volver por ellos.
 - Los obstáculos destruidos **no** se guardan: reaparecen al reiniciar la misión. Al morir y volver al checkpoint, siguen destruidos.
 - Un componente `AbilityObstacleTilemap` en cada Tilemap guarda la configuración (interacción que pide, modo instantáneo o por calor, sprites por etapa y VFX) y el estado de cada celda.
 
@@ -1345,6 +1559,25 @@ Hay dos tipos de obstáculo. Cada uno pide una **interacción**, y cada habilida
 - Un muro de varios bloques se funde **de uno en uno**, desde el lado donde está el jugador.
 - El estado de calor se guarda en un `Dictionary<Vector3Int, float>` por celda dentro de `AbilityObstacleTilemap`. Solo se actualizan las celdas con calor mayor a 0.
 
+#### Prisioneros (desbloqueo de Neotisleo)
+
+Como en *Gravity Circuit*, cada nivel esconde **3 prisioneros**. Al rescatarlos a todos se desbloquea **Neotisleo** como personaje jugable.
+
+- **Cuántos:** 3 por nivel en los niveles 2 a 9, **24 en total**. El Simulador no tiene (es una simulación) y la Torre alienígena tampoco, para que quien los busque pueda usar a Neotisleo contra Coliel.
+- **Dónde:** escondidos en caminos secundarios, atajos y zonas difíciles. Algunos detrás de obstáculos del taladro o del lanzallamas (15.2), así que completar la lista pide repetir niveles con distintos personajes, igual que los coleccionables de habilidad (8.9). Al menos uno por nivel debe poder rescatarse sin habilidades **[AJUSTAR]**.
+- **Quién los rescata:** **cualquier personaje** (a diferencia de los coleccionables de habilidad, que son de su dueño).
+- **Cómo se rescata:** el prisionero está en una celda o atado. Basta con **tocarlo** (la celda se abre sola); agradece con un gesto y desaparece con un teletransporte. Aparece un contador en pantalla (por ejemplo, "Prisioneros 2/3"). **No detiene el juego**: el jugador no pasa a `Disabled`.
+- **Se guarda en el momento** (15.4), como los coleccionables de habilidad: no se pierde si el jugador muere, abandona el nivel o cierra el juego. Un prisionero rescatado ya no aparece al repetir el nivel.
+- **Desbloqueo:** antes de la misión final, el comando quiere bombardear Coleópolis. Si están los 24 prisioneros, estos **convencen a Neotisleo de pelear junto a Rosslyn** para detener a Coliel sin destruir la ciudad (1.4). Se reproduce esa escena y Neotisleo aparece en la selección de personaje, ya disponible para la Torre alienígena.
+- **Cuándo se ve la escena:** la primera vez que se cumplen las dos condiciones (Ciudad alienígena completada y los 24 prisioneros rescatados), al terminar el nivel en el que ocurre. Normalmente es al terminar la Ciudad alienígena; si el último prisionero se rescata después, al repetir un nivel, la escena sale al terminar ese nivel.
+- Hay un solo final: sin todos los prisioneros, la misión final se juega igual, solo sin Neotisleo.
+- **Dónde se ve el progreso:** en la selección de nivel (rescatados de cada nivel), en el menú de pausa (los del nivel actual) y un total en la pantalla de slots **[AJUSTAR]**.
+
+**Componentes y datos:**
+- `Prisoner` (en la escena): un id único (por ejemplo, `forest_p1`), su sprite y su celda. Al cargar la escena revisa en `GameManager` si ya fue rescatado y, si es así, no aparece.
+- `MissionData.prisonerIds`: los ids de los prisioneros del nivel, para mostrar el progreso sin cargar la escena. El total se calcula sumando los del `MissionCatalog`.
+- **Validación** (`Game/Validate`): cada nivel tiene 3 ids únicos en `MissionData.prisonerIds` y un `Prisoner` en la escena por cada uno.
+
 ### 15.3 Opciones de PC
 
 - Pantalla completa, ventana y ventana sin bordes.
@@ -1352,6 +1585,16 @@ Hay dos tipos de obstáculo. Cada uno pide una **interacción**, y cada habilida
 - VSync activado y límite de FPS opcional.
 - Volumen general, de música y de SFX.
 - Remapeo de controles (ver sección 12).
+- **Idioma:** español o inglés. La primera vez se elige según el idioma del sistema (inglés si no es español).
+
+#### Idiomas
+
+El juego sale en **español e inglés**. Todo el texto se maneja con el paquete *Localization* de Unity desde el inicio, no se traduce al final:
+- **String Tables** por área: `UI`, `Gameplay` (nombres de habilidades, personajes, niveles, briefings) y una por nivel para sus escenas.
+- Los campos de texto de los datos (`MissionData.briefing`, `CharacterData.description`, `AbilityData.displayName`, `SpeakerData.displayName`, el texto de `LineStep`…) son `LocalizedString`, no `string`.
+- La fuente pixel incluye acentos, `ñ`, `¿` y `¡`.
+- El cuadro de diálogo y los menús se prueban con los dos idiomas: el inglés suele ser más corto y el español más largo.
+- `Game/Validate` avisa si a una entrada le falta la traducción.
 
 ### 15.4 Guardado
 
@@ -1380,10 +1623,12 @@ Hay **dos tipos de archivo**, separados a propósito:
   "lastSavedAt": "2026-10-09T21:12:44Z",
   "playTimeSeconds": 5420.5,
   "completedMissions": ["mission_station"],
+  "rescuedPrisoners": ["forest_p1", "forest_p3"],
   "lastCharacter": "rosslyn",
   "characters": [
     { "id": "rosslyn", "unlockedAbilities": ["flamethrower"], "selectedAbility": "flamethrower" },
-    { "id": "veyron", "unlockedAbilities": ["drill", "knife"], "selectedAbility": "drill" }
+    { "id": "veyron", "unlockedAbilities": ["drill", "knife"], "selectedAbility": "drill" },
+    { "id": "aquamarine", "unlockedAbilities": [], "selectedAbility": "" }
   ],
   "stats": {
     "deaths": 37
@@ -1400,6 +1645,7 @@ public class SaveData
     public string lastSavedAt;
     public float playTimeSeconds;
     public List<string> completedMissions = new();
+    public List<string> rescuedPrisoners = new();                // Prisoner ids (15.2)
     public string lastCharacter;                                // CharacterData.id
     public List<CharacterProgress> characters = new();
     public SaveStats stats = new();
@@ -1435,7 +1681,8 @@ public class CharacterProgress
   "windowScale": 4,
   "vSync": true,
   "bindingOverrides": "{...}",
-  "lastUsedSlot": 1
+  "lastUsedSlot": 1,
+  "language": "es"
 }
 ```
 
@@ -1448,11 +1695,12 @@ public class CharacterProgress
 | Momento | Qué se guarda |
 |---|---|
 | Al recoger un coleccionable de habilidad | Habilidad desbloqueada del personaje y tiempo de juego (no el estado del nivel) |
+| Al rescatar un prisionero | Prisionero rescatado y tiempo de juego (no el estado del nivel) |
 | Al completar una misión (después del diálogo de cierre) | Misión completada, último personaje usado, tiempo de juego, estadísticas |
 | Al cambiar una opción | `settings.json` |
 | Al salir del juego desde el menú | Tiempo de juego |
 
-- **No se guarda el estado de la misión.** La única escritura a mitad de misión es la de un coleccionable recogido, que solo guarda el progreso. Los checkpoints solo existen mientras se juega la misión. Si el jugador cierra el juego dentro de una misión, al volver aparece en la selección de misiones (o en la Misión 0, si todavía no la completa). Esto coincide con el estilo de Mega Man y evita guardar el estado del nivel (enemigos, obstáculos, posición).
+- **No se guarda el estado de la misión.** La única escritura a mitad de misión es la de un coleccionable recogido, que solo guarda el progreso. Los checkpoints solo existen mientras se juega la misión. Si el jugador cierra el juego dentro de una misión, al volver aparece en la selección de nivel (o en la Misión 0, si todavía no la completa). Esto coincide con el estilo de Mega Man y evita guardar el estado del nivel (enemigos, obstáculos, posición).
 - Mientras se guarda, aparece un icono pequeño en una esquina de la pantalla.
 
 #### Escritura segura
@@ -1468,7 +1716,7 @@ Si el juego se cierra o se va la luz justo mientras escribe, el archivo puede qu
 - Cada archivo tiene `version`. `SaveSystem.CurrentVersion` es la versión actual del formato.
 - Al cargar un archivo con versión anterior, `SaveMigrator` aplica los pasos en orden (`v1 → v2 → v3…`) y después se guarda con la versión nueva.
 - Si el archivo tiene una versión **mayor** que la del juego (por ejemplo, el jugador volvió a una versión anterior), no se carga ni se sobrescribe.
-- La versión 2 del juego (vehículos, más misiones) probablemente necesite su primera migración. Por eso este mecanismo existe desde el inicio.
+- La versión 2 del juego (más niveles) probablemente necesite su primera migración. Por eso este mecanismo existe desde el inicio.
 
 #### Validación al cargar
 
@@ -1487,7 +1735,7 @@ Si el juego se cierra o se va la luz justo mientras escribe, el archivo puede qu
 | `SaveMigrator` | Actualiza archivos de versiones anteriores |
 | `GameManager` | Tiene la partida actual en memoria (`SaveData`), la actualiza durante el juego y pide a `SaveSystem` que guarde en los momentos definidos |
 
-Los sistemas del juego (habilidades, selección de misiones) **leen y modifican el estado a través de `GameManager`**, nunca leen archivos directamente.
+Los sistemas del juego (habilidades, selección de nivel) **leen y modifican el estado a través de `GameManager`**, nunca leen archivos directamente.
 
 **Implementación del Hito 4** (antes de la escena `Boot` y de la pantalla de slots):
 - `GameManager` se crea solo la primera vez que se usa (`GameManager.Instance`, `DontDestroyOnLoad`). En el Hito 6 pasa a vivir en la escena `Boot`.
@@ -1503,7 +1751,7 @@ Los sistemas del juego (habilidades, selección de misiones) **leen y modifican 
 Menú `Game/Save` en el editor de Unity:
 - **Abrir carpeta de guardado** (`EditorUtility.RevealInFinder`).
 - **Borrar todos los guardados.**
-- **Crear guardado de prueba** (slot 1): todas las habilidades de todos los personajes desbloqueadas; las misiones completadas se agregan cuando exista `MissionCatalog` (Hito 6).
+- **Crear guardado de prueba** (slot 1): todas las habilidades de todos los personajes desbloqueadas y todos los prisioneros rescatados; las misiones completadas se agregan cuando exista `MissionCatalog` (Hito 6).
 - **Cargar un JSON específico**, para reproducir problemas reportados (se copia como `slot_1.json`).
 - **Mostrar los slots en la consola** (estado y contenido de cada uno).
 - **Desbloquear la siguiente habilidad (Play)**: simula un coleccionable mientras no existan (Hito 5). Solo con el modo de prueba de habilidades apagado.
@@ -1555,11 +1803,11 @@ public class MusicTrack : ScriptableObject
 | Momento | Pista |
 |---|---|
 | Menú principal | Tema principal |
-| Selección de misiones | Tema de selección |
-| Misión (diálogo de inicio y nivel) | Tema de la misión (`MissionData.music`) |
+| Selección de nivel | Tema de selección |
+| Nivel (escena de inicio y nivel) | Tema del nivel (`MissionData.music`) |
 | Sala del jefe | Diálogo con el jefe: tensión o silencio **[AJUSTAR]**. Al llenarse su barra: tema de jefe (`MissionData.bossMusic`) |
 | Jefe vencido | *Jingle* de victoria (sin loop), luego silencio durante el diálogo de cierre |
-| Misión final | Tema propio + tema del comandante |
+| Torre alienígena (nivel final) | Tema propio + tema de Coliel |
 | Créditos | Tema de créditos |
 
 - Al morir, la música **sigue sonando** (como en Mega Man). No se reinicia al reaparecer.
@@ -1609,17 +1857,17 @@ public class SfxData : ScriptableObject
 | Categoría | Sonidos |
 |---|---|
 | Jugador | Salto, aterrizaje, pasos, dash, disparo, daño, muerte, teletransporte (entrada y salida) |
-| Habilidades | Lanzar granada, rebote, explosión, tajo de espada, tajo de cuchillo, proyectil destruido por la espada, lanzallamas (loop), taladro, láser (carga y loop), arma sónica **[DECIDIR]**, recoger coleccionable de habilidad (jingle), sin energía (error), cambio de habilidad |
-| Obstáculos | Bloque roto, acero calentándose (loop), acero fundido |
+| Habilidades | Lanzar granada, rebote, explosión, tajo de espada, tajo de cuchillo, proyectil destruido por la espada, lanzallamas (loop), taladro, láser (carga y loop), boom sónico, ráfaga de burbujas, recoger coleccionable de habilidad (jingle), sin energía (error), cambio de habilidad |
+| Obstáculos | Bloque roto, acero calentándose (loop), acero fundido, fuego (loop), fuego apagado |
 | Enemigos | Disparo, golpe recibido, muerte (2–3 variantes genéricas al inicio) |
 | Pickups | Vida, energía |
 | UI | Mover cursor, confirmar, cancelar, pausa, letra del diálogo, misión desbloqueada |
 
 | Música | Pistas |
 |---|---|
-| Menús | Tema principal, selección de misiones, créditos |
-| Misiones | 5 temas de misión + misión final |
-| Jefes | Tema de jefe + tema del comandante **[DECIDIR]** si cada jefe tiene su propio tema |
+| Menús | Tema principal, selección de nivel, créditos |
+| Niveles | 10 temas, uno por nivel (el Simulador incluido) |
+| Jefes | Un tema de jefe compartido + el tema de Coliel |
 | Jingles | Victoria, habilidad obtenida |
 
 #### Checklist de clips por conseguir
@@ -1667,7 +1915,8 @@ Marca cada casilla al importar el clip y asignarlo a su `SfxData` (en `Assets/_P
 | [ ] | Láser: rayo | `Sfx_LaserLoop` | 1 | *loop* |
 | [ ] | Disparo básico de Veyron | `Sfx_VeyronShoot` | 1–2 | Más grave que el bláster. Hito 7 |
 | [ ] | Tajo de cuchillo | `Sfx_KnifeSlash` | 2 | Hito 7 |
-| [ ] | Arma sónica | — | — | **[DECIDIR]**. Hito 7 |
+| [ ] | Boom sónico | `Sfx_SonicBoom` | 1–2 | Golpe grave, como escopeta. Hito 7 |
+| [ ] | Ráfaga de burbujas | `Sfx_BubbleBurst` | 1–2 | Burbujas reventando. Hito 8 |
 
 **Hito 5: enemigos, pickups y obstáculos**
 
@@ -1678,8 +1927,11 @@ Marca cada casilla al importar el clip y asignarlo a su `SfxData` (en `Assets/_P
 | [ ] | Muerte de enemigo | `Sfx_EnemyDeath` | 2–3 | Genéricas para todos los enemigos al inicio |
 | [ ] | Pickup de vida | `Sfx_PickupHealth` | 1 | |
 | [ ] | Coleccionable de habilidad | `Sfx_AbilityPickup` | 1 | Jingle corto al recogerlo (8.9) |
+| [ ] | Prisionero rescatado | `Sfx_PrisonerRescue` | 1 | Agradecimiento + teletransporte (15.2) |
 | [ ] | Pickup de energía | `Sfx_PickupEnergy` | 1 | |
 | [ ] | Bloque roto | `Sfx_BlockBreak` | 1–2 | Taladro contra un bloque destructible |
+| [ ] | Fuego (loop) | `Sfx_FireLoop` | 1 | Suena cerca de los tiles de fuego |
+| [ ] | Fuego apagado | `Sfx_FireExtinguish` | 1–2 | Chorro de agua contra el fuego (vapor) |
 | [ ] | Acero calentándose | `Sfx_SteelHeatLoop` | 1 | *loop* |
 | [ ] | Acero fundido | `Sfx_SteelMelt` | 1 | |
 
@@ -1699,11 +1951,10 @@ Marca cada casilla al importar el clip y asignarlo a su `SfxData` (en `Assets/_P
 Cada pista con introducción se exporta como `Track_Nombre_Intro.ogg` + `Track_Nombre_Loop.ogg`.
 
 - [ ] Tema principal (menú)
-- [ ] Selección de misiones
-- [ ] Temas de las 5 misiones (uno por misión)
-- [ ] Misión final
-- [ ] Tema de jefe (compartido; ver decisión pendiente 6)
-- [ ] Tema del comandante (jefe final)
+- [ ] Selección de nivel
+- [ ] Temas de los 10 niveles (uno por nivel)
+- [ ] Tema de jefe (compartido)
+- [ ] Tema de Coliel (jefe final)
 - [ ] Jingle de victoria (sin loop)
 - [ ] Jingle de habilidad obtenida (sin loop)
 - [ ] Créditos
@@ -1734,7 +1985,7 @@ Cada pista con introducción se exporta como `Track_Nombre_Intro.ogg` + `Track_N
 - Barra de vida.
 - Barra de energía compartida.
 - Las barras de vida y energía toman su máximo del `CharacterData` del personaje en juego.
-- Las barras (vida, energía, jefe) son un mismo componente reutilizable, `SegmentedBar`, que recibe valor actual y máximo y dibuja segmentos. En la versión 2 se reutiliza para la vida de los vehículos.
+- Las barras (vida, energía, jefe) son un mismo componente reutilizable, `SegmentedBar`, que recibe valor actual y máximo y dibuja segmentos. También se usa para la vida y la energía de los vehículos (18).
 - **Icono de la habilidad seleccionada** junto a la barra de energía. Al cambiar de habilidad, el icono se actualiza y aparece el nombre durante 1–2 segundos.
 - Barra de vida del jefe.
 - **Canvas pixel perfect:**
@@ -1744,118 +1995,150 @@ Cada pista con introducción se exporta como `Track_Nombre_Intro.ogg` + `Track_N
   - Las posiciones de los elementos van en píxeles enteros.
   - Fuente bitmap (pixel font) con `Filter Mode = Point`.
 
-### 15.7 Escenas y diálogos
+### 15.7 Escenas y diálogos (estilo novela visual)
 
-Como en Mega Man X, los diálogos no son pantallas fijas: **ocurren dentro del nivel**, con **escenas cortas** en las que los personajes entran, caminan, se voltean, hacen gestos y se teletransportan mientras aparece el cuadro de texto. Son escenas sencillas hechas con los sprites del juego, sin cámaras complejas ni arte especial.
+Los diálogos se presentan como una **novela visual**, al estilo de *Sonic Battle*: una pantalla con **una ilustración en el centro**, **de 1 a 4 personajes a los lados** y el cuadro de texto abajo. El personaje que habla se ve con **opacidad completa** y los demás atenuados. Cada personaje tiene **varios retratos, uno por emoción**, y la ilustración puede cambiar conforme avanza la escena.
+
+La novela visual **reemplaza** a las escenas con personajes caminando dentro del nivel. Dentro del nivel solo quedan acciones cortas: el teletransporte del jugador, la entrada del jefe (pose y barra) y movimientos de cámara.
 
 **Dónde se usan:**
-- Inicio y cierre de cada misión (`MissionData.introCutscene` / `outroCutscene`).
-- Al entrar a la sala de cada jefe (`MissionData.bossCutscene`): diálogo con el jefe, su pose y el llenado de su barra (14.2).
-- Momentos especiales activados por una zona del nivel (`CutsceneTrigger`): el final de la Misión 0 y la revelación del comandante en la misión final (17.2).
+- Inicio y cierre de cada nivel (`MissionData.introCutscene` / `outroCutscene`).
+- Al entrar a la sala de cada jefe (`MissionData.bossCutscene`): diálogo con el jefe y, ya en el nivel, su pose y el llenado de su barra (14.2).
+- Momentos especiales activados por una zona del nivel (`CutsceneTrigger`): el final del Simulador, las incorporaciones de personajes y otros eventos de la historia.
+
+#### Presentación
+
+Distribución en la resolución de referencia (320×180) **[AJUSTAR]**:
+
+```
+┌────────────────────────────────────────────────────────┐
+│  [1] [2]     ┌──────────────────────────┐    [3] [4]   │
+│              │                          │              │
+│  retratos    │   Ilustración central    │  retratos    │
+│  izquierda   │        144×104           │  derecha     │
+│              │                          │              │
+│              └──────────────────────────┘              │
+├────────────────────────────────────────────────────────┤
+│ ROSSLYN                                                │
+│ General, el objetivo está en las minas.                │
+│ Vamos para allá.                                    ▼  │
+└────────────────────────────────────────────────────────┘
+```
+
+- **4 posiciones:** 1 y 2 a la izquierda, 3 y 4 a la derecha. Las interiores (2 y 3) quedan un poco delante de las exteriores y se pueden traslapar.
+- **Retratos de busto** de unos 64×96 px **[AJUSTAR]**, dibujados mirando a la derecha. Los de la derecha se voltean en el juego.
+- **El que habla** se ve normal; los demás se **oscurecen** (por ejemplo, multiplicando su color por 50% de gris). Se oscurecen en lugar de volverse transparentes porque, al traslaparse, la transparencia dejaría ver un retrato a través del otro. Opcionalmente, el que habla sube 1–2 px **[AJUSTAR]**.
+- **Ilustración central** de unos 144×104 px **[AJUSTAR]** que muestra la situación (el lugar, el jefe, un objeto). Puede cambiar en cualquier momento de la escena, con corte o fundido.
+- **Fondo:** un panel o marco fijo que tapa el nivel mientras dura la novela visual **[AJUSTAR]**.
+- **Cuadro de texto** abajo, de 320 × 56 px **[AJUSTAR]**: el **nombre** del que habla en una pestaña de su lado, hasta **3 líneas** de texto e indicador ▼ cuando se puede avanzar.
+- **Líneas por radio:** el retrato del que habla aparece con un marco de transmisión (estática o líneas) **[AJUSTAR]**. Lo usan el General cuando no está presente y su sustituto (ver abajo).
+- Entradas y salidas: los retratos entran deslizándose desde su lado y salen igual.
+- Usa el mismo Canvas pixel perfect y la misma fuente pixel del HUD (15.6).
+
+#### Emociones
+
+- Cada personaje que habla tiene un set de retratos por emoción. Set: `Neutral`, `Feliz`, `Enojado`, `Sorprendido`, `Triste`, `Determinado`.
+- Las emociones son un `enum` compartido por todos. Si a un personaje le falta una emoción, se usa `Neutral` y `Game/Validate` avisa.
+- Los jefes pueden tener menos (por ejemplo, `Neutral` y `Enojado`).
 
 #### Datos
 
 Una escena es una **lista de pasos** que se ejecutan en orden. Las líneas de diálogo son un tipo de paso más.
 
 ```csharp
+public enum Emotion { Neutral, Happy, Angry, Surprised, Sad, Determined }
+
 [CreateAssetMenu(menuName = "Game/Speaker")]
 public class SpeakerData : ScriptableObject
 {
-    public string displayName;      // "Rosslyn", "Comandante", etc.
-    public Sprite portrait;
+    public string id;                       // "rosslyn", "neotisleo", "wolfang"…
+    public string displayName;              // "Rosslyn", "General Neotisleo", etc.
+    public Sprite[] portraits;              // uno por Emotion, en el orden del enum
+    public SpeakerData standIn;             // quién dice sus líneas cuando se juega con este personaje (Neotisleo)
 }
 
 [CreateAssetMenu(menuName = "Game/Cutscene")]
 public class CutsceneData : ScriptableObject
 {
+    public Sprite startIllustration;        // ilustración al abrir la novela visual
     [SerializeReference] public List<CutsceneStep> steps = new();
 }
 
 [System.Serializable]
 public abstract class CutsceneStep
 {
+    public bool firstTimeOnly;           // se omite si la escena se repite en el mismo intento de nivel
     public bool waitToFinish = true;     // false = el siguiente paso empieza al mismo tiempo
     public abstract IEnumerator Run(CutsceneContext ctx);
     public abstract void Skip(CutsceneContext ctx);   // deja el estado final al instante
 }
 ```
 
+**Pasos de la novela visual:**
+
 | Paso | Datos | Hace |
 |---|---|---|
-| `LineStep` | `SpeakerData`, texto | Muestra el cuadro de diálogo y espera a que el jugador avance |
-| `MoveStep` | Actor, marcador, velocidad | Camina (o corre) hasta el marcador y se voltea en la dirección del movimiento |
-| `FaceStep` | Actor, izquierda / derecha / hacia otro actor | Lo voltea |
-| `PlayStep` | Actor, clip (gesto) | Reproduce un clip de cuerpo completo; espera a que termine si no es loop |
-| `TeleportStep` | Actor, entrar o salir, marcador | `FullBody_Teleport_In` / `Out` en el marcador |
+| `ShowStep` | Personaje, posición (1–4), emoción | El retrato entra deslizándose a su posición. Si la posición está ocupada, reemplaza al anterior |
+| `HideStep` | Personaje | El retrato sale |
+| `LineStep` | Personaje, emoción (opcional), texto, por radio (sí/no) | Resalta al que habla, cambia su emoción si se indica, escribe el texto y espera a que el jugador avance |
+| `EmotionStep` | Personaje, emoción | Cambia la emoción sin hablar (una reacción) |
+| `IllustrationStep` | Sprite, transición (corte o fundido) | Cambia la ilustración central |
 | `WaitStep` | Segundos | Pausa |
-| `FadeStep` | A negro o desde negro, duración | Fundido de pantalla completa; mientras está en negro se pueden quitar o colocar actores sin que se vea |
-| `CameraStep` | Marcador o actor, duración, sacudida opcional | Lleva la cámara a un punto (`SetTarget`, 13) o la regresa al jugador |
 | `AudioStep` | `SfxData` o `MusicTrack` | Sonido, cambio de música o silencio |
-| `BossBarStep` | Jefe | Llena la barra de vida del jefe (escena del jefe) |
 
-- `firstTimeOnly`: campo de todos los pasos. Si es verdadero, el paso se omite cuando la escena se repite en el mismo intento de misión (por ejemplo, el diálogo con el jefe después de morir).
-- `waitToFinish = false` permite pasos en paralelo: dos personajes caminando a la vez o un gesto mientras se escribe una línea.
-- Los pasos usan **ids de texto** para actores y marcadores, porque un ScriptableObject no puede apuntar a objetos de una escena. `CutsceneRunner` los busca al empezar.
+**Pasos dentro del nivel:**
+
+| Paso | Datos | Hace |
+|---|---|---|
+| `TeleportStep` | Entrar o salir | El jugador aparece o se va con `FullBody_Teleport_In` / `Out` |
+| `CameraStep` | Punto o jefe, duración, sacudida opcional | Lleva la cámara a un punto (`SetTarget`, 13) o la regresa al jugador |
+| `BossIntroStep` | Jefe | El jefe hace su pose `Boss_Intro` mientras se llena su barra de vida (14.2) |
+
+- La novela visual **se abre** con un fundido cuando empieza el primer paso de novela visual y **se cierra** con otro fundido cuando sigue un paso dentro del nivel o termina la escena.
+- `waitToFinish = false` permite pasos en paralelo, por ejemplo cambiar la ilustración mientras un personaje entra.
 - Para agregar pasos en el inspector (`[SerializeReference]`) hace falta un editor pequeño con un menú para elegir el tipo de paso.
-- Todo el texto vive en assets, no en código. Si algún día se traduce el juego, se puede migrar al paquete *Localization* de Unity.
+- Todo el texto vive en String Tables del paquete *Localization*, en español e inglés (15.3).
 
-> **Por qué no Timeline:** estas escenas son secuencias cortas que esperan a que el jugador avance el texto, con pocos actores y animaciones elegidas por código (`Animator.Play`, 9.2). Una lista de pasos es más fácil de escribir, de saltar y de depurar. Si en la V2 hace falta una escena más elaborada, Timeline se puede usar para esa escena sin cambiar el resto.
+#### Personajes en las escenas
 
-#### Actores y marcadores
-
-- `CutsceneActor`: componente con un **id** (`rosslyn`, `veyron`, `commander`, el id de un jefe…). Puede estar en la escena (el comandante, un jefe) o crearse al empezar.
-- `CutsceneMarker`: un punto con id, colocado en la escena, al que se mueven los actores o la cámara.
-- **Los soldados se escriben por nombre, no como "el jugador".** Así la regla de 1.4 (los mismos diálogos para los dos) también aplica a las escenas:
-  - El actor del personaje elegido es **el jugador**.
-  - El otro soldado, si un paso lo usa, se **crea como personaje no jugable** con su prefab en estado `Disabled` (5.4, 6.2).
-  - **Al terminar la escena**, si el soldado que no se juega sigue en pantalla, hay un **fundido a negro** (`FadeStep`): mientras la pantalla está en negro desaparece y el jugador queda en su posición. La pantalla vuelve y el jugador toma el control. Es igual en todas las escenas (inicio, cierre, jefe y momentos especiales).
-  - En la Misión 0 solo existe Rosslyn: los pasos de Veyron se omiten.
-  - **En la escena del jefe** el fundido ocurre después del diálogo y antes de la pose del jefe (14.2).
-- **El comandante** aparece como un actor en la escena; cómo se presenta (holograma o en persona) está por definir **[DECIDIR]** (17.2).
-- Los movimientos se redondean a la rejilla de píxeles (2.2), igual que todo lo animado por código.
-
-#### Presentación del cuadro de diálogo
-
-```
-┌──────────────────────────────────────────────┐
-│ ┌──────┐  COMANDANTE                         │
-│ │      │  Rosslyn, detectamos al objetivo en  │
-│ │ cara │  la estación Orión. Neutralízalo…    │
-│ └──────┘                                  ▼  │
-└──────────────────────────────────────────────┘
-```
-
-- Cuadro en la parte inferior de la pantalla: 320 × 56 px **[AJUSTAR]** en la resolución de referencia. Se acomoda arriba si un actor que habla queda tapado **[AJUSTAR]**.
-- Retrato de **48×48 px** a la izquierda **[AJUSTAR]**, dibujado en Piskel con PPU 16.
-- Nombre arriba del texto y hasta **3 líneas** de texto por cuadro.
-- Indicador ▼ parpadeando cuando la línea terminó y se puede avanzar.
-- Usa el mismo Canvas pixel perfect y la misma fuente pixel del HUD (15.6).
+- **Las escenas son las mismas sin importar el personaje elegido** (1.4). Se escriben con los personajes por nombre; el jugador no necesita aparecer en ellas.
+- **Personajes que aún no se unen:** los pasos de un personaje que todavía no está disponible se **omiten**. Las escenas se escriben para que sus líneas se puedan quitar sin romper el diálogo.
+- En el Simulador solo aparece Rosslyn (además del General).
+- **Si se juega con Neotisleo:**
+  - En los niveles 1 a 9 (que solo se juegan con él al repetirlos, porque se desbloquea con los prisioneros de esos niveles), las escenas **no cambian**.
+  - **En la misión final (Torre alienígena)**, sus líneas de mando las dice **Goldo, otro general, por radio**. `SpeakerData.standIn` de Neotisleo apunta al `SpeakerData` de Goldo, y `CutsceneRunner` solo lo aplica en el nivel con `MissionData.isFinal`.
 
 #### Comportamiento
 
 - **Efecto máquina de escribir:** el texto aparece letra por letra (40 caracteres por segundo **[AJUSTAR]**), con un sonido corto cada pocas letras.
-- **Avanzar** (`Jump`, `Fire` o `Enter`): si la línea aún se está escribiendo, se muestra completa; si ya terminó, pasa a la siguiente. Entre líneas, los pasos de movimiento y gestos corren solos.
-- **Saltar escena** (`Pause` / `Esc`): termina la escena completa. `CutsceneRunner` llama a `Skip` en cada paso pendiente, en orden, para que actores, cámara y música queden en su estado final (por ejemplo, el jugador en su posición de inicio y el otro soldado ya fuera). Útil al repetir misiones.
+- **Avanzar** (`Jump`, `Fire` o `Enter`): si la línea aún se está escribiendo, se muestra completa; si ya terminó, pasa a la siguiente.
+- **Saltar escena** (`Pause` / `Esc`): termina la escena completa. `CutsceneRunner` llama a `Skip` en cada paso pendiente, en orden, para que el jugador, la cámara, el jefe y la música queden en su estado final. Útil al repetir niveles.
 - Mientras hay escena, el jugador está en el estado `Disabled`, el HUD se oculta (salvo la barra del jefe en su entrada), el menú de pausa no se abre y los enemigos están en pausa.
 - Se activa el Action Map `Dialogue` y se desactiva `Gameplay`, para que los botones de avanzar no disparen ni salten.
+
+#### Arte
+
+- **Retratos:** una tira horizontal por personaje en `Art/Portraits/<Personaje>/`, con un frame por emoción en el orden del `enum`. Un setup los corta y los asigna al `SpeakerData`, igual que el arte de las habilidades (8.8).
+- **Ilustraciones:** `Art/Illustrations/<Nivel>/`, un PNG por ilustración.
+- **Volumen de arte:** unos 5 personajes × 6 emociones, más el General, su sustituto y los 9 jefes, son **unos 60 retratos**. Con 2 o 3 ilustraciones por nivel, son **20–30 ilustraciones**. Se reutilizan ilustraciones entre las escenas de un mismo nivel (2 o 3 por nivel).
 
 #### Componentes
 
 | Componente | Hace |
 |---|---|
-| `CutsceneRunner` | Recibe un `CutsceneData`, resuelve actores y marcadores, ejecuta los pasos (en orden o en paralelo), maneja el salto y lanza el evento `Finished` |
-| `CutsceneStep` y sus tipos | Cada tipo de paso de la tabla de arriba |
-| `CutsceneActor` / `CutsceneMarker` | Ids de actores y puntos en la escena |
+| `CutsceneRunner` | Recibe un `CutsceneData`, ejecuta los pasos (en orden o en paralelo), abre y cierra la novela visual, maneja el salto y lanza el evento `Finished` |
+| `CutsceneStep` y sus tipos | Cada tipo de paso de las tablas de arriba |
+| `VisualNovelView` | La UI: fondo, ilustración central, 4 posiciones de retrato con su resaltado y animaciones de entrada y salida |
+| `DialogueBox` | El cuadro de texto: nombre, texto con efecto máquina de escribir, marco de radio e indicador ▼ |
 | `CutsceneTrigger` | Zona del nivel que inicia una escena una sola vez |
-| `DialogueBox` | La UI: retrato, nombre, texto con efecto máquina de escribir e indicador ▼ |
 
-`MissionController` (en cada escena de misión) llama a `CutsceneRunner.Play(introCutscene)` al empezar y espera `Finished` antes de dar el control al jugador. Al vencer al jefe hace lo mismo con `outroCutscene` antes de volver a la selección de misiones.
+`MissionController` (en cada escena de nivel) llama a `CutsceneRunner.Play(introCutscene)` al empezar y espera `Finished` antes de dar el control al jugador. Al vencer al jefe hace lo mismo con `outroCutscene` antes de volver a la selección de nivel.
 
-**Validación** (`Game/Validate`): cada id de actor y de marcador que usa una escena existe en la escena de su misión.
+**Validación** (`Game/Validate`): cada `SpeakerData` tiene los retratos de las emociones que usan sus líneas, y cada `CutsceneData` empieza con una ilustración.
 
 #### Fuera de alcance
 
-Opciones de respuesta, varias expresiones por retrato, retratos en ambos lados del cuadro y voces.
+Opciones de respuesta, animación de los retratos (parpadeo, boca) y voces.
 
 ---
 
@@ -1952,43 +2235,90 @@ Ordenadas de la más sencilla a la más compleja; cada una agrega una pieza nuev
 - [x] `SaveSystem` base: `SaveData`, escritura segura con respaldo, versión, menú `Game/Save` del editor y guardado de habilidades desbloqueadas por personaje
 - [x] `CharacterData` (5.4): mover vida, energía, `PlayerMovementData`, `BusterData` y habilidades al asset del personaje; `PlayerController.Initialize` y spawn del jugador desde datos
 
-### Hito 5 — Enemigos y nivel de prueba
-- [ ] Torreta, caminante y volador, con estado `Stunned` y reacción al empuje (14.1)
+### Hito 5 — Enemigos base y nivel de prueba
+- [ ] Arquitectura de enemigos por piezas (14.1): `EnemyData`, `EnemyWeaponData`, biblioteca de estados, `OnDeath`
+- [ ] Primeros enemigos, que cubren las piezas básicas: **Torreta** (apunta en 8 direcciones), **Soldado** (patrulla y dispara) y **Robot volador** (vuelo por puntos), con `Stunned`, `Frozen` y reacción al empuje
+- [ ] `DamageZone` (8.7)
 - [ ] Pickups de vida y energía con drops
 - [ ] Peligros, checkpoints, muerte y respawn
-- [ ] `AbilityObstacleTilemap` en la capa `AbilityObstacle`, con interacciones `ObstacleInteraction` (`Break`, `Melt`): bloques destructibles (taladro) y muros de acero con calor acumulado (lanzallamas)
-- [ ] `AbilityPickup`: coleccionable de habilidad, secuencia al recogerlo, guardado inmediato y holograma para el otro personaje (8.9)
+- [ ] `AbilityObstacleTilemap` en la capa `AbilityObstacle`, con interacciones `ObstacleInteraction` (`Break`, `Melt`): bloques destructibles (taladro) y muros de metal con calor acumulado (lanzallamas)
+- [ ] `AbilityPickup`: coleccionable de habilidad que recoge cualquier personaje y se desbloquea para su dueño, secuencia al recogerlo, guardado inmediato y validación de la cadena de obstáculos (8.9)
+- [ ] `Prisoner`: rescate, contador en pantalla, guardado inmediato y `MissionData.prisonerIds` (15.2)
 - [ ] Cámara con confiner por sección
 
-### Hito 6 — Primera misión completa
+### Hito 6 — Simulador y Bosque completos
+
+El Simulador (nivel 1) y el Bosque (nivel 2) con la Excavadora de combate, de principio a fin.
+
 - [ ] Misión 0 (simulador): misión de introducción con Rosslyn, sin tutorial explícito, arranque directo desde la partida nueva, `forcedCharacter` y `MissionCatalog.firstMission` (15.1)
-- [ ] Jefe con fases
+- [ ] Bosque: nivel, enemigos y la **Excavadora de combate** con sus fases (14.2)
 - [ ] `GameManager`, flujo de escenas, menú de pausa con selección de habilidad
-- [ ] `MissionData`, `MissionCatalog` y pantalla de selección de misiones con briefing y coleccionables encontrados
+- [ ] `MissionData`, `MissionCatalog` (orden de los 10 niveles) y pantalla de selección de nivel con briefing y coleccionables encontrados
 - [ ] Validación del editor `Game/Validate` para los coleccionables (8.9)
 - [ ] `CharacterCatalog` y pantalla de selección de personaje (15.1)
 - [ ] Guardado de misiones completadas, `settings.json` y autoguardado al completar una misión
 - [ ] Pantalla de slots: continuar, cargar, partida nueva y borrar (con confirmación)
-- [ ] Opciones de PC: pantalla, audio y remapeo de controles
+- [ ] Opciones de PC: pantalla, audio, remapeo de controles e idioma
+- [ ] Paquete *Localization*: String Tables en español e inglés, `LocalizedString` en los datos y fuente con acentos (15.3)
 - [ ] `MusicPlayer` con intro + loop y crossfade, música de misión y de jefe
 - [ ] Snapshot de pausa y volúmenes en opciones
-- [ ] Sistema de escenas y diálogos (15.7): `CutsceneData` con pasos, `CutsceneRunner` con salto, `CutsceneActor`, `CutsceneMarker`, `CutsceneTrigger`, `DialogueBox` y editor de pasos
-- [ ] Escenas de inicio y cierre de la misión, y escena del jefe: diálogo, `Boss_Intro` y barra de vida; versión corta al reintentar (`firstTimeOnly`)
-- [ ] Gestos de cuerpo completo de Rosslyn en su hoja (4.4)
+- [ ] Sistema de escenas estilo novela visual (15.7): `CutsceneData` con pasos, `CutsceneRunner` con salto, `VisualNovelView` (ilustración, 4 posiciones, resaltado del que habla), `DialogueBox` con marco de radio, `CutsceneTrigger` y editor de pasos
+- [ ] Escenas de inicio y cierre del nivel, y escena del jefe: cámara, diálogo, `Boss_Intro` y barra de vida; versión corta al reintentar (`firstTimeOnly`)
+- [ ] Retratos por emoción de Rosslyn, Veyron, el General y la Excavadora, e ilustraciones del Simulador y el Bosque (15.7)
 
 ### Hito 7 — Segundo personaje (Veyron)
 
 Depende de las decisiones pendientes 8, 10 y 11 (17.2).
 
-- [ ] Diseño: estadísticas y arma sónica
+- [ ] `PlayerMovementData` de Veyron con la velocidad original (6 u/s) y la de Rosslyn subida (~7 u/s)
 - [ ] Disparo básico corto y potente: `BusterData` propio con `maxRange` y VFX de disipación (sección 7)
 - [ ] Spritesheet con la misma cuadrícula que Rosslyn (4.2.1) y `PlayerArtSetup` por personaje; mover el arte y los clips de Rosslyn a `Characters/<Personaje>/`
 - [ ] Prefab variant, `CharacterData`, `PlayerMovementData` y `BusterData` propios
-- [ ] Cuchillo (reutiliza `MeleeEffect`) y arma sónica, con su arte; el taladro y el láser ya existen desde el Hito 4
-- [ ] Colocar los coleccionables de los dos personajes en la primera misión y validar el ciclo de 8.9 (sin dependencias circulares)
-- [ ] Retrato de diálogo (`SpeakerData`), gestos de cuerpo completo (4.4) e imagen de la pantalla de selección
-- [ ] Probar las escenas con cada personaje: el elegido es el jugador y el otro aparece como no jugable (15.7)
-- [ ] Recorrer el nivel de prueba y la primera misión con los dos personajes (mínimos de salto de 5.4)
+- [ ] Cuchillo (reutiliza `MeleeEffect`) y arma sónica (`BlastEffect`), con su arte; el taladro ya existe desde el Hito 4 (el láser pasa a Agente X)
+- [ ] Colocar los coleccionables de Rosslyn y Veyron en el Bosque y validar el ciclo de 8.9 (sin dependencias circulares)
+- [ ] Imagen de la pantalla de selección
+- [ ] Recorrer el nivel de prueba y el Bosque con los dos personajes (mínimos de salto de 5.4)
+
+### Hito 8 — Aquamarine y Agente X
+- [ ] Sus `CharacterData`, hojas, prefabs, `BusterData` (burbujas lentas y bala láser rápida) y desbloqueo por historia (`requiredMissions`)
+- [ ] Planeo con burbuja (6.3) y salto alto (valor)
+- [ ] Ráfaga de burbujas (`BlastEffect` con otro arte), chorro de agua (`destroyOnGround`, interacción `Extinguish` y obstáculo de fuego) y rayo congelante (láser + `freezeBuildup` y estado `Frozen`)
+- [ ] Láser movido a Agente X, dron (`CompanionDrone`) y granada incendiaria (`DamageZone`)
+- [ ] Retratos por emoción de Aquamarine y Agente X, y escenas de incorporación al escuadrón
+
+### Hito 9 — Vehículos
+- [ ] Estado `Piloting` (6.2), `IPilotable`, `VehicleData`, cámara y HUD del vehículo (18)
+- [ ] Sistema de habilidades y energía reutilizable por los vehículos (18.4); subir saltando encima y bajar con salto + arriba
+- [ ] **Robotanque:** ametralladoras automáticas en 8 direcciones, lanzacohetes y tenazas
+- [ ] **Exoesqueleto:** disparo cargado, rayo de corto alcance, misil y arma láser
+
+### Hito 10 — Resto de enemigos
+Agrupados por la pieza nueva que necesitan (14.1):
+- [ ] Variantes de datos: soldados, moto, fire bat, tank, araña cañón
+- [ ] Cuerpo a cuerpo por distancia: furro, escarabajo, mole
+- [ ] Embestida: el de las recargas
+- [ ] Enemigos compuestos (`EnemyGroup`): soldado carreta, soldado carreola, robot con escudo
+- [ ] Al morir crea otro: robo-dron; generador: araña spawner
+- [ ] Autodestrucción y charcos: abuelita, Mr. Bombastic, alterado
+- [ ] Rebote y techo: medusa (`BounceTop`), oruga
+- [ ] Agarre: mantis atea y estado `Grabbed` (6.2)
+
+### Hito 11 — Niveles 3 a 10 y sus jefes
+Un nivel a la vez, en orden, cada uno con su jefe, sus escenas, su música y sus coleccionables:
+- [ ] 3. Minas — Ayahuastli
+- [ ] 4. Montaña — Robot de batalla
+- [ ] 5. Bosque en llamas — Wolfang
+- [ ] 6. Laboratorio — Gosarou
+- [ ] 7. Tren militar — Zaipoc
+- [ ] 8. Castillo — Grallet
+- [ ] 9. Ciudad alienígena — Narabee
+- [ ] 10. Torre alienígena — Coliel, y créditos
+
+### Hito 12 — Neotisleo
+Se une antes de la misión final si se rescató a los 24 prisioneros (15.2).
+- [ ] `CharacterEntry.requiresAllPrisoners` + Ciudad alienígena en `requiredMissions`, escena en la que los prisioneros lo convencen, `CharacterData` con más energía, hoja y prefab
+- [ ] Disco de energía (`DrillEffect` sin `Break`), espada de luz (`MeleeEffect`) y munición eléctrica (`Projectile` + `Explosion`)
+- [ ] Escenas cuando se juega con él (17.2)
 
 ---
 
@@ -2006,7 +2336,7 @@ Depende de las decisiones pendientes 8, 10 y 11 (17.2).
 | Herramienta de arte | Piskel (lienzo de 48×64 para el jugador, pies en y = 12) |
 | Framerate y física | 60 FPS con VSync, Fixed Timestep de 1/60, temporizadores en segundos |
 | Control de versiones | GitHub, sin Git LFS |
-| Disparo | Normal, un tiro por pulsación, sin carga |
+| Disparo | Normal, un tiro por pulsación, sin carga (los personajes; el Exoesqueleto sí carga) |
 | Direcciones de disparo | Adelante, diagonal arriba-adelante, arriba y abajo (solo en el aire) |
 | Pose del torso | Cambia al mantener arriba o arriba-adelante (`Torso_Aim_*`); las 4 direcciones tienen además su clip de disparo (`Torso_Shoot_*`) |
 | Dash | Suelo + aire (uno por salto), dash jump con impulso (también al salir de una orilla durante el dash), sin i-frames |
@@ -2015,9 +2345,14 @@ Depende de las decisiones pendientes 8, 10 y 11 (17.2).
 | Collider durante el dash | Sin cambios |
 | Habilidades | Propias de cada personaje, con progreso por personaje; barra de energía compartida, siguiente/anterior |
 | Habilidades de Rosslyn | Lanzallamas, granada de goma y espada de fuego |
-| Habilidades de Veyron | Taladro, láser, cuchillo y arma sónica |
+| Habilidades de Veyron | Taladro, arma sónica y cuchillo (el láser pasó a Agente X) |
+| Arma sónica | Como la escopeta de Metal Slug: área corta frente al personaje, mucho daño a todo lo que toca, poca cadencia. Veyron: boom sónico; Aquamarine: ráfaga de burbujas (mismo `BlastEffect`) |
+| Habilidades de Aquamarine | Ráfaga de burbujas (efecto del arma sónica), chorro de agua (granada que se deshace en el suelo y apaga el fuego) y rayo congelante (láser que congela) |
+| Habilidades de Agente X | Láser, dron y granada incendiaria |
+| Habilidades de Neotisleo | Disco de energía (taladro sin romper muros), espada de luz (espada con más alcance) y munición eléctrica |
+| Pasivas | Aquamarine: planeo con burbuja. Agente X: salto más alto. Neotisleo: más energía |
 | Obtención de habilidades | Coleccionables escondidos en los niveles; los jefes no entregan habilidades. Se guardan al recogerlos |
-| Cuchillo | Reutiliza el sistema de la espada (`MeleeEffect`, `Torso_Melee*`): 4 direcciones y rebote hacia abajo |
+| Cuchillo | Reutiliza el sistema de la espada (`MeleeEffect`, `Torso_Melee*`): 4 direcciones, rebote hacia abajo y destruye proyectiles |
 | Frames activos del tajo | Ventana de frames en `MeleeEffect`, sin Animation Events |
 | Instancias de los efectos | Una por habilidad, hija del jugador; lo que se lanza sale de pools del efecto |
 | Fogonazo del disparo | No hay; el movimiento del arma en los clips de disparo es el feedback |
@@ -2037,67 +2372,104 @@ Depende de las decisiones pendientes 8, 10 y 11 (17.2).
 | Espada de fuego | 4 direcciones y agachada, con un clip `Torso_Melee*` por dirección; destruye proyectiles enemigos; el tajo hacia abajo rebota al golpear (pogo) |
 | Lanzallamas | Movimiento al 50%; visual de llamas sueltas que aparecen y se disipan; daño con una zona fija |
 | Taladro | Atraviesa enemigos sin límite; rompe un bloque destructible y se detiene |
-| Obstáculos por habilidad | Bloques destructibles (taladro, Veyron) y muros de acero que se funden con calor acumulado (lanzallamas, Rosslyn). Nunca cierran el camino principal, tampoco en la misión final |
-| Repetir misiones | Sí, con cualquier personaje, para abrir caminos y buscar coleccionables |
-| Diálogos | Nombre + retrato + cuadro de texto, dentro de escenas cortas en el nivel (al estilo de Mega Man X): inicio y cierre de misión, entrada a la sala de cada jefe (diálogo + pose; sin diálogo al reintentar) y momentos especiales. Se pueden saltar |
-| Escenas | Lista de pasos (`CutsceneData`), no Timeline. Los soldados se escriben por nombre: el elegido es el jugador y el otro aparece como no jugable. El que no se juega desaparece con un fundido a negro en todas las escenas |
-| Historia | Dos soldados espaciales; el comandante da las misiones y resulta ser el traidor y jefe final |
-| Personajes | 2 jugables en la versión 1, elegidos en una pantalla antes de cada misión; el comandante se agrega como tercero en la versión 2 al completar todas las misiones |
-| Diferencias entre personajes | Estadísticas, disparo básico y habilidades. Todos comparten el movimiento (correr, saltar, agacharse, dash) y la cuadrícula del spritesheet |
+| Obstáculos por habilidad | Bloques destructibles (taladro, Veyron), muros de metal que se funden con calor acumulado (lanzallamas, Rosslyn) y fuego sólido que daña al tocarlo y se apaga con agua (chorro de agua, Aquamarine). Solo esas tres habilidades los abren. Nunca cierran el camino principal, tampoco en el nivel final |
+| Repetir niveles | Sí, con cualquier personaje disponible, para abrir caminos y buscar coleccionables |
+| Diálogos | Novela visual al estilo de *Sonic Battle*: ilustración central que puede cambiar, de 1 a 4 personajes a los lados con retratos por emoción, el que habla con opacidad completa y los demás atenuados. Inicio y cierre de nivel, sala de cada jefe (sin diálogo al reintentar) y momentos especiales. Se pueden saltar |
+| Escenas | Lista de pasos (`CutsceneData`), no Timeline. La novela visual reemplaza a las escenas con personajes caminando en el nivel; dentro del nivel solo quedan el teletransporte, la cámara y la entrada del jefe. Las escenas son las mismas para todos los personajes |
+| Historia | Un escuadrón recibe misiones del General Neotisleo contra una amenaza alienígena; el jefe final es Coliel en la Torre alienígena. Ya no hay traición del comandante |
+| Personajes | 5 jugables en la versión 1, elegidos en una pantalla antes de cada nivel: Rosslyn y Veyron desde el inicio, Aquamarine y Agente X con la historia, Neotisleo al rescatar a todos los prisioneros |
+| Prisioneros | 3 por nivel en los niveles 2 a 9 (24; ni el Simulador ni la Torre tienen), los rescata cualquier personaje tocándolos, se guardan al rescatarlos; con todos, antes de la misión final convencen a Neotisleo de pelear junto a Rosslyn sin destruir Coleópolis, y se vuelve jugable. Un solo final |
+| Neotisleo en las escenas | Las mismas escenas. Solo en la misión final, si se juega con él, sus líneas de mando las dice Goldo, otro general, por radio (`SpeakerData.standIn`) |
+| Diferencias entre personajes | Estadísticas, disparo básico, habilidades y pasiva. Todos comparten el movimiento (correr, saltar, agacharse, dash) y la cuadrícula del spritesheet |
 | Progreso entre personajes | Las misiones completadas son del slot; las habilidades desbloqueadas son de cada personaje |
 | Primer personaje | Rosslyn, la soldado espacial |
 | Segundo personaje | Veyron, compañero de escuadrón de Rosslyn |
+| Disparos básicos de los nuevos | Aquamarine: burbujas más lentas. Agente X: bala más rápida con menos daño. Neotisleo: normal |
 | Disparo básico de Veyron | Más daño y mucho menos alcance que el bláster (`maxRange`); mismas direcciones y cadencia |
-| Diálogos y personajes | Los mismos para todos: en el lore los dos soldados van a cada misión |
+| Diálogos y personajes | Los mismos para todos: en el lore el escuadrón va a cada misión |
 | Audio | `AudioMixer` (Music, SFX/Gameplay, SFX/UI), `MusicPlayer` con intro + loop y crossfade, `SfxPlayer` con pool, variación, límite de voces y cooldown |
 | Origen del audio | SFX de librerías (con registro de licencias en `CREDITS.md`); música compuesta por el equipo, exportada como intro + loop en `.ogg` |
 | Guardado | 3 slots de partida; autoguardado al completar misiones y al recoger habilidades; `settings.json` separado de los slots; escritura segura con respaldo; versión y migraciones desde el inicio; no se guarda a mitad de misión |
-| Láser | Atraviesa enemigos; jugador quieto en el suelo |
+| Láser | De Agente X. Atraviesa enemigos; jugador quieto en el suelo |
 | Debilidades de jefes | No |
-| Misión 0 | Misión de introducción en un simulador, al estilo de la primera de Mega Man X (sin tutorial explícito), solo con Rosslyn. Es lo primero de una partida nueva, desbloquea la selección de misiones y no cuenta para la misión final |
-| Progresión | Misión 0 + selección libre de 5 misiones + misión final; todos los jefes se pueden vencer solo con el disparo básico de cualquier personaje |
+| Misión 0 | El Simulador de combate (nivel 1): misión de introducción al estilo de la primera de Mega Man X (sin tutorial explícito), solo con Rosslyn. Es lo primero de una partida nueva |
+| Progresión | 10 niveles en orden (Simulador, Bosque, Minas, Montaña, Bosque en llamas, Laboratorio, Tren militar, Castillo, Ciudad alienígena, Torre alienígena); 9 jefes; todos se pueden vencer solo con el disparo básico de cualquier personaje |
+| Vehículos | En la versión 1: Robotanque y Exoesqueleto, con su propia vida, energía, disparo y habilidades (18) |
+| Enemigos | 22 tipos (14.1), armados con piezas reutilizables; arte en `Enemies.png` |
+| Velocidad de Veyron | Más lento: conserva la velocidad original (6 u/s); Rosslyn sube a ~7 u/s |
+| Incorporaciones | Aquamarine después del Bosque en llamas; Agente X después del Tren militar |
+| Vehículos por nivel | Exoesqueleto: Minas, Laboratorio, Tren militar. Robotanque: Montaña, Torre alienígena |
+| Subir y bajar del vehículo | Subir saltando encima; bajar saltando con arriba |
+| Vehículos: recarga y obstáculos | Se recargan con los mismos pickups; no rompen obstáculos |
+| Apuntado del Robotanque | 8 direcciones según la dirección presionada, sin bloqueo |
+| Arma láser del Exoesqueleto | Rayo como el láser, más potente que el de Agente X |
+| Coleccionables de habilidad | Los recoge cualquier personaje y se desbloquean para su dueño; se pueden poner detrás de obstáculos de otros personajes |
+| Simulador | Un nivel más, sin jefe; termina en una línea de meta. No se puede saltar; se puede repetir. Sin habilidades prestadas |
+| Novela visual | General por radio en las misiones y en persona en momentos importantes; 6 emociones (2 para jefes); bustos de 64×96 e ilustración de 144×104; 2 o 3 ilustraciones por nivel; panel fijo detrás |
+| Temas de jefe | Uno compartido + el de Coliel |
+| Personajes sin desbloquear | Silueta con "???" en la selección |
+| Disparo de Agente X | 1 de daño; su ventaja es la velocidad de la bala |
+| Estados | Los enemigos congelados sirven de plataforma; los jefes no se congelan ni se aturden |
+| Dron | Si ya hay uno, no se activa ni gasta energía |
+| Mantis | 1 de daño cada 0.5 s; unas 8 pulsaciones para soltarse |
+| Munición eléctrica | Aturde |
+| Dificultad | Una sola |
+| Idiomas | Español e inglés, con el paquete *Localization* desde el inicio |
 
 ### 17.2 Pendientes
 
-Ninguna bloquea el inicio del desarrollo.
-
 | # | Decisión | Opciones | Recomendación | Bloquea |
 |---|---|---|---|---|
-| 2 | En qué misión se esconde cada coleccionable | — | Repartir los 7 entre las 5 misiones, con el taladro y el lanzallamas accesibles sin habilidades y caminos de los dos personajes en cada misión (8.9) | Hito 6 |
-| 3 | Nivel de amenaza en el briefing | Sí / no | Sí, orienta al jugador sin imponer un orden | Hito 6 |
-| 4 | Misión final | Un nivel / varios niveles seguidos | Un nivel largo con varios checkpoints | Después del Hito 6 |
-| 5 | Momento de la revelación del comandante | En la escena de inicio de la misión final / en la escena del jefe, antes de la pelea final (14.2) | Antes de la pelea: la misión empieza como una más y la traición se revela al llegar al jefe | Después del Hito 6 |
-| 6 | Temas de jefe | Uno compartido + el del comandante / uno por jefe | Uno compartido al inicio; agregar más si hay tiempo | Hito 6 |
-| 7 | Quién puede recoger un coleccionable | Solo su dueño / cualquiera (se desbloquea para su dueño) | Solo su dueño; el otro personaje lo ve como holograma. Deja claro que hay que volver con el otro personaje | Hito 5 |
-| 8 | Veyron: diseño y estadísticas | — | Que se sienta distinto en algo medible (por ejemplo, más vida y menos velocidad) sin romper los mínimos de salto de 5.4 | Hito 7 |
-| 10 | Arma sónica de Veyron | — | Que cubra algo que no hagan el láser (largo alcance) ni el cuchillo (cuerpo a cuerpo); por ejemplo, una onda corta que empuja enemigos | Hito 7 |
-| 11 | Qué distingue al cuchillo del disparo básico de Veyron | Destruye proyectiles / casi sin costo y muy rápido / otro | Que destruya proyectiles enemigos como la espada; así tiene un uso defensivo que el disparo no tiene | Hito 7 |
-| 12 | Misión 0: habilidad prestada | Sí (temporal, sin desbloquear) / no | No: como en Mega Man X, solo con el disparo básico. Las habilidades se descubren al encontrar los coleccionables | Hito 6 |
-| 13 | Misión 0: final | Jefe holográfico que se puede vencer / pelea que no se puede ganar (como Vile en Mega Man X) | La pelea que no se gana: presenta la historia y puede sembrar la primera pista de la traición | Hito 6 |
-| 14 | Misión 0: repetir y saltar | Repetible como "Simulador" / no · Saltable en partida nueva / no | Repetible desde la selección de misiones; saltable solo si ya hay otra partida que la completó | Hito 6 |
-| 15 | Cómo aparece el comandante en las escenas | Holograma / transmisión en el cuadro de diálogo / en persona | Holograma durante las misiones y en persona en la misión final: refuerza la revelación | Hito 6 |
-| 16 | Set de gestos de los personajes | — | Empezar con 4 (asentir, señalar, saludo, brazos cruzados) y agregar según lo pidan las escenas | Hito 6 |
+| 2 | En qué nivel se esconde cada coleccionable y cada prisionero | — | Que al menos una de las habilidades que abren caminos se alcance sin habilidades y que la cadena no tenga ciclos; `Game/Validate` lo revisa (8.9) | Hito 6 |
+| 30 | Qué enemigos van en cada nivel | — | Agruparlos por tema (bosque: soldados, abuelita, oruga; minas: mole, araña…) | Hito 10 |
+| 32 | Diseño de jefes pendientes | Robot de batalla, Grallet, Narabee, Coliel | — | Hito 11 |
+| 33 | Historia detallada | — | Definir quién es Coliel y por qué se une cada personaje | Hito 6 |
 
 ---
 
-## 18. Versión 2 (futuro)
+## 18. Vehículos (estilo Metal Slug)
 
-Funciones planeadas para después de la versión 1. **No se implementan ahora**, pero la versión 1 se construye de forma que agregarlas no obligue a rehacer sistemas (ver 18.3).
+Los vehículos entran en la **versión 1**. Hay dos: el **Robotanque** y el **Exoesqueleto** (arte en `Enemies.png`). Cualquier personaje puede pilotearlos.
 
-### 18.1 Vehículos (estilo Metal Slug)
+| Vehículo | Niveles |
+|---|---|
+| Exoesqueleto | Minas, Laboratorio, Tren militar |
+| Robotanque | Montaña, Torre alienígena |
 
-El personaje puede subirse a vehículos colocados en algunos niveles, pilotearlos y bajarse.
+### 18.1 Comportamiento base
 
-**Comportamiento base:**
-- **Subir:** saltando dentro del vehículo o con un botón al estar junto a él.
+- **Subir:** saltando sobre el vehículo (al caer encima, el personaje entra).
 - **Dentro del vehículo:** el personaje no recibe daño; el daño lo recibe el vehículo, que tiene su **propia barra de vida**.
-- **Bajar:** con un botón. Al bajar, el personaje tiene invulnerabilidad breve.
+- **Energía y habilidades propias:** cada vehículo tiene su **propia barra de energía** y **sus propias habilidades**, que reemplazan a las del personaje mientras lo pilotea. Se cambian con los mismos botones de siguiente y anterior y se usan con el botón de habilidad.
+- **Disparo principal propio** con el botón de disparo.
+- **Bajar:** saltando con **arriba** presionado. Al bajar, el personaje tiene invulnerabilidad breve. Saltar sin arriba hace saltar al vehículo.
+- No hace falta una acción nueva en el Input System: subir y bajar usan `Jump` y `Move` (12).
 - **Vehículo destruido:** expulsa al personaje automáticamente y explota, dañando a los enemigos cercanos (como el Metal Slug original).
-- **Armas propias:** cada vehículo tiene su arma principal (por ejemplo, un cañón que apunta de forma independiente al movimiento) y opcionalmente una secundaria.
+- **Recarga:** los pickups de vida y energía recargan al vehículo mientras se pilotea.
+- Los vehículos **no rompen obstáculos**: esos caminos quedan ligados a los personajes.
 
-**Ideas de vehículos para el tema espacial:** tanque flotante (*hover tank*), mecha y nave para secciones de vuelo **[DECIDIR]**.
+### 18.2 Robotanque
 
-**Arquitectura:**
+| | |
+|---|---|
+| Disparo principal | Ametralladoras en las tenazas. **Automático**: mientras se mantiene el botón, dispara en ráfaga continua |
+| Apuntado | **8 direcciones**, según la dirección presionada (sin bloqueo al disparar) |
+| Habilidad 1 | **Lanzacohetes** (gasta energía del vehículo) |
+| Habilidad 2 | **Ataque con las tenazas**: cuerpo a cuerpo, **no gasta energía** (`MeleeEffect` con costo 0) |
+
+### 18.3 Exoesqueleto
+
+| | |
+|---|---|
+| Disparo principal | **Manual**. Al mantener el botón **se carga**, como el disparo de Mega Man X: soltar sin cargar da un tiro normal, con carga media un tiro más fuerte y con carga completa el más fuerte **[AJUSTAR]** niveles y tiempos |
+| Apuntado | Como el personaje: 4 direcciones (5.4, 6.5) |
+| Habilidad 1 | **Rayo de corto alcance**, como el arma de Winston en Overwatch: sostenido, daña por tick a los enemigos que estén delante a poca distancia sin tener que apuntar con precisión (`DamageHitbox` por tick en forma de cono o rectángulo corto) |
+| Habilidad 2 | **Misil** que lanza desde el brazo (`Projectile` + `Explosion`) |
+| Habilidad 3 | **Arma láser**: un rayo como el láser (`LaserEffect`), **más potente que el de Agente X**, que apunta igual que el personaje |
+
+El disparo cargado es nuevo; solo lo tiene el Exoesqueleto (los personajes no cargan, 1.3). Encaja en el modelo de habilidades: el arma cuenta el tiempo mientras se mantiene el botón y dispara en `ButtonReleased` (8.4).
+
+### 18.4 Arquitectura
 
 ```csharp
 public interface IPilotable
@@ -2109,68 +2481,57 @@ public interface IPilotable
 }
 ```
 
-- `PlayerController` agrega un estado de nivel superior **`Piloting`**, junto a `Alive`, `Hurt`, `Dead` y `Disabled` (6.2). En `Piloting`, las FSM del jugador se desactivan, sus sprites y colliders se ocultan, y el `InputSnapshot` se le pasa al vehículo.
-- Cada vehículo es un prefab con su propia FSM (`Idle`, `Move`, `Airborne`, `Destroyed`), su `Rigidbody2D`, su vida (`IDamageable`) y un `VehicleData` (ScriptableObject) con velocidad, vida, armas y sprites.
-- **Apuntado del cañón en pixel art:** sin rotar sprites. El cañón tiene un sprite por dirección (8 o 16 direcciones **[DECIDIR]**).
-- **Cámara:** cambia su objetivo al vehículo mientras se pilotea.
-- **HUD:** muestra la barra de vida del vehículo mientras se pilotea.
+- `PlayerController` pasa al estado **`Piloting`** (6.2). Las FSM del jugador se desactivan, sus sprites y colliders se ocultan y el `InputSnapshot` se le pasa al vehículo.
+- Cada vehículo es un prefab con su propia FSM (`Idle`, `Move`, `Airborne`, `Destroyed`), su `Rigidbody2D`, su vida (`IDamageable`) y un **`VehicleData`** (ScriptableObject): velocidad, salto, vida, energía, disparo principal (`VehicleWeaponData`: automático, manual o cargado, y modo de apuntado) y su lista de `AbilityData`.
+- **Las habilidades del vehículo usan el mismo sistema que las del personaje** (`AbilityData` + `AbilityEffect`, sección 8). Para eso, la energía y la lista de habilidades salen de `PlayerEnergy` y `PlayerAbilities` a componentes que también puede tener el vehículo (por ejemplo, `Energy` y `AbilityUser`). Los efectos reciben el `AbilityContext` del vehículo (su FirePoint y su apuntado).
+- **Apuntado en pixel art:** sin rotar sprites. El arma del Robotanque tiene un sprite por cada una de sus **8 direcciones**.
+- **Cámara:** cambia su objetivo al vehículo mientras se pilotea (`SetTarget`, 13).
+- **HUD:** muestra la vida y la energía del vehículo (`SegmentedBar`, 15.6) y el icono de su habilidad seleccionada.
 - **Capas nuevas:** `Vehicle` y `VehicleHurtbox`.
-- **[DECIDIR]** si se pueden usar habilidades dentro del vehículo. Recomendación: no, el vehículo reemplaza al arsenal del personaje mientras se usa.
 
-### 18.2 Más misiones
+---
 
-La versión completa tendrá más misiones que las 5 de la versión 1.
+## 19. Versión 2 (futuro)
 
-- **Datos:** agregar una misión es crear un `MissionData` nuevo, su escena y sumarlo al `MissionCatalog`. El guardado usa `id`, así que las partidas de la versión 1 siguen funcionando.
-- **Desbloqueo de la misión final:** se define en el `MissionCatalog` con una lista de misiones requeridas, no con un número fijo. Así se pueden agregar misiones opcionales o cambiar cuántas hacen falta.
-- **Coleccionables:** `MissionData.abilityPickups` puede estar vacío, para misiones sin habilidades escondidas (por ejemplo, misiones de vehículo o secundarias).
-- **Pantalla de selección:** debe admitir más de 5 misiones (cuadrícula con desplazamiento o páginas).
-- **Historia:** las misiones nuevas pueden ampliar las pistas de la traición del comandante o agregar un arco posterior a la revelación **[DECIDIR]**.
+Funciones planeadas para después de la versión 1. **No se implementan ahora**, pero la versión 1 se construye de forma que agregarlas no obligue a rehacer sistemas (ver 19.2).
+
+### 19.1 Más niveles
+
+La versión completa podría tener más niveles que los 10 de la versión 1.
+
+- **Datos:** agregar un nivel es crear un `MissionData` nuevo, su escena y sumarlo al `MissionCatalog`. El guardado usa `id`, así que las partidas de la versión 1 siguen funcionando.
+- **Coleccionables:** `MissionData.abilityPickups` puede estar vacío, para niveles sin habilidades escondidas.
+- **Pantalla de selección:** debe admitir más niveles (desplazamiento o páginas).
 
 **Decisiones de la versión 2:**
 
 | # | Decisión | Opciones |
 |---|---|---|
-| 1 | Cuántas misiones tendrá la versión completa | — |
-| 2 | ¿Las misiones nuevas esconden habilidades? | Sí (más habilidades) / solo algunas |
-| 3 | Estructura de la historia | Más misiones antes de la revelación / un segundo acto después de ella |
-| 4 | Tipos de vehículo | Tanque flotante / mecha / nave / otros |
-| 5 | Misiones con vehículos | Secciones dentro de misiones normales / misiones completas en vehículo |
-| 6 | Habilidades dentro del vehículo | Sí / no |
-| 7 | Direcciones del cañón | 8 / 16 |
-| 8 | Comandante jugable en la historia | Epílogo / modo aparte / sin explicación en el lore |
-| 9 | Diálogos al jugar con el comandante | Los mismos / se omiten / variantes solo para él |
-| 10 | Comandante bloqueado en la selección | Silueta con "???" / oculto hasta desbloquearse |
+| 1 | Cuántos niveles tendrá la versión completa | — |
+| 2 | ¿Los niveles nuevos esconden habilidades? | Sí (más habilidades) / solo algunos |
+| 3 | Estructura de la historia | Un segundo acto después de Coliel / niveles opcionales |
 
-### 18.3 Preparación en la versión 1
+### 19.2 Preparación en la versión 1
 
 Cambios baratos que se hacen **desde la versión 1** para que la versión 2 no obligue a rehacer sistemas:
 
 | Preparación | Dónde | Por qué |
 |---|---|---|
-| El input se lee en `PlayerInputReader` y se pasa como `InputSnapshot`; nadie más lee el Input System | 5.2, 12 | El controller puede redirigir el input a un vehículo |
-| La FSM de nivel superior del jugador admite estados nuevos | 6.2 | Agregar `Piloting` no toca la locomoción ni la acción |
+| El input se lee en `PlayerInputReader` y se pasa como `InputSnapshot`; nadie más lee el Input System | 5.2, 12 | El controller redirige el input a un vehículo (ya se usa en la V1) |
+| La FSM de nivel superior del jugador admite estados nuevos | 6.2 | `Grabbed` y `Piloting` no tocan la locomoción ni la acción |
 | La cámara sigue un objetivo configurable, no al jugador fijo | 13 | Cambiar el objetivo al vehículo |
 | Las barras del HUD son un componente reutilizable (`SegmentedBar`) | 15.6 | Vida, energía, jefe y vehículo usan la misma barra |
-| El desbloqueo de la misión final se lee del `MissionCatalog` | 15.1 | Agregar misiones sin tocar código |
-| `MissionData.abilityPickups` puede estar vacío | 15.1 | Misiones sin coleccionables |
-| La pantalla de selección de misiones se arma desde el catálogo, no con 5 botones fijos | 15.1 | Admitir más misiones |
+| El orden de los niveles se lee del `MissionCatalog` | 15.1 | Agregar niveles sin tocar código |
+| `MissionData.abilityPickups` puede estar vacío | 15.1 | Niveles sin coleccionables |
+| La pantalla de selección de nivel se arma desde el catálogo, no con botones fijos | 15.1 | Admitir más niveles |
 | El guardado tiene `version` y `SaveMigrator` desde el inicio | 15.4 | Las partidas de la versión 1 se actualizan solas al formato de la versión 2 |
-| La pantalla de selección de personaje se arma desde el `CharacterCatalog`, con condiciones de desbloqueo | 15.1 | Agregar al comandante sin tocar código |
-| `AbilityEffect` decide cuándo termina (`IsFinished`) | 8.4, 8.5 | Habilidades cargadas u otros modos sin tocar `UsingAbility` |
+| La pantalla de selección de personaje se arma desde el `CharacterCatalog`, con condiciones de desbloqueo | 15.1 | Agregar personajes sin tocar código |
+| `AbilityEffect` decide cuándo termina (`IsFinished`) | 8.4, 8.5 | El disparo cargado y otros modos sin tocar `UsingAbility` |
 | Obstáculos por `ObstacleInteraction` en una sola capa `AbilityObstacle` | 15.2 | Tipos de obstáculo nuevos y más habilidades que los abran, sin capas nuevas |
-| `DamageInfo` con `knockback` y `stunDuration` | 10.1 | Armas que empujan o aturden (el arma sónica, y más en la V2) |
+| `DamageInfo` con `knockback`, `stunDuration` y `freezeBuildup` | 10.1 | Armas que empujan, aturden o congelan |
 | Valores propios de cada habilidad en su efecto, no en `AbilityData` | 8.3 | `AbilityData` no crece con cada habilidad |
 | Tabla de clips en un asset `SpritesheetLayout` | 4.2.1 | Clips nuevos sin tocar `PlayerArtSetup.cs` |
 | Selección de habilidad desde el menú de pausa | 8.1, 15.1 | Elegir rápido con más habilidades por personaje |
-| El progreso de habilidades se guarda en una lista por `id` de personaje | 15.4 | El comandante tiene su propio progreso sin migración |
-| Todo personaje es un `CharacterData` + prefab variant con la misma cuadrícula de spritesheet | 4.2.1, 5.4 | El comandante jugable reutiliza todo el pipeline |
-
-### 18.4 Tercer personaje: el comandante
-
-Al completar **todas las misiones** (en la versión 1 eso incluye la misión final, donde se le vence), el comandante se vuelve **personaje jugable**.
-
-- **Desbloqueo:** en el `CharacterCatalog` (15.1) su `requiredMissions` incluye la misión final. Si en la versión 2 hay más misiones y se quiere exigir todas, se agregan a esa lista sin tocar código.
-- **Personaje:** igual que los otros dos (5.4): su `CharacterData`, prefab variant, estadísticas, disparo básico y habilidades **[DECIDIR]**, con su propio progreso de habilidades en el guardado.
-- **Arte:** un spritesheet con la misma cuadrícula que los soldados (4.2.1). El sprite del comandante como jefe es aparte (un enemigo de una sola pieza, 14.1), aunque puede servir de referencia.
-- **Historia y diálogos [DECIDIR]:** en los diálogos de las misiones el comandante es quien da las órdenes, así que la regla de "los mismos diálogos para todos" choca con jugarlo a él. Ver decisiones 8 y 9 de 18.2.
+| El progreso de habilidades se guarda en una lista por `id` de personaje | 15.4 | Personajes nuevos sin migración |
+| Todo personaje es un `CharacterData` + prefab variant con la misma cuadrícula de spritesheet | 4.2.1, 5.4 | Personajes nuevos reutilizan todo el pipeline |
+| Enemigos por piezas (`EnemyData`, `EnemyWeaponData`, biblioteca de estados) | 14.1 | Enemigos nuevos como combinaciones de piezas existentes |
